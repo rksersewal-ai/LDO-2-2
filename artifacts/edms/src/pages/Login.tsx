@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../lib/auth';
-import { Shield, Loader2, AlertCircle, Eye, EyeOff, Lock } from 'lucide-react';
+import { Shield, Loader2, AlertCircle, Eye, EyeOff, Lock, Clock } from 'lucide-react';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login, isLoading, error, clearError } = useAuth();
+  const { login, isLoading, error, sessionExpired, clearError } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -20,7 +20,6 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-slate-950 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-teal-900/20 via-slate-950 to-green-900/10 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Logo & Header */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-400 to-emerald-600 flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-teal-500/30">
             <span className="text-white font-bold text-2xl">L2</span>
@@ -29,12 +28,18 @@ export default function Login() {
           <p className="text-slate-400 text-sm">Enterprise Document Management System</p>
         </div>
 
-        {/* Card */}
         <div className="bg-slate-900/60 backdrop-blur-xl border border-teal-500/20 rounded-2xl p-8 shadow-2xl shadow-teal-950/50">
           <div className="flex items-center gap-2 mb-6">
             <Shield className="w-5 h-5 text-teal-400" />
             <h2 className="text-lg font-semibold text-slate-100">Secure Sign In</h2>
           </div>
+
+          {sessionExpired && (
+            <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-start gap-2">
+              <Clock className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
+              <p className="text-sm text-amber-300">Your session has expired. Please sign in again to continue.</p>
+            </div>
+          )}
 
           {error && (
             <div className="mb-4 p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl flex items-start gap-2">

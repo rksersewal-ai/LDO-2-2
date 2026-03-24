@@ -23,7 +23,7 @@ interface AuthState {
 
 interface AuthContextType extends AuthState {
   login: (username: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  logout: (expired?: boolean) => void;
   clearError: () => void;
   hasPermission: (requiredRole: UserRole[]) => boolean;
 }
@@ -48,6 +48,7 @@ const MOCK_USERS: Record<string, { password: string; user: User }> = {
 };
 
 const SESSION_KEY = 'ldo2_session';
+const SESSION_TIMEOUT_MS = 30 * 60 * 1000;
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -57,12 +58,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const saved = sessionStorage.getItem(SESSION_KEY);
-    if (saved) {
+    const timestampStr = sessionStorage.getItem(`${SESSION_KEY}_ts`);
+    if (saved && timestampStr) {
       try {
-        const user = JSON.parse(saved) as User;
-        setState(s => ({ ...s, user, isAuthenticated: true, isLoading: false }));
+        const ts = parseInt(timestampStr, 10);
+        if (Date.now() - ts > SESSION_TIMEOUT_MS) {
+          sessionStorage.removeItem(SESSION_KEY);
+          sessionStorage.removeItem(`${SESSION_KEY}_ts`);
+          setState(s => ({ ...s, isLoading: false, sessionExpired: true }));
+        } else {
+          const user = JSON.parse(saved) as User;
+          setState(s => ({ ...s, user, isAuthenticated: true, isLoading: false }));
+        }
       } catch {
         sessionStorage.removeItem(SESSION_KEY);
+        sessionStorage.removeItem(`${SESSION_KEY}_ts`);
         setState(s => ({ ...s, isLoading: false }));
       }
     } else {
@@ -76,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const entry = MOCK_USERS[username.toLowerCase()];
     if (entry && entry.password === password) {
       sessionStorage.setItem(SESSION_KEY, JSON.stringify(entry.user));
+      sessionStorage.setItem(`${SESSION_KEY}_ts`, String(Date.now()));
       setState({ user: entry.user, isAuthenticated: true, isLoading: false, sessionExpired: false, error: null, loginAttempts: 0 });
       return true;
     }
@@ -83,9 +94,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return false;
   };
 
-  const logout = () => {
+  const logout = (expired = false) => {
     sessionStorage.removeItem(SESSION_KEY);
-    setState({ user: null, isAuthenticated: false, isLoading: false, sessionExpired: false, error: null, loginAttempts: 0 });
+    sessionStorage.removeItem(`${SESSION_KEY}_ts`);
+    setState({ user: null, isAuthenticated: false, isLoading: false, sessionExpired: expired, error: null, loginAttempts: 0 });
   };
 
   const clearError = () => setState(s => ({ ...s, error: null }));

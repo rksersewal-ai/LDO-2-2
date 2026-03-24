@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider } from 'react-router';
 import { AuthProvider } from './lib/auth';
+import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import AppLayout from './components/layout/AppLayout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -21,6 +22,13 @@ import BannerManagement from './pages/BannerManagement';
 import RestrictedAccess from './pages/RestrictedAccess';
 import DesignSystem from './pages/DesignSystem';
 
+const ALL_ROLES = ['admin', 'supervisor', 'engineer', 'reviewer', 'viewer'] as const;
+const STAFF_ROLES = ['admin', 'supervisor', 'engineer', 'reviewer'] as const;
+const ADMIN_ONLY = ['admin'] as const;
+const ADMIN_SUPERVISOR = ['admin', 'supervisor'] as const;
+const ENGINEER_UP = ['admin', 'supervisor', 'engineer'] as const;
+const REVIEWER_UP = ['admin', 'supervisor', 'engineer', 'reviewer'] as const;
+
 const router = createBrowserRouter([
   {
     path: '/login',
@@ -30,24 +38,146 @@ const router = createBrowserRouter([
     path: '/',
     element: <AppLayout />,
     children: [
-      { index: true, element: <Dashboard /> },
-      { path: 'documents', element: <DocumentHub /> },
-      { path: 'documents/:id', element: <DocumentDetail /> },
-      { path: 'bom', element: <BOMExplorer /> },
-      { path: 'pl', element: <PLKnowledgeHub /> },
-      { path: 'pl/:id', element: <PLDetail /> },
-      { path: 'ledger', element: <WorkLedger /> },
-      { path: 'ledger-reports', element: <LedgerReports /> },
-      { path: 'cases', element: <Cases /> },
-      { path: 'approvals', element: <Approvals /> },
-      { path: 'reports', element: <Reports /> },
-      { path: 'admin', element: <AdminWorkspace /> },
-      { path: 'ocr', element: <OCRMonitor /> },
-      { path: 'audit', element: <AuditLog /> },
-      { path: 'settings', element: <Settings /> },
-      { path: 'banners', element: <BannerManagement /> },
-      { path: 'restricted', element: <RestrictedAccess /> },
-      { path: 'design-system', element: <DesignSystem /> },
+      {
+        index: true,
+        element: (
+          <ProtectedRoute allowedRoles={[...ALL_ROLES]}>
+            <Dashboard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'documents',
+        element: (
+          <ProtectedRoute allowedRoles={[...ALL_ROLES]}>
+            <DocumentHub />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'documents/:id',
+        element: (
+          <ProtectedRoute allowedRoles={[...ALL_ROLES]}>
+            <DocumentDetail />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'bom',
+        element: (
+          <ProtectedRoute allowedRoles={[...ENGINEER_UP]}>
+            <BOMExplorer />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'pl',
+        element: (
+          <ProtectedRoute allowedRoles={[...ENGINEER_UP]}>
+            <PLKnowledgeHub />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'pl/:id',
+        element: (
+          <ProtectedRoute allowedRoles={[...ENGINEER_UP]}>
+            <PLDetail />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'ledger',
+        element: (
+          <ProtectedRoute allowedRoles={[...ENGINEER_UP]}>
+            <WorkLedger />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'ledger-reports',
+        element: (
+          <ProtectedRoute allowedRoles={[...ADMIN_SUPERVISOR]}>
+            <LedgerReports />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'cases',
+        element: (
+          <ProtectedRoute allowedRoles={[...REVIEWER_UP]}>
+            <Cases />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'approvals',
+        element: (
+          <ProtectedRoute allowedRoles={[...REVIEWER_UP]}>
+            <Approvals />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'reports',
+        element: (
+          <ProtectedRoute allowedRoles={[...ADMIN_SUPERVISOR]}>
+            <Reports />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'admin',
+        element: (
+          <ProtectedRoute allowedRoles={[...ADMIN_ONLY]}>
+            <AdminWorkspace />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'ocr',
+        element: (
+          <ProtectedRoute allowedRoles={[...ADMIN_ONLY]}>
+            <OCRMonitor />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'audit',
+        element: (
+          <ProtectedRoute allowedRoles={[...ADMIN_ONLY]}>
+            <AuditLog />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'settings',
+        element: (
+          <ProtectedRoute allowedRoles={[...ADMIN_ONLY]}>
+            <Settings />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'banners',
+        element: (
+          <ProtectedRoute allowedRoles={[...ADMIN_ONLY]}>
+            <BannerManagement />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'restricted',
+        element: <RestrictedAccess />,
+      },
+      {
+        path: 'design-system',
+        element: (
+          <ProtectedRoute allowedRoles={[...ADMIN_ONLY]}>
+            <DesignSystem />
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
 ]);
