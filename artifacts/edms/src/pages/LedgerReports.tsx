@@ -42,10 +42,20 @@ type Analytics = Awaited<ReturnType<typeof WorkLedgerService.getAnalytics>>;
 export default function LedgerReports() {
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [avgDays, setAvgDays] = useState(0);
+  const [last12MonthsByCategory, setLast12MonthsByCategory] = useState<Record<string, number>>({});
 
   useEffect(() => {
     WorkLedgerService.getAnalytics().then(setAnalytics);
     WorkLedgerService.getAll().then(records => {
+      const cutoff = new Date();
+      cutoff.setMonth(cutoff.getMonth() - 12);
+      const cutoffStr = cutoff.toISOString().split('T')[0];
+
+      const recent = records.filter(r => r.date >= cutoffStr);
+      const catCounts: Record<string, number> = {};
+      recent.forEach(r => { catCounts[r.workCategory] = (catCounts[r.workCategory] ?? 0) + 1; });
+      setLast12MonthsByCategory(catCounts);
+
       const completed = records.filter(r => r.daysTaken != null);
       if (completed.length > 0) {
         const avg = Math.round(completed.reduce((s, r) => s + (r.daysTaken ?? 0), 0) / completed.length);
@@ -62,8 +72,8 @@ export default function LedgerReports() {
     );
   }
 
-  const categoryData = analytics.byCategory
-    .map(c => ({ name: CATEGORY_LABEL[c.category] ?? c.category, count: c.count }))
+  const categoryData = Object.entries(last12MonthsByCategory)
+    .map(([cat, count]) => ({ name: CATEGORY_LABEL[cat] ?? cat, count }))
     .sort((a, b) => b.count - a.count);
 
   const statusData = analytics.byStatus.map(s => ({
@@ -114,7 +124,7 @@ export default function LedgerReports() {
         {/* Work volume by category */}
         <GlassCard className="p-6">
           <h2 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-            <FileBarChart className="w-4 h-4 text-teal-400" /> Work Volume by Category
+            <FileBarChart className="w-4 h-4 text-teal-400" /> Work Volume by Category (Last 12 Months)
           </h2>
           {categoryData.length > 0 ? (
             <ResponsiveContainer width="100%" height={240}>

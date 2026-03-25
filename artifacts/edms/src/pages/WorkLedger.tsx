@@ -822,9 +822,11 @@ export default function WorkLedger() {
               <Briefcase className="w-10 h-10 mx-auto mb-3 opacity-20" />
               <p className="font-medium text-slate-400 mb-1">No work records found</p>
               <p className="text-sm mb-4">Try adjusting the search or category filter</p>
-              <Button size="sm" onClick={() => setShowForm(true)}>
-                <Plus className="w-3.5 h-3.5" /> Create First Record
-              </Button>
+              {canCreate && (
+                <Button size="sm" onClick={() => setShowForm(true)}>
+                  <Plus className="w-3.5 h-3.5" /> Create First Record
+                </Button>
+              )}
             </div>
           )}
         </div>
