@@ -10,6 +10,7 @@ interface UseWorkRecordsResult {
   add: (record: Omit<WorkRecord, 'id' | 'createdAt'>) => Promise<WorkRecord>;
   update: (id: string, patch: Partial<WorkRecord>) => Promise<WorkRecord | null>;
   verify: (id: string, verifierName: string) => Promise<WorkRecord | null>;
+  remove: (id: string) => Promise<boolean>;
 }
 
 export function useWorkRecords(): UseWorkRecordsResult {
@@ -58,5 +59,11 @@ export function useWorkRecords(): UseWorkRecordsResult {
     return result;
   }, [refetch]);
 
-  return { data, loading, error, refetch, add, update, verify };
+  const remove = useCallback(async (id: string) => {
+    const result = await WorkLedgerService.delete(id);
+    refetch();
+    return result;
+  }, [refetch]);
+
+  return { data, loading, error, refetch, add, update, verify, remove };
 }

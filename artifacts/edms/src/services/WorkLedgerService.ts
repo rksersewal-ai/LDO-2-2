@@ -188,6 +188,12 @@ export const WorkLedgerService = {
     });
   },
 
+  delete(id: string): Promise<boolean> {
+    const before = _store.length;
+    _store = _store.filter(w => w.id !== id);
+    return Promise.resolve(_store.length < before);
+  },
+
   search(query: string): Promise<WorkRecord[]> {
     const q = query.trim().toLowerCase();
     if (!q) return WorkLedgerService.getAll();

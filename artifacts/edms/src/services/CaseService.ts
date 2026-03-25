@@ -50,10 +50,11 @@ export const CaseService = {
 
   add(data: Omit<CaseRecord, 'id' | 'createdAt' | 'updatedAt'>): Promise<CaseRecord> {
     const now = new Date().toISOString().split('T')[0];
+    const newId = generateId();
     const c: CaseRecord = {
       ...data,
-      id: generateId(),
-      caseNumber: generateId(),
+      id: newId,
+      caseNumber: newId,
       createdAt: now,
       updatedAt: now,
     };
