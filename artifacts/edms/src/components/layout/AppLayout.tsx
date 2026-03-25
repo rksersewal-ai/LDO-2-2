@@ -83,7 +83,7 @@ export default function AppLayout() {
             </div>
           )}
 
-          <div className="flex-1 overflow-auto p-8 pt-4 custom-scrollbar">
+          <div className="flex-1 overflow-auto p-6 pt-5 custom-scrollbar">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={location.pathname}

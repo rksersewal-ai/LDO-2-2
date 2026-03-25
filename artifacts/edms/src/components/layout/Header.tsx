@@ -33,13 +33,13 @@ export function Header() {
   };
 
   return (
-    <header className="h-20 px-8 flex items-center justify-between z-30 relative">
-      <div className="flex items-center gap-4">
-        <div className="flex items-center text-sm text-slate-400 font-medium">
+    <header className="h-14 px-6 flex items-center justify-between z-30 relative border-b border-white/[0.04] shrink-0">
+      <div className="flex items-center gap-3">
+        <div className="flex items-center text-xs text-slate-500 font-medium">
           {breadcrumbs.map((crumb, i) => (
             <div key={i} className="flex items-center">
-              {i > 0 && <span className="mx-2 text-slate-600">/</span>}
-              <span className={i === breadcrumbs.length - 1 ? "text-teal-300" : ""}>{crumb}</span>
+              {i > 0 && <span className="mx-1.5 text-slate-700">/</span>}
+              <span className={i === breadcrumbs.length - 1 ? "text-slate-300 font-semibold" : "hover:text-slate-300 transition-colors cursor-default"}>{crumb}</span>
             </div>
           ))}
         </div>
@@ -49,14 +49,14 @@ export function Header() {
         {/* Global Omnisearch */}
         <div className="relative group">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-slate-500 group-focus-within:text-teal-400 transition-colors" />
+            <Search className="h-3.5 w-3.5 text-slate-500 group-focus-within:text-teal-400 transition-colors" />
           </div>
           <input
             ref={headerInputRef}
             type="text"
             value={headerQuery}
             onChange={e => setHeaderQuery(e.target.value)}
-            className="block w-72 md:w-80 pl-10 pr-12 py-2 border border-teal-500/20 rounded-xl leading-5 bg-slate-900/50 backdrop-blur-md text-slate-300 placeholder-slate-500 focus:outline-none focus:bg-slate-900 focus:border-teal-400/50 focus:ring-1 focus:ring-teal-400/50 text-sm transition-all"
+            className="block w-64 md:w-72 pl-9 pr-10 py-1.5 border border-teal-500/20 rounded-lg leading-5 bg-slate-900/50 backdrop-blur-md text-slate-300 placeholder-slate-500 focus:outline-none focus:bg-slate-900 focus:border-teal-400/50 focus:ring-1 focus:ring-teal-400/30 text-sm transition-all"
             placeholder="Search documents, PLs, OCR text..."
             onKeyDown={e => {
               if (e.key === 'Enter') {
@@ -75,9 +75,9 @@ export function Header() {
         <div className="relative">
           <button
             onClick={() => { setShowTextControls(!showTextControls); setShowNotifications(false); setShowProfile(false); }}
-            className="w-9 h-9 rounded-xl bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:text-teal-400 hover:border-teal-500/30 flex items-center justify-center transition-all"
+            className="w-8 h-8 rounded-lg bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:text-teal-400 hover:border-teal-500/30 flex items-center justify-center transition-all"
           >
-            <Type className="w-4 h-4" />
+            <Type className="w-3.5 h-3.5" />
           </button>
           {showTextControls && (
             <div className="absolute right-0 top-full mt-2 bg-slate-900/95 backdrop-blur-xl border border-teal-500/20 rounded-xl shadow-xl p-3 flex items-center gap-2 z-50">
@@ -99,9 +99,9 @@ export function Header() {
         <div className="relative">
           <button
             onClick={() => { setShowNotifications(!showNotifications); setShowTextControls(false); setShowProfile(false); }}
-            className="relative w-9 h-9 rounded-xl bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:text-teal-400 hover:border-teal-500/30 flex items-center justify-center transition-all"
+            className="relative w-8 h-8 rounded-lg bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:text-teal-400 hover:border-teal-500/30 flex items-center justify-center transition-all"
           >
-            <Bell className="w-4 h-4" />
+            <Bell className="w-3.5 h-3.5" />
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">{unreadCount}</span>
             )}

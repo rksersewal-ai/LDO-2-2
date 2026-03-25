@@ -47,10 +47,10 @@ export default function Dashboard() {
   const quickActions = allQuickActions.filter(action => !action.roles || hasPermission(action.roles as UserRole[]));
 
   return (
-    <div className="space-y-8 max-w-[1400px] mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-6 max-w-[1400px] mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-1">Dashboard</h1>
+          <h1 className="text-2xl font-bold text-white mb-0.5 tracking-tight">Dashboard</h1>
           <p className="text-slate-400 text-sm">
             Good morning, <span className="text-teal-300 font-medium">{user?.name}</span>. System operational.
           </p>
@@ -76,7 +76,7 @@ export default function Dashboard() {
                 </div>
                 <ArrowRight className="w-4 h-4 text-slate-600 group-hover:text-teal-400 transition-colors" />
               </div>
-              <div className="text-3xl font-bold text-white mb-0.5">{card.value}</div>
+              <div className="text-2xl font-bold text-white mb-0.5 tabular-nums">{card.value}</div>
               <div className="text-sm font-medium text-slate-300">{card.label}</div>
               <div className="text-xs text-slate-500 mt-1">{card.sub}</div>
             </GlassCard>

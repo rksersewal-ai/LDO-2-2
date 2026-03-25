@@ -1,0 +1,540 @@
+# ERP Website UI Guidelines Skill
+
+## Title
+ERP / Industrial Web UI Guidelines
+
+## Purpose
+Use this skill to produce production-ready guidance for serious enterprise web applications including ERP, MES, WMS, SCM, procurement, finance, HR, planning, logistics, admin, back-office, and industrial operations tools.
+
+This standard is framework-agnostic and suitable for React, Angular, Vue, and design-system teams.
+
+## Overview
+Favor clarity, speed, trust, predictable navigation, dense information display, and error prevention over novelty. Optimize for trained operators who use the system repeatedly. Avoid consumer-style layouts, oversized marketing typography, decorative dashboards, and unstable page structures.
+
+## Working mode
+When applying this skill, follow this sequence:
+
+1. Identify the primary user role.
+2. Define the main task, frequency, and business risk.
+3. Estimate data density and decide the interaction density.
+4. Choose a shell layout with left navigation, workspace, and optional right utility panel.
+5. Design for scanability first: hierarchy, labels, grouping, status, and alignment.
+6. Keep important scope, status, and actions visible.
+7. Validate keyboard flow, loading states, empty states, errors, permissions, and responsive behavior.
+8. Convert the guidance into engineering tokens and implementation notes.
+
+## Primary product stance
+Apply these defaults:
+
+- Optimize for repeat use, not one-time discovery.
+- Keep navigation stable across modules.
+- Use compact-comfortable enterprise density by default.
+- Prefer boring consistency over clever variation.
+- Show page scope clearly: plant, site, business unit, date range, saved view, workflow stage.
+- Use color as a supporting signal, not the only signal.
+- Make dense screens feel orderly with alignment, rhythm, and grouping rather than oversized whitespace.
+- Keep primary actions visible and semantically specific.
+
+## Realistic example prompt
+Design a production planning workspace for a manufacturing ERP used by plant schedulers. The page should support high-frequency daily use, medium-to-high business risk, dense tabular data, quick status scanning, collapsible left navigation, and a collapsible right utility panel for job details, notes, and validation issues. Provide exact typography, spacing, shell dimensions, table density, and implementation guidance for React, Angular, and Vue teams.
+
+## How this skill interprets that example
+- Primary role: plant scheduler
+- Task frequency: high
+- Risk level: medium to high
+- Data density: high
+- Recommended shell: left navigation + page workspace + optional right utility panel
+- Recommended density: compact enterprise density
+- Key UX priority: scanability, fast exception handling, minimal layout shift, strong keyboard support
+
+## Shell standard
+Use this shell unless the workflow clearly requires something else:
+
+- Left navigation rail for modules and global navigation
+- Top app bar only for product-wide context, search, environment, alerts, and account utilities
+- Page header for title, scope, key status, and page-level actions
+- Main workspace for tables, forms, dashboards, schedulers, and detail views
+- Optional right utility panel for page information and essential contextual controls
+
+Do not overload the top bar with module navigation when a left navigation rail exists.
+
+## Layout system
+Use a 12-column desktop grid conceptually, but avoid card-heavy marketing layouts on operational screens.
+
+### Layout rules
+- Keep page content left-aligned inside the workspace.
+- Use full-width content for tables, planners, dispatch boards, and operations dashboards.
+- Use constrained centered layouts only for setup flows, authentication, approval steps, or focused forms.
+- Keep action locations stable across related pages.
+- Use sticky regions only where they materially improve speed: page header, action bars, table header, utility panel header/footer.
+
+## Typography standard
+Use a compact enterprise type scale.
+
+| Token | px | rem | Use |
+|---|---:|---:|---|
+| display-lg | 28 | 1.75 | Rare page-only title for strategic overview pages |
+| heading-1 | 24 | 1.5 | Main page title |
+| heading-2 | 20 | 1.25 | Section heading or major panel title |
+| heading-3 | 18 | 1.125 | Subsection heading |
+| title-md | 16 | 1.0 | Card title, form section title, modal title |
+| body-md | 14 | 0.875 | Default body text, field labels, table content |
+| body-sm | 13 | 0.8125 | Dense metadata, secondary labels |
+| caption | 12 | 0.75 | Hints, timestamps, helper text, badges |
+| micro | 11 | 0.6875 | Very dense metadata only |
+
+### Typography rules
+- Default body text: 14 px
+- Default table text: 14 px
+- Dense metadata may use 13 px
+- Avoid making whole screens 13 px by default
+- Page titles should usually be 24 px
+- Section titles should usually be 16–20 px
+- Prefer font weight before using larger size
+- Use sentence case for most labels and headings
+- Use tabular numerals for quantities, currency, duration, rates, and IDs
+- Line height: 1.2–1.3 for headings, 1.4 for labels/short body text, 1.5 for longer explanatory copy
+
+### Weight guidance
+- 600: titles, active labels, emphasized metrics
+- 500: field labels, tabs, key controls
+- 400: body text, table cells, metadata
+
+## Spacing standard
+Use a 4 px base spacing system.
+
+| Token | px | Use |
+|---|---:|---|
+| 1 | 4 | Fine alignment |
+| 2 | 8 | Tight control gaps |
+| 3 | 12 | Dense groups |
+| 4 | 16 | Default internal spacing |
+| 5 | 20 | Dense section gaps |
+| 6 | 24 | Standard panel/card padding |
+| 8 | 32 | Large section gaps |
+| 10 | 40 | Major separation |
+
+### Spacing defaults
+- Page padding desktop: 24 px
+- Page padding dense mode/tablet: 16 px
+- Panel/card padding: 12–16 px for dense operational surfaces
+- Filter/action row gap: 8–12 px
+- Label to input gap: 6 px
+- Helper/error text gap under control: 4 px
+
+## Left navigation standard
+Design the left navigation for recognition, stability, and memory.
+
+### Widths
+- Expanded standard: 264 px
+- Expanded compact: 240 px
+- Collapsed icon rail: 72 px
+- Temporary mobile drawer: 280–320 px
+
+### Item sizing
+- Icon size: 18–20 px
+- Icon-to-label gap: 12 px
+- Nav item height: 36–40 px
+- Group header text: 11–12 px uppercase or 12 px semibold sentence case
+
+### Navigation rules
+- Group items by business domain, not technical architecture
+- Show active module and active page independently
+- Keep first-level navigation manageable
+- Use expandable groups for large suites
+- Preserve unread counts, badges, and active indication in collapsed mode
+- Keep collapse state sticky per user and viewport class when helpful
+- Provide a keyboard-reachable collapse toggle at the top of the rail
+
+### Collapse behavior
+- Expand by default on desktop
+- Collapse to icon rail, not full hide, when module switching is frequent
+- Animate width only over 160–220 ms
+- Do not trigger unpredictable reflow in unrelated controls
+- Convert labels into immediate tooltips in collapsed mode
+- Keep active indicators visible in both states
+- Preserve group expansion state when switching between expanded and collapsed modes
+- Make pinned or favorite destinations available at the top when useful
+
+### Anti-patterns for left nav
+- Icon-only rail with weak icon recognition
+- Inconsistent module order
+- Collapsing behavior that causes major content jump
+- Hidden group structures without clear affordance
+- Overloaded top bar competing with left navigation
+
+## Right utility panel standard
+Use the right panel only when it materially improves task speed or trust.
+
+### Good uses
+- Record summary
+- Workflow history
+- Validation issues
+- Attachments
+- Notes
+- Approvals
+- Audit details
+- Saved views or persistent filters
+- Contextual tools such as calculators or shortcuts
+
+### Widths
+- Narrow information panel: 320 px
+- Standard utility panel: 360 px
+- Form-heavy utility panel: 400 px
+- Wide details panel: 440 px maximum on desktop
+
+### Rules
+- Keep it visually subordinate to the main workspace
+- Make it independently collapsible
+- Use sticky header and sticky footer action areas when actions are present
+- Preserve state per page or workflow where useful
+- Convert to a drawer below laptop widths
+- Never hide mandatory or destructive actions exclusively inside the panel
+- Never allow the panel to steal too much width from the primary content area
+
+### Collapse behavior
+- Use a header toggle or clear edge handle
+- Animate width or slide over 160–220 ms
+- Optionally keep a narrow collapsed stub only when it preserves useful awareness
+- Do not let the panel obscure destructive confirmations or critical validation
+
+## Top bar and page header
+### Top bar
+- Standard height: 56 px
+- Dense mode top bar: 48 px only for highly operational products
+
+Top bar content:
+- Product or environment context
+- Global search
+- Alerts
+- System-wide quick utilities
+- User/account menu
+
+### Page header
+- Minimum height: 64 px, may grow with metadata rows
+- Sticky action bar height: 48–56 px
+
+Page header should contain:
+- Page title
+- Optional breadcrumb when hierarchy matters
+- Scope row: plant, site, warehouse, business unit, date range, saved view
+- Record ID and status when relevant
+- Primary actions
+- Secondary actions separated from primary ones
+
+Do not compress everything into one overloaded toolbar.
+
+## Page structure rules
+For most screens, use this vertical order:
+
+1. Page title and breadcrumb when necessary
+2. Scope row
+3. Status and metadata row
+4. Primary action row
+5. Secondary controls: filters, tabs, bulk actions, saved views, export
+6. Main content area
+
+## Page templates
+
+### Record list page
+1. Page title and page-level actions
+2. Scope row
+3. Filters and action row
+4. Main table
+5. Optional detail panel
+
+### Record detail page
+1. Title, record ID, status, owner, last updated
+2. Primary actions
+3. Tabs or section navigation
+4. Main form or detail content
+5. Optional right panel for history, notes, approvals, attachments
+
+### Workspace page
+Use for planning, dispatching, scheduling, or exception handling.
+
+- Left area within content: queue or list
+- Center: board, scheduler, main detail, or dense table
+- Right: contextual insights only when they improve speed
+
+## Form standard
+Design forms for speed and error prevention.
+
+### Rules
+- Group fields by business meaning, not the underlying data model
+- Prefer one-column forms for complex or high-risk workflows
+- Use two columns only when relationships remain obvious
+- Keep visible labels above fields
+- Keep units, currency, and format guidance close to the input
+- Mark required fields consistently
+- Do not rely on placeholders as labels
+- Validate formatting early and business logic at submit or step transitions
+- Keep helper text short and actionable
+- Present immutable system values as read-only fields or metadata, not disabled inputs
+- Keep actions semantically explicit: Save, Submit, Approve, Release, Post, Reconcile
+
+### Control sizes
+- Default input height: 36 px
+- Dense input height: 32 px
+- Textarea minimum height: 88 px
+- Default button height: 36 px
+- Dense button height: 32 px
+- Large page-level primary button: 40 px when justified
+- Button horizontal padding: 12–16 px
+- Icon-to-label gap in buttons: 8 px
+
+### Long workflows
+- Split into sections
+- Add sticky section navigation when needed
+- Surface unsaved changes clearly
+- Use auto-save only when it is safe and understandable
+
+## Tabs, controls, and utility components
+### Tabs
+- Standard tab height: 40 px
+- Dense tab height: 36 px
+- Use tabs for peer views
+- Use stepper/section navigation for sequences
+- Prefer underline or active background, not both at full emphasis
+
+### Chips and badges
+- Height: 20–24 px
+- Font size: 12 px
+- Use for concise status only
+- Pair color with text labels
+- Maintain a controlled vocabulary across the product
+
+## Table standard
+Treat tables as first-class product surfaces.
+
+### Table defaults
+- Header row height: 40 px
+- Standard row height: 40 px
+- Dense row height: 32–36 px
+- Cell horizontal padding: 12 px standard, 8 px dense
+- Sticky header: yes for long tables
+- Sticky first column: yes when the table is wide and identity matters
+
+### Table rules
+- Use full-width, high-information tables
+- Right-align numeric values
+- Align decimals where practical
+- Keep sorting, filtering, density, column visibility, and export discoverable
+- Support saved views
+- Make bulk selection and bulk actions obvious
+- Keep row click behavior distinct from checkbox selection and inline actions
+- Allow inline edit only for low-risk, high-frequency fields
+- Use side panel or detail page for complex editing
+
+### Status in tables
+- Pair color with text
+- Avoid too many badge styles
+- Keep status vocabulary controlled and consistent
+- Favor compact chips only when scanability remains strong
+
+## Dashboard and KPI standard
+ERP dashboards are operational, not promotional.
+
+### Rules
+- Lead with exceptions, bottlenecks, overdue work, and action-needed items
+- Show comparison context: target, SLA, threshold, trend, forecast, previous period
+- Use trend plus current value for time-based KPIs
+- Keep KPI card count restrained
+- Make drill-down to underlying records fast
+- Avoid oversized hero charts and decorative summaries
+
+## States and feedback
+Define all important states:
+
+- Loading
+- Empty
+- No results
+- Partial data
+- Validation error
+- Permission restricted
+- Offline or sync delayed
+- Success confirmation
+- Background processing
+- Stale data warning
+
+### Feedback rules
+- Use inline errors for local problems
+- Use banners or toasts for broader or asynchronous events
+- Do not rely on a toast alone for high-risk confirmation
+- Explain missing actions when permissions restrict them
+
+## Interaction and behavior rules
+- Support full keyboard navigation for primary workflows
+- Keep focus states highly visible
+- Keep hit targets practical even in dense layouts
+- Use confirmation dialogs only for irreversible or risky actions
+- Prefer inline warnings over excessive modal interruption
+- Keep destructive actions visually distinct and spatially separated from primary actions
+- Debounce search and filters responsibly
+- Preserve user context when moving from list to detail and back
+
+## Accessibility and resilience
+Always include:
+
+- Accessible contrast
+- Meaningful non-color status cues
+- Visible labels for ambiguous icons
+- Screen-reader naming based on business meaning
+- Keyboard-friendly table interactions
+- Safe handling for long translated labels
+- Safe handling for large numbers and timezone-sensitive values
+- Reduced motion where possible
+- Explicit loading, empty, and permission states
+
+## Breakpoints and responsive behavior
+Use behavior-based breakpoints.
+
+- >= 1440 px: full shell with optional right utility panel
+- 1200–1439 px: expanded left nav, right panel allowed selectively
+- 992–1199 px: expanded or compact left nav, right panel may become overlay/drawer
+- 768–991 px: temporary left drawer, stacked page controls
+- < 768 px: simplified mobile flow; do not force desktop ERP density
+
+## Color and visual language
+Use restrained styling.
+
+### Rules
+- Keep surfaces mostly neutral
+- Use borders, spacing, and subtle contrast to create structure
+- Use shadows sparingly
+- Use radius moderately, not playfully
+- Use semantic colors for meaning, not decoration
+- Keep icon style consistent in size and stroke
+
+### Semantic mapping
+- Neutral: default structure
+- Informative accent: current selection or active process
+- Success: completed state
+- Warning: risk or threshold breach
+- Danger: failed or destructive state
+
+Do not encode business meaning with color alone.
+
+## Truncation and overflow
+- Truncate long IDs only when the full value is easy to reveal and copy
+- Prefer wrapping for descriptive text
+- Keep table headers short
+- Use tooltip/help text for longer definitions
+- Never truncate critical totals or action labels
+
+## Implementation tokens
+Define at least these tokens:
+
+### Typography tokens
+- font family
+- font sizes
+- font weights
+- line heights
+- tabular numeral support
+
+### Spacing tokens
+- 4 px spacing scale
+- page padding
+- panel padding
+- row gaps
+
+### Shell tokens
+- left nav expanded width
+- left nav collapsed width
+- right panel widths
+- top bar height
+- page header minimum height
+
+### Control tokens
+- button heights
+- input heights
+- tab heights
+- table row heights
+- chip heights
+
+### Structural tokens
+- radius: 6–10 px depending on brand tone
+- border styles: default, strong, focus
+- elevation: none, overlay, modal
+- motion tokens: fast-enter, fast-exit, panel-collapse
+
+## Engineering handoff notes
+When handing off to development, always specify:
+
+- Sticky regions
+- Overflow and wrapping rules
+- Truncation behavior
+- Focus styling
+- Hover, active, disabled, read-only, hidden, and unavailable states
+- Permission-aware visibility rules
+- Responsive behavior at each breakpoint
+- Collapse persistence rules
+- Keyboard order and tab flow
+- Data-dense table behavior
+- Scroll container ownership
+- Loading and asynchronous refresh behavior
+
+## Framework-agnostic implementation notes
+This standard is suitable for any modern enterprise stack.
+
+### React teams
+- Map sizes and structure into design tokens and reusable layout primitives
+- Separate shell, page header, filter bar, and data surfaces into composable components
+- Avoid per-page spacing drift by centralizing tokens
+
+### Angular teams
+- Implement shell and dense data components as shared module-level primitives
+- Standardize tables, forms, and status patterns through shared directives/components
+- Keep role and permission states centralized
+
+### Vue teams
+- Use a token-driven component library with clear slot regions for header, content, and utility panel
+- Standardize panel collapse behavior and table density at the design-system layer
+- Preserve predictable state across route changes
+
+### Design-system teams
+- Publish tokens, shell primitives, and behavior rules separately
+- Document standard page templates, not just isolated components
+- Treat tables, filters, page headers, and utility panels as first-class patterns
+
+## Review rubric
+Score the UI against these questions:
+
+1. Is the current task obvious within five seconds?
+2. Is page scope visible and unambiguous?
+3. Are primary actions easy to find?
+4. Is navigation stable and memorable?
+5. Is density appropriate for the user role?
+6. Are tables and forms optimized for repeated work?
+7. Are states, errors, and permissions explicit?
+8. Is the interface accessible and keyboard-friendly?
+9. Does collapse behavior preserve context?
+10. Would an operator trust the screen during a stressful workflow?
+
+## Anti-patterns
+Avoid these unless there is a strong reason:
+
+- Oversized typography borrowed from marketing websites
+- Large empty cards for transactional data
+- Hidden filters behind multiple clicks
+- Icon-only controls without recognition support
+- Generic button labels like Continue for business actions
+- Excessive modal editing for full records
+- Layouts that shift when panels open or collapse
+- Decorative dashboards with weak drill-down
+- Disabled inputs used as information display
+- Low-contrast status chips relying on color alone
+- Inconsistent action placement across pages
+
+## Output style
+When responding with this skill, produce one or more of the following:
+
+- Page shell recommendation
+- Layout spec with exact sizing tokens
+- Navigation and collapse behavior spec
+- Typography and spacing spec
+- Form, table, dashboard, and state guidance
+- Engineering handoff notes
+- Review with concrete fixes and priorities
+
+Avoid vague advice such as “make it modern” or “keep it clean.” Use exact values whenever possible.

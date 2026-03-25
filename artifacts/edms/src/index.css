@@ -57,7 +57,12 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-size: 14px;
-    line-height: 1.6;
+    line-height: 1.5;
+  }
+  :focus-visible {
+    outline: 2px solid rgba(20, 184, 166, 0.6);
+    outline-offset: 2px;
+    border-radius: 4px;
   }
   code, .font-mono, [class*="font-mono"] {
     font-family: var(--font-mono);
@@ -88,8 +93,13 @@
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(20, 184, 166, 0.05);
   }
 
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
   .pill-filter {
-    @apply px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-150 cursor-pointer;
+    @apply px-2.5 py-1 rounded-full text-xs font-medium border transition-all duration-150 cursor-pointer;
   }
 
   .pill-filter-active {

@@ -67,7 +67,7 @@ const navGroups: NavGroup[] = [
 ];
 
 export function Sidebar() {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const location = useLocation();
   const { hasPermission } = useAuth();
 
@@ -75,10 +75,10 @@ export function Sidebar() {
     <motion.aside
       initial={false}
       animate={{ width: isExpanded ? 260 : 72 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="h-[calc(100vh-2rem)] ml-4 my-4 flex flex-col bg-slate-900/60 backdrop-blur-2xl border border-teal-500/20 shadow-2xl shadow-teal-950/50 rounded-3xl overflow-hidden z-40 shrink-0"
+      transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
+      className="h-[calc(100vh-2rem)] ml-4 my-4 flex flex-col bg-slate-900/60 backdrop-blur-2xl border border-teal-500/20 shadow-2xl shadow-teal-950/50 rounded-2xl overflow-hidden z-40 shrink-0"
     >
-      <div className="flex items-center p-5 gap-3 cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
+      <div className="flex items-center p-4 gap-3 cursor-pointer border-b border-white/5 min-h-[52px]" onClick={() => setIsExpanded(!isExpanded)}>
         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-400 to-emerald-600 flex items-center justify-center shrink-0 shadow-lg shadow-teal-500/20">
           <span className="text-white font-bold text-sm">L2</span>
         </div>
@@ -125,31 +125,33 @@ export function Sidebar() {
                   <NavLink
                     key={item.path}
                     to={item.path}
-                    onClick={() => { if (!isExpanded) setIsExpanded(true); }}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 group ${
+                    title={!isExpanded ? item.label : undefined}
+                    className={`relative flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 group ${
                       isActive
                         ? 'bg-teal-500/15 text-teal-300 border border-teal-500/25'
                         : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                     }`}
                   >
-                    <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-teal-400' : ''}`} />
+                    {isActive && !isExpanded && (
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full bg-teal-500" />
+                    )}
+                    <Icon className={`w-[18px] h-[18px] shrink-0 ${isActive ? 'text-teal-400' : ''}`} />
                     <AnimatePresence>
                       {isExpanded && (
                         <motion.span
                           initial={{ opacity: 0, x: -5 }}
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0 }}
-                          className="text-sm font-medium whitespace-nowrap overflow-hidden"
+                          className="text-sm font-medium whitespace-nowrap overflow-hidden flex-1"
                         >
                           {item.label}
                         </motion.span>
                       )}
                     </AnimatePresence>
-                    {isActive && (
+                    {isActive && isExpanded && (
                       <motion.div
                         layoutId="activeIndicator"
-                        className="ml-auto w-1 h-4 rounded-full bg-teal-500 shrink-0"
-                        style={{ display: isExpanded ? 'block' : 'none' }}
+                        className="w-1 h-4 rounded-full bg-teal-500 shrink-0"
                       />
                     )}
                   </NavLink>

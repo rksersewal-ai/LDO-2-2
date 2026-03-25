@@ -2,7 +2,7 @@ import React from 'react';
 
 export function GlassCard({ children, className = "", ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`glass-card rounded-2xl ${className}`} {...props}>
+    <div className={`glass-card rounded-xl ${className}`} {...props}>
       {children}
     </div>
   );
@@ -10,7 +10,7 @@ export function GlassCard({ children, className = "", ...props }: React.HTMLAttr
 
 export function GlassCardTeal({ children, className = "", ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`glass-card-teal rounded-2xl ${className}`} {...props}>
+    <div className={`glass-card-teal rounded-xl ${className}`} {...props}>
       {children}
     </div>
   );
@@ -75,7 +75,7 @@ export function Button({
 export function Input({ className = "", ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
-      className={`bg-slate-950/60 border border-slate-700/50 text-slate-200 text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/30 transition-all placeholder:text-slate-600 ${className}`}
+      className={`bg-slate-950/60 border border-slate-700/50 text-slate-200 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/30 transition-all placeholder:text-slate-600 ${className}`}
       {...props}
     />
   );
@@ -84,7 +84,7 @@ export function Input({ className = "", ...props }: React.InputHTMLAttributes<HT
 export function Select({ className = "", children, ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <select
-      className={`bg-slate-950/60 border border-slate-700/50 text-slate-200 text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/30 transition-all cursor-pointer ${className}`}
+      className={`bg-slate-950/60 border border-slate-700/50 text-slate-200 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/30 transition-all cursor-pointer ${className}`}
       {...props}
     >
       {children}
@@ -95,11 +95,11 @@ export function Select({ className = "", children, ...props }: React.SelectHTMLA
 export function StatCard({ label, value, sub, accent = false }: { label: string; value: string | number; sub?: string; accent?: boolean }) {
   return (
     <div className="glass-card rounded-xl px-4 py-3 flex flex-col gap-0.5">
-      <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">{label}</span>
-      <span className={`text-xl font-bold ${accent ? 'text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400' : 'text-slate-100'}`}>
+      <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{label}</span>
+      <span className={`text-xl font-bold tabular-nums ${accent ? 'text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400' : 'text-slate-100'}`}>
         {value}
       </span>
-      {sub && <span className="text-[10px] text-slate-500">{sub}</span>}
+      {sub && <span className="text-xs text-slate-500">{sub}</span>}
     </div>
   );
 }
