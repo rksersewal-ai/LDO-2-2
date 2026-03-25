@@ -7,10 +7,12 @@ import {
   Box, Layers, Cpu, Shield, Search, ChevronRight, ChevronDown,
   GripVertical, X, ExternalLink, FileText, ArrowLeft,
   GitBranch, Eye, AlertCircle, Hash, ChevronUp,
+  Plus, Package, CheckCircle, Info,
 } from 'lucide-react';
 import { PRODUCTS, BOM_TREES, PL_DATABASE, searchTree, countNodes, cloneTree, findNode } from '../lib/bomData';
 import type { BOMNode } from '../lib/bomData';
-import { GlassCard, Badge, Button, Input, PageHeader } from '../components/ui/Shared';
+import { GlassCard, Badge, Button, Input, Select, PageHeader } from '../components/ui/Shared';
+import { DatePicker } from '../components/ui/DatePicker';
 
 const BOM_ITEM_TYPE = 'BOM_NODE';
 
@@ -350,6 +352,252 @@ function DetailPanel({ node, onClose }: { node: BOMNode; onClose: () => void }) 
   );
 }
 
+function getAllNodeIds(nodes: BOMNode[]): { id: string; name: string; type: string }[] {
+  const result: { id: string; name: string; type: string }[] = [];
+  function collect(arr: BOMNode[]) {
+    for (const n of arr) {
+      if (n.type !== 'part') result.push({ id: n.id, name: n.name, type: n.type });
+      collect(n.children);
+    }
+  }
+  collect(nodes);
+  return result;
+}
+
+interface AddNodeForm {
+  plNumber: string;
+  name: string;
+  nodeType: 'assembly' | 'sub-assembly' | 'part';
+  parentId: string;
+  quantity: number;
+  findNumber: string;
+  revision: string;
+  effectiveDate: string;
+  usedInProducts: string[];
+}
+
+function AddNodeModal({
+  bom, products, onClose, onAdd,
+}: {
+  bom: BOMNode[];
+  products: typeof PRODUCTS;
+  onClose: () => void;
+  onAdd: (node: BOMNode, parentId: string | null) => void;
+}) {
+  const [form, setForm] = useState<AddNodeForm>({
+    plNumber: '',
+    name: '',
+    nodeType: 'part',
+    parentId: 'ROOT',
+    quantity: 1,
+    findNumber: '10',
+    revision: 'A',
+    effectiveDate: '',
+    usedInProducts: products.map(p => p.id),
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [plLookupResult, setPlLookupResult] = useState<typeof PL_DATABASE[string] | null | 'not-found'>(null);
+
+  const parentOptions = [{ id: 'ROOT', name: 'Top Level (no parent)', type: 'root' }, ...getAllNodeIds(bom)];
+
+  const lookupPL = () => {
+    if (!form.plNumber.trim()) return;
+    const pl = PL_DATABASE[form.plNumber.trim()];
+    if (pl) {
+      setPlLookupResult(pl);
+      setForm(f => ({
+        ...f,
+        name: pl.name,
+        nodeType: pl.type === 'assembly' ? 'assembly' : pl.type === 'sub-assembly' ? 'sub-assembly' : 'part',
+        revision: pl.revision,
+      }));
+    } else {
+      setPlLookupResult('not-found');
+    }
+  };
+
+  const validate = () => {
+    const errs: Record<string, string> = {};
+    if (!form.plNumber.trim()) errs.plNumber = 'PL Number is required';
+    if (!form.name.trim()) errs.name = 'Name is required';
+    if (form.quantity < 1) errs.quantity = 'Quantity must be at least 1';
+    return errs;
+  };
+
+  const handleSubmit = () => {
+    const errs = validate();
+    if (Object.keys(errs).length > 0) { setErrors(errs); return; }
+    const newNode: BOMNode = {
+      id: form.plNumber.trim(),
+      name: form.name.trim(),
+      type: form.nodeType,
+      revision: form.revision || 'A',
+      quantity: form.quantity,
+      findNumber: form.findNumber || '10',
+      unitOfMeasure: 'EA',
+      tags: plLookupResult && plLookupResult !== 'not-found' ? plLookupResult.tags.slice(0, 2) : [],
+      children: [],
+    };
+    onAdd(newNode, form.parentId === 'ROOT' ? null : form.parentId);
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+      <GlassCard className="w-full max-w-2xl p-6 shadow-2xl max-h-[92vh] overflow-auto">
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h2 className="text-lg font-bold text-white">Add BOM Node</h2>
+            <p className="text-xs text-slate-500 mt-0.5">Look up a PL number to auto-fill details, then place it in the BOM tree</p>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-300 hover:bg-slate-700/50 transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          {/* PL Lookup */}
+          <div>
+            <label className="text-xs font-medium text-slate-400 mb-1.5 block">PL Number * (8 digits)</label>
+            <div className="flex gap-2">
+              <Input
+                value={form.plNumber}
+                onChange={e => { setForm(f => ({ ...f, plNumber: e.target.value })); setPlLookupResult(null); }}
+                placeholder="e.g. 38110000"
+                className={`flex-1 font-mono ${errors.plNumber ? 'border-rose-500/50' : ''}`}
+                maxLength={8}
+              />
+              <Button variant="secondary" onClick={lookupPL} size="sm">
+                <Search className="w-3.5 h-3.5" /> Look Up PL
+              </Button>
+            </div>
+            {errors.plNumber && <p className="text-[10px] text-rose-400 mt-1">{errors.plNumber}</p>}
+          </div>
+
+          {/* PL Lookup result */}
+          {plLookupResult && plLookupResult !== 'not-found' && (
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-teal-900/20 border border-teal-500/20">
+              <CheckCircle className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-teal-300">{plLookupResult.name}</p>
+                <p className="text-xs text-slate-400">{plLookupResult.department} · Rev {plLookupResult.revision} · {plLookupResult.lifecycleState}</p>
+                {plLookupResult.safetyVital && (
+                  <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-rose-900/30 border border-rose-500/30 rounded-full text-[10px] text-rose-300">
+                    <Shield className="w-2.5 h-2.5" /> Safety Vital
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+          {plLookupResult === 'not-found' && (
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-amber-900/20 border border-amber-500/20">
+              <Info className="w-4 h-4 text-amber-400 shrink-0" />
+              <p className="text-xs text-amber-300">PL number not in database. You can still create the node manually — go to PL Hub to create the record first for full metadata.</p>
+            </div>
+          )}
+
+          <div>
+            <label className="text-xs font-medium text-slate-400 mb-1.5 block">Component Name *</label>
+            <Input
+              value={form.name}
+              onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+              placeholder="e.g. Bogie Frame Assembly"
+              className={`w-full ${errors.name ? 'border-rose-500/50' : ''}`}
+            />
+            {errors.name && <p className="text-[10px] text-rose-400 mt-1">{errors.name}</p>}
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium text-slate-400 mb-1.5 block">Node Type</label>
+              <Select value={form.nodeType} onChange={e => setForm(f => ({ ...f, nodeType: e.target.value as AddNodeForm['nodeType'] }))} className="w-full">
+                <option value="assembly">Assembly</option>
+                <option value="sub-assembly">Sub-Assembly</option>
+                <option value="part">Part</option>
+              </Select>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-slate-400 mb-1.5 block">Revision</label>
+              <Input value={form.revision} onChange={e => setForm(f => ({ ...f, revision: e.target.value }))} placeholder="e.g. A" className="w-full font-mono" />
+            </div>
+          </div>
+
+          {/* Assembly level / Parent */}
+          <div>
+            <label className="text-xs font-medium text-slate-400 mb-1.5 block">Place Under (Assembly Level)</label>
+            <Select value={form.parentId} onChange={e => setForm(f => ({ ...f, parentId: e.target.value }))} className="w-full">
+              {parentOptions.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.type === 'root' ? '⊤ Top Level' : `↳ ${p.name} (${p.id})`}
+                </option>
+              ))}
+            </Select>
+            <p className="text-[10px] text-slate-600 mt-1">The system will automatically link PL details using the PL number provided.</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium text-slate-400 mb-1.5 block">Quantity</label>
+              <Input type="number" min={1} value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: Number(e.target.value) }))} className={`w-full ${errors.quantity ? 'border-rose-500/50' : ''}`} />
+              {errors.quantity && <p className="text-[10px] text-rose-400 mt-1">{errors.quantity}</p>}
+            </div>
+            <div>
+              <label className="text-xs font-medium text-slate-400 mb-1.5 block">Find Number</label>
+              <Input value={form.findNumber} onChange={e => setForm(f => ({ ...f, findNumber: e.target.value }))} placeholder="e.g. 10" className="w-full font-mono" />
+            </div>
+          </div>
+
+          <DatePicker
+            label="Effective From Date"
+            value={form.effectiveDate}
+            onChange={v => setForm(f => ({ ...f, effectiveDate: v }))}
+            placeholder="Optional"
+          />
+
+          {/* Used In Products */}
+          <div>
+            <label className="text-xs font-medium text-slate-400 mb-2 block">
+              Used In Products
+              <span className="text-slate-600 ml-1 font-normal">(node will be added to all selected product BOMs)</span>
+            </label>
+            <div className="space-y-1.5">
+              {products.map(p => (
+                <label key={p.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-800/30 border border-slate-700/40 hover:border-teal-500/20 cursor-pointer transition-all">
+                  <input
+                    type="checkbox"
+                    checked={form.usedInProducts.includes(p.id)}
+                    onChange={e => setForm(f => ({
+                      ...f,
+                      usedInProducts: e.target.checked
+                        ? [...f.usedInProducts, p.id]
+                        : f.usedInProducts.filter(x => x !== p.id),
+                    }))}
+                    className="accent-teal-500 w-4 h-4"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-slate-200">{p.name}</p>
+                    <p className="text-[10px] text-slate-500">{p.category} · {p.lifecycle}</p>
+                  </div>
+                  <Badge variant={p.lifecycle === 'Production' ? 'success' : p.lifecycle === 'In Development' ? 'info' : 'default'} className="text-[9px] px-1.5 shrink-0">
+                    {p.lifecycle}
+                  </Badge>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex gap-3 mt-6 pt-5 border-t border-slate-700/50">
+          <Button variant="secondary" onClick={onClose} className="flex-1">Cancel</Button>
+          <Button onClick={handleSubmit} className="flex-1">
+            <Plus className="w-4 h-4" /> Add to BOM
+          </Button>
+        </div>
+      </GlassCard>
+    </div>
+  );
+}
+
 function BOMProductViewInner() {
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
@@ -360,6 +608,7 @@ function BOMProductViewInner() {
   const [bom, setBom] = useState<BOMNode[]>(initialTree ? cloneTree(initialTree) : []);
   const [selectedNode, setSelectedNode] = useState<BOMNode | null>(null);
   const [search, setSearch] = useState('');
+  const [showAddNode, setShowAddNode] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(() => {
     const s = new Set<string>();
     if (initialTree?.[0]) s.add(initialTree[0].id);
@@ -387,6 +636,24 @@ function BOMProductViewInner() {
   const collapseAll = useCallback(() => {
     setExpanded(bom.length > 0 ? new Set([bom[0].id]) : new Set());
   }, [bom]);
+
+  const handleAddNode = useCallback((node: BOMNode, parentId: string | null) => {
+    setBom(prev => {
+      const cloned = cloneTree(prev);
+      if (parentId === null) {
+        cloned.push(node);
+      } else {
+        const parent = findNode(cloned, parentId);
+        if (parent) parent.children.push(node);
+      }
+      return cloned;
+    });
+    setExpanded(prev => {
+      const next = new Set(prev);
+      if (parentId) next.add(parentId);
+      return next;
+    });
+  }, []);
 
   const onMove = useCallback((parentId: string | null, fromIndex: number, toIndex: number) => {
     setBom(prev => {
@@ -438,6 +705,9 @@ function BOMProductViewInner() {
             </Button>
             <Button variant="secondary" size="sm" onClick={() => navigate('/pl')}>
               <Eye className="w-3.5 h-3.5" /> PL Hub
+            </Button>
+            <Button size="sm" onClick={() => setShowAddNode(true)}>
+              <Plus className="w-3.5 h-3.5" /> Add Node
             </Button>
           </div>
         }
@@ -507,6 +777,15 @@ function BOMProductViewInner() {
           )}
         </AnimatePresence>
       </div>
+
+      {showAddNode && (
+        <AddNodeModal
+          bom={bom}
+          products={PRODUCTS}
+          onClose={() => setShowAddNode(false)}
+          onAdd={handleAddNode}
+        />
+      )}
     </div>
   );
 }

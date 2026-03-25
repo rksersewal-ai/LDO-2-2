@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import {
   Search, Filter, DatabaseBackup, ArrowRight, Layers, Box, Cpu, Shield, Hash,
   Plus, X, ChevronDown, AlertTriangle, CheckCircle, Clock, SlidersHorizontal,
-  Building2,
+  Building2, Link as LinkIcon, Unlink, ExternalLink, FileText, FilePlus,
 } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { GlassCard, Badge, Button, Input, Select } from '../components/ui/Shared';
@@ -11,6 +11,7 @@ import { LoadingState } from '../components/ui/LoadingState';
 import { ErrorState } from '../components/ui/ErrorState';
 import type { PLNumber, InspectionCategory } from '../lib/types';
 import { INSPECTION_CATEGORY_LABELS, AGENCIES } from '../lib/constants';
+import { MOCK_DOCUMENTS } from '../lib/mock';
 
 function NodeIcon({ safetyCritical, className = "w-5 h-5" }: { safetyCritical: boolean; className?: string }) {
   if (safetyCritical) return <Shield className={`${className} text-rose-400`} />;
@@ -59,6 +60,144 @@ const EMPTY_FORM: CreatePLFormData = {
   designSupervisor: '',
   applicationArea: '',
 };
+
+const DOC_STATUS_VARIANT: Record<string, 'success' | 'warning' | 'default' | 'danger'> = {
+  Approved: 'success',
+  'In Review': 'warning',
+  Draft: 'default',
+  Obsolete: 'danger',
+};
+
+function LinkDocumentsModal({
+  pl,
+  onClose,
+  onUpdate,
+}: {
+  pl: PLNumber;
+  onClose: () => void;
+  onUpdate: (linkedIds: string[]) => void;
+}) {
+  const navigate = useNavigate();
+  const [search, setSearch] = useState('');
+  const [linked, setLinked] = useState<string[]>(pl.linkedDocumentIds ?? []);
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    return MOCK_DOCUMENTS.filter(d =>
+      !q || d.id.toLowerCase().includes(q) || d.name.toLowerCase().includes(q) || d.category.toLowerCase().includes(q)
+    );
+  }, [search]);
+
+  const toggle = (id: string) => {
+    setLinked(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
+  const handleSave = () => {
+    onUpdate(linked);
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+      <GlassCard className="w-full max-w-2xl p-6 shadow-2xl flex flex-col max-h-[90vh]">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-bold text-white">Link Documents</h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              <span className="font-mono text-teal-400">{pl.plNumber}</span> — {pl.name}
+            </p>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-300 hover:bg-slate-700/50 transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {linked.length > 0 && (
+          <div className="mb-3 flex flex-wrap gap-1.5">
+            {linked.map(id => {
+              const doc = MOCK_DOCUMENTS.find(d => d.id === id);
+              return doc ? (
+                <span key={id} className="inline-flex items-center gap-1 px-2 py-0.5 bg-teal-500/10 border border-teal-500/30 rounded-full text-xs text-teal-300">
+                  <FileText className="w-3 h-3" />
+                  {doc.id}
+                  <button onClick={() => toggle(id)} className="ml-0.5 text-slate-500 hover:text-rose-400 transition-colors">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ) : null;
+            })}
+          </div>
+        )}
+
+        <div className="relative mb-3">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Input
+            placeholder="Search documents by ID, name or category..."
+            className="pl-10 w-full"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+        </div>
+
+        <div className="flex-1 overflow-y-auto space-y-1.5 min-h-0 pr-0.5 custom-scrollbar">
+          {filtered.map(doc => {
+            const isLinked = linked.includes(doc.id);
+            return (
+              <div
+                key={doc.id}
+                className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${isLinked ? 'bg-teal-900/20 border-teal-500/30' : 'bg-slate-800/30 border-slate-700/40 hover:border-slate-600/60'}`}
+                onClick={() => toggle(doc.id)}
+              >
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${isLinked ? 'bg-teal-500/20' : 'bg-slate-700/40'}`}>
+                  <FileText className={`w-4 h-4 ${isLinked ? 'text-teal-400' : 'text-slate-500'}`} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-mono text-xs text-slate-400">{doc.id}</span>
+                    <Badge variant={DOC_STATUS_VARIANT[doc.status] ?? 'default'} className="text-[9px]">{doc.status}</Badge>
+                  </div>
+                  <p className="text-sm text-slate-200 truncate">{doc.name}</p>
+                  <p className="text-[10px] text-slate-500">{doc.category} · Rev {doc.revision} · {doc.size}</p>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {isLinked ? (
+                    <span className="flex items-center gap-1 text-[10px] text-teal-400 font-medium">
+                      <LinkIcon className="w-3 h-3" /> Linked
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1 text-[10px] text-slate-500">
+                      <FilePlus className="w-3 h-3" /> Link
+                    </span>
+                  )}
+                  <button
+                    onClick={e => { e.stopPropagation(); navigate(`/documents/${doc.id}`); }}
+                    className="w-6 h-6 rounded-lg flex items-center justify-center text-slate-500 hover:text-teal-400 hover:bg-slate-700/50 transition-colors"
+                    title="Open preview"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+          {filtered.length === 0 && (
+            <div className="text-center py-10 text-slate-500 text-sm">No documents match your search</div>
+          )}
+        </div>
+
+        <div className="flex gap-3 mt-4 pt-4 border-t border-slate-700/50 shrink-0">
+          <div className="flex-1 text-xs text-slate-500 self-center">
+            {linked.length} document{linked.length !== 1 ? 's' : ''} linked
+          </div>
+          <Button variant="secondary" onClick={onClose}>Cancel</Button>
+          <Button onClick={handleSave}>
+            <LinkIcon className="w-4 h-4" /> Save Links
+          </Button>
+        </div>
+      </GlassCard>
+    </div>
+  );
+}
 
 function CreatePLModal({ onClose, onSave }: { onClose: () => void; onSave: (data: CreatePLFormData) => Promise<void> }) {
   const [form, setForm] = useState<CreatePLFormData>(EMPTY_FORM);
@@ -221,6 +360,7 @@ export default function PLKnowledgeHub() {
   const [safetyFilter, setSafetyFilter] = useState('ALL');
   const [showFilters, setShowFilters] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [linkingPL, setLinkingPL] = useState<PLNumber | null>(null);
 
   const filtered = useMemo(() => {
     return plItems.filter(p => {
@@ -247,6 +387,11 @@ export default function PLKnowledgeHub() {
   }), [plItems]);
 
   const activeFilters = [statusFilter, categoryFilter, safetyFilter].filter(f => f !== 'ALL').length;
+
+  const handleLinkUpdate = (plId: string, linkedIds: string[]) => {
+    const item = plItems.find(p => p.id === plId);
+    if (!item) return;
+  };
 
   const handleCreate = async (data: CreatePLFormData) => {
     await add({
@@ -414,10 +559,21 @@ export default function PLKnowledgeHub() {
                 )}
               </div>
 
-              <div className="flex items-center gap-3 shrink-0">
+              <div className="flex items-center gap-2 shrink-0">
                 {pl.engineeringChanges && pl.engineeringChanges.length > 0 && (
                   <span className="text-[10px] text-slate-600 font-mono">{pl.engineeringChanges.length} EC{pl.engineeringChanges.length !== 1 ? 's' : ''}</span>
                 )}
+                <button
+                  onClick={e => { e.stopPropagation(); setLinkingPL(pl); }}
+                  title="Link / Unlink Documents"
+                  className={`w-7 h-7 flex items-center justify-center rounded-lg border transition-all ${
+                    pl.linkedDocumentIds.length > 0
+                      ? 'bg-teal-500/10 border-teal-500/30 text-teal-400 hover:bg-teal-500/20'
+                      : 'bg-slate-800/50 border-slate-700/40 text-slate-600 hover:text-slate-300 hover:border-slate-600'
+                  }`}
+                >
+                  <LinkIcon className="w-3.5 h-3.5" />
+                </button>
                 <ArrowRight className="w-4 h-4 text-slate-600 group-hover:text-teal-400 transition-colors" />
               </div>
             </div>
@@ -447,6 +603,16 @@ export default function PLKnowledgeHub() {
         <CreatePLModal
           onClose={() => setShowCreateModal(false)}
           onSave={handleCreate}
+        />
+      )}
+
+      {linkingPL && (
+        <LinkDocumentsModal
+          pl={linkingPL}
+          onClose={() => setLinkingPL(null)}
+          onUpdate={(linkedIds) => {
+            handleLinkUpdate(linkingPL.id, linkedIds);
+          }}
         />
       )}
     </div>

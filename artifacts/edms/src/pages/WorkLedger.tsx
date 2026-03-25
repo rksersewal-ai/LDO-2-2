@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { GlassCard, Badge, Button, Input, Select } from '../components/ui/Shared';
+import { DatePicker } from '../components/ui/DatePicker';
 import { LoadingState } from '../components/ui/LoadingState';
 import { ErrorState } from '../components/ui/ErrorState';
 import { useWorkRecords } from '../hooks/useWorkRecords';
@@ -11,7 +12,7 @@ import {
   FileText, Link as LinkIcon, AlertTriangle, CheckCircle,
   Clock, Lock, Shield, BarChart3, Layers,
   Unlock, Calendar, Hash, ZapOff, TrendingUp,
-  AlertCircle, ChevronDown,
+  AlertCircle, ChevronDown, Truck, CheckSquare,
 } from 'lucide-react';
 import { useNavigate } from 'react-router';
 
@@ -121,6 +122,8 @@ interface CreateFormData {
   concernedOfficer: string;
   consentGiven: string;
   date: string;
+  dispatchDate: string;
+  closingDate: string;
 }
 
 const EMPTY_FORM: CreateFormData = {
@@ -135,7 +138,17 @@ const EMPTY_FORM: CreateFormData = {
   concernedOfficer: '',
   consentGiven: 'N/A',
   date: new Date().toISOString().split('T')[0],
+  dispatchDate: '',
+  closingDate: '',
 };
+
+function calcDaysBetween(start: string, end: string): number | undefined {
+  if (!start || !end) return undefined;
+  const s = new Date(start).getTime();
+  const e = new Date(end).getTime();
+  if (isNaN(s) || isNaN(e) || e < s) return undefined;
+  return Math.round((e - s) / (1000 * 60 * 60 * 24));
+}
 
 function CreateWorkModal({
   onClose,
@@ -176,6 +189,7 @@ function CreateWorkModal({
     const errs = validate();
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
     setSaving(true);
+    const autodays = calcDaysBetween(form.dispatchDate || form.date, form.closingDate);
     try {
       await onSave({
         userId: 'USR-001',
@@ -194,7 +208,10 @@ function CreateWorkModal({
         targetDays,
         status: 'OPEN',
         isLocked: false,
-      });
+        dispatchDate: form.dispatchDate || undefined,
+        closingDate: form.closingDate || undefined,
+        daysTaken: autodays,
+      } as Omit<WorkRecord, 'id' | 'createdAt'>);
       onClose();
     } finally {
       setSaving(false);
@@ -315,10 +332,11 @@ function CreateWorkModal({
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs font-medium text-slate-400 mb-1.5 block">Date Received / Started</label>
-              <Input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} className="w-full" />
-            </div>
+            <DatePicker
+              label="Date Received / Started"
+              value={form.date}
+              onChange={v => setForm(f => ({ ...f, date: v }))}
+            />
             {consentApplicable && (
               <div>
                 <label className="text-xs font-medium text-slate-400 mb-1.5 block">Consent Given</label>
@@ -330,6 +348,44 @@ function CreateWorkModal({
               </div>
             )}
           </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <DatePicker
+              label="Date of Dispatch"
+              value={form.dispatchDate}
+              onChange={v => setForm(f => ({ ...f, dispatchDate: v }))}
+              placeholder="Optional"
+            />
+            <DatePicker
+              label="Closing / Completion Date"
+              value={form.closingDate}
+              onChange={v => setForm(f => ({ ...f, closingDate: v }))}
+              placeholder="Optional"
+              minDate={form.dispatchDate || form.date}
+            />
+          </div>
+
+          {(form.dispatchDate || form.closingDate) && (
+            <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-slate-800/40 border border-slate-700/40">
+              <Clock className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+              <div className="flex items-center gap-4 text-xs">
+                {form.dispatchDate && (
+                  <span className="text-slate-400"><span className="text-slate-600">Dispatched:</span> <span className="text-teal-300 font-mono">{form.dispatchDate}</span></span>
+                )}
+                {form.closingDate && (
+                  <span className="text-slate-400"><span className="text-slate-600">Closed:</span> <span className="text-teal-300 font-mono">{form.closingDate}</span></span>
+                )}
+                {(() => {
+                  const d = calcDaysBetween(form.dispatchDate || form.date, form.closingDate);
+                  return d !== undefined ? (
+                    <span className={`font-semibold ${d <= targetDays ? 'text-emerald-400' : 'text-rose-400'}`}>
+                      {d}d taken {d <= targetDays ? '✓' : `(+${d - targetDays}d over)`}
+                    </span>
+                  ) : null;
+                })()}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex gap-3 mt-6 pt-5 border-t border-slate-700/50">
@@ -371,12 +427,15 @@ function RecordDetail({ record, onVerify, onClose }: { record: WorkRecord; onVer
           { label: 'Assignee', value: record.userName },
           { label: 'Section', value: record.userSection ?? record.sectionType ?? '—' },
           { label: 'Date Received', value: record.date },
-          { label: 'Completion Date', value: record.completionDate ?? 'Pending' },
+          { label: 'Dispatch Date', value: (record as any).dispatchDate ?? '—', icon: <Truck className="w-3 h-3 text-amber-400" /> },
+          { label: 'Closing Date', value: (record as any).closingDate ?? record.completionDate ?? 'Pending', icon: <CheckSquare className="w-3 h-3 text-emerald-400" /> },
           { label: 'Target Days', value: record.targetDays ? `${record.targetDays}d` : '—' },
-          { label: 'Days Taken', value: record.daysTaken != null ? `${record.daysTaken}d` : '—' },
+          { label: 'Days Taken', value: record.daysTaken != null ? `${record.daysTaken}d` : (record as any).dispatchDate && (record as any).closingDate ? `${calcDaysBetween((record as any).dispatchDate, (record as any).closingDate) ?? '—'}d` : '—' },
         ].map(f => (
           <div key={f.label}>
-            <p className="text-[10px] text-slate-500 mb-0.5">{f.label}</p>
+            <p className="text-[10px] text-slate-500 mb-0.5 flex items-center gap-1">
+              {(f as any).icon}{f.label}
+            </p>
             <p className="text-sm text-slate-200 font-medium">{f.value}</p>
           </div>
         ))}
