@@ -243,6 +243,121 @@
     @apply bg-slate-900/50 border-slate-700/50 text-slate-400 hover:text-slate-200 hover:border-slate-600;
   }
 
+  /* ──────────────────────────────────────────────────────────────────────────
+     Typography Utilities — Replaces hardcoded text-xs, text-sm, etc.
+     ────────────────────────────────────────────────────────────────────────── */
+  
+  .text-app-title {
+    font-size: var(--font-size-app-title);
+    line-height: var(--line-height-app-title);
+  }
+  
+  .text-page-title {
+    font-size: var(--font-size-page-title);
+    line-height: var(--line-height-page-title);
+  }
+  
+  .text-section-title {
+    font-size: var(--font-size-section-title);
+    line-height: var(--line-height-section-title);
+  }
+  
+  .text-subsection-title {
+    font-size: var(--font-size-subsection-title);
+    line-height: var(--line-height-subsection-title);
+  }
+  
+  .text-body {
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-body);
+  }
+  
+  .text-label {
+    font-size: var(--font-size-label);
+    line-height: var(--line-height-label);
+  }
+  
+  .text-caption {
+    font-size: var(--font-size-caption);
+    line-height: var(--line-height-caption);
+  }
+  
+  .text-micro {
+    font-size: var(--font-size-micro);
+    line-height: var(--line-height-micro);
+  }
+  
+  .text-mono-data {
+    font-size: var(--font-size-mono-data);
+    line-height: var(--line-height-mono-data);
+    font-family: var(--font-mono);
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────────
+     Spacing Utilities — Replaces hardcoded p-4, gap-2, etc.
+     ────────────────────────────────────────────────────────────────────────── */
+  
+  .gap-xs { gap: var(--spacing-xs); }
+  .gap-sm { gap: var(--spacing-sm); }
+  .gap-md { gap: var(--spacing-md); }
+  .gap-lg { gap: var(--spacing-lg); }
+  .gap-xl { gap: var(--spacing-xl); }
+  .gap-2xl { gap: var(--spacing-2xl); }
+  .gap-3xl { gap: var(--spacing-3xl); }
+  .gap-4xl { gap: var(--spacing-4xl); }
+  .gap-5xl { gap: var(--spacing-5xl); }
+  
+  .p-xs { padding: var(--spacing-xs); }
+  .p-sm { padding: var(--spacing-sm); }
+  .p-md { padding: var(--spacing-md); }
+  .p-lg { padding: var(--spacing-lg); }
+  .p-xl { padding: var(--spacing-xl); }
+  .p-2xl { padding: var(--spacing-2xl); }
+  .p-3xl { padding: var(--spacing-3xl); }
+  .p-4xl { padding: var(--spacing-4xl); }
+  .p-5xl { padding: var(--spacing-5xl); }
+  
+  .px-xs { padding-left: var(--spacing-xs); padding-right: var(--spacing-xs); }
+  .px-sm { padding-left: var(--spacing-sm); padding-right: var(--spacing-sm); }
+  .px-md { padding-left: var(--spacing-md); padding-right: var(--spacing-md); }
+  .px-lg { padding-left: var(--spacing-lg); padding-right: var(--spacing-lg); }
+  .px-xl { padding-left: var(--spacing-xl); padding-right: var(--spacing-xl); }
+  .px-2xl { padding-left: var(--spacing-2xl); padding-right: var(--spacing-2xl); }
+  .px-3xl { padding-left: var(--spacing-3xl); padding-right: var(--spacing-3xl); }
+  
+  .py-xs { padding-top: var(--spacing-xs); padding-bottom: var(--spacing-xs); }
+  .py-sm { padding-top: var(--spacing-sm); padding-bottom: var(--spacing-sm); }
+  .py-md { padding-top: var(--spacing-md); padding-bottom: var(--spacing-md); }
+  .py-lg { padding-top: var(--spacing-lg); padding-bottom: var(--spacing-lg); }
+  .py-xl { padding-top: var(--spacing-xl); padding-bottom: var(--spacing-xl); }
+  .py-2xl { padding-top: var(--spacing-2xl); padding-bottom: var(--spacing-2xl); }
+  .py-3xl { padding-top: var(--spacing-3xl); padding-bottom: var(--spacing-3xl); }
+  
+  .m-xs { margin: var(--spacing-xs); }
+  .m-sm { margin: var(--spacing-sm); }
+  .m-md { margin: var(--spacing-md); }
+  .m-lg { margin: var(--spacing-lg); }
+  .m-xl { margin: var(--spacing-xl); }
+  .m-2xl { margin: var(--spacing-2xl); }
+  .m-3xl { margin: var(--spacing-3xl); }
+  
+  .mb-xs { margin-bottom: var(--spacing-xs); }
+  .mb-sm { margin-bottom: var(--spacing-sm); }
+  .mb-md { margin-bottom: var(--spacing-md); }
+  .mb-lg { margin-bottom: var(--spacing-lg); }
+  .mb-xl { margin-bottom: var(--spacing-xl); }
+  .mb-2xl { margin-bottom: var(--spacing-2xl); }
+  .mb-3xl { margin-bottom: var(--spacing-3xl); }
+  
+  /* ──────────────────────────────────────────────────────────────────────────
+     Component Height Utilities
+     ────────────────────────────────────────────────────────────────────────── */
+  
+  .h-table-row-dense { height: var(--height-table-row-dense); }
+  .h-table-row { height: var(--height-table-row); }
+  .h-control { height: var(--height-control); }
+  .h-action-button { height: var(--height-action-button); }
+
   @keyframes marquee {
     0% { transform: translateX(0); }
     100% { transform: translateX(-50%); }
