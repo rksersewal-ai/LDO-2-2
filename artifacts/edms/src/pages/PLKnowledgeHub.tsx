@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import {
   Search, DatabaseBackup, Shield, Hash,
-  Plus, X, AlertTriangle, CheckCircle, Clock, SlidersHorizontal,
+  Plus, X, AlertTriangle, CheckCircle, Clock,
   Building2, Link as LinkIcon, ExternalLink, FileText, FilePlus,
   ChevronUp, ChevronDown, ChevronsUpDown, ArrowRight,
 } from 'lucide-react';
@@ -362,7 +362,6 @@ export default function PLKnowledgeHub() {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
   const [safetyFilter, setSafetyFilter] = useState('ALL');
-  const [showFilters, setShowFilters] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [linkingPL, setLinkingPL] = useState<PLNumber | null>(null);
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
@@ -492,70 +491,64 @@ export default function PLKnowledgeHub() {
       </div>
 
       <GlassCard className="p-6">
-        <div className="flex flex-wrap gap-2 mb-4">
-          <div className="relative flex-1 min-w-[220px]">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-            <Input
-              placeholder="Search PL records by number, name, or drawing..."
-              className="pl-11 w-full"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-          </div>
-          <button
-            onClick={() => setShowFilters(f => !f)}
-            className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-medium border transition-colors ${showFilters || activeFilters > 0 ? 'bg-teal-500/15 border-teal-500/40 text-teal-300' : 'bg-slate-800/60 border-slate-700/50 text-slate-400 hover:text-slate-200'}`}
-          >
-            <SlidersHorizontal className="w-3.5 h-3.5" /> Filters
-            {activeFilters > 0 && <span className="w-4 h-4 rounded-full bg-teal-500 text-white text-[9px] flex items-center justify-center">{activeFilters}</span>}
-          </button>
+        {/* Search */}
+        <div className="relative mb-4">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Input
+            placeholder="Search PL records by number, name, or drawing..."
+            className="pl-11 w-full"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
         </div>
 
-        {showFilters && (
-          <div className="mb-4 p-4 rounded-xl bg-slate-800/30 border border-slate-700/40 space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-500 mb-1.5">Status</p>
-                <div className="flex flex-wrap gap-1">
-                  {['ALL', 'ACTIVE', 'UNDER_REVIEW', 'OBSOLETE'].map(s => (
-                    <button key={s} onClick={() => setStatusFilter(s)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${statusFilter === s ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40' : 'bg-slate-800/60 text-slate-500 hover:text-slate-300 border border-slate-700/30'}`}>
-                      {s === 'ALL' ? 'All' : STATUS_LABEL[s]}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-500 mb-1.5">Inspection Category</p>
-                <div className="flex flex-wrap gap-1">
-                  {['ALL', 'CAT-A', 'CAT-B', 'CAT-C', 'CAT-D'].map(c => (
-                    <button key={c} onClick={() => setCategoryFilter(c)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${categoryFilter === c ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40' : 'bg-slate-800/60 text-slate-500 hover:text-slate-300 border border-slate-700/30'}`}>
-                      {c === 'ALL' ? 'All' : c}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-500 mb-1.5">Safety</p>
-                <div className="flex flex-wrap gap-1">
-                  {[['ALL', 'All'], ['SAFETY', 'Safety Vital'], ['NON_SAFETY', 'Standard']].map(([v, l]) => (
-                    <button key={v} onClick={() => setSafetyFilter(v)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${safetyFilter === v ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40' : 'bg-slate-800/60 text-slate-500 hover:text-slate-300 border border-slate-700/30'}`}>
-                      {l}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
+        {/* Filter pills — always visible */}
+        <div className="space-y-2 mb-4">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-500 w-16 shrink-0">Status</span>
+            {['ALL', 'ACTIVE', 'UNDER_REVIEW', 'OBSOLETE'].map(s => (
+              <button
+                key={s}
+                onClick={() => setStatusFilter(s)}
+                className={`pill-filter ${statusFilter === s ? 'pill-filter-active' : 'pill-filter-inactive'}`}
+              >
+                {s === 'ALL' ? 'All' : STATUS_LABEL[s]}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-500 w-16 shrink-0">Category</span>
+            {['ALL', 'CAT-A', 'CAT-B', 'CAT-C', 'CAT-D'].map(c => (
+              <button
+                key={c}
+                onClick={() => setCategoryFilter(c)}
+                className={`pill-filter ${categoryFilter === c ? 'pill-filter-active' : 'pill-filter-inactive'}`}
+              >
+                {c === 'ALL' ? 'All' : c}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-500 w-16 shrink-0">Safety</span>
+            {[['ALL', 'All'], ['SAFETY', 'Safety Vital'], ['NON_SAFETY', 'Standard']].map(([v, l]) => (
+              <button
+                key={v}
+                onClick={() => setSafetyFilter(v)}
+                className={`pill-filter ${safetyFilter === v ? 'pill-filter-active' : 'pill-filter-inactive'}`}
+              >
+                {l}
+              </button>
+            ))}
             {activeFilters > 0 && (
-              <button onClick={() => { setStatusFilter('ALL'); setCategoryFilter('ALL'); setSafetyFilter('ALL'); }}
-                className="text-xs text-slate-500 hover:text-teal-400 underline transition-colors">
-                Clear all filters
+              <button
+                onClick={() => { setStatusFilter('ALL'); setCategoryFilter('ALL'); setSafetyFilter('ALL'); }}
+                className="text-xs text-slate-500 hover:text-teal-400 underline transition-colors ml-1"
+              >
+                Clear all
               </button>
             )}
           </div>
-        )}
+        </div>
 
         <div className="text-xs text-slate-500 mb-4 font-medium">
           Showing <span className="text-teal-400 font-semibold">{filtered.length}</span> of {plItems.length} PL records

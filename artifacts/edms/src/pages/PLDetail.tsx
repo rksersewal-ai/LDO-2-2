@@ -650,6 +650,44 @@ function PLNumberDetailView({
                 </div>
               </GlassCard>
             )}
+
+            {/* Recent Activity Feed */}
+            {(pl.engineeringChanges ?? []).length > 0 && (
+              <GlassCard className="p-5">
+                <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-teal-400" />
+                  Recent Activity
+                </h3>
+                <div className="space-y-3">
+                  {[...(pl.engineeringChanges ?? [])]
+                    .sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''))
+                    .slice(0, 5)
+                    .map(ec => (
+                      <div key={ec.id} className="flex gap-2.5">
+                        <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${EC_STATUS_DOT[ec.status] ?? 'bg-slate-500'}`} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-mono text-[10px] text-teal-300">{ec.ecNumber}</span>
+                            <span className={`text-[9px] px-1.5 py-0.5 rounded-full border font-semibold ${EC_STATUS_VARIANT[ec.status] ?? 'bg-slate-800 text-slate-400 border-slate-700'}`}>
+                              {ec.status.replace('_', ' ')}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-400 truncate">{ec.description}</p>
+                          <p className="text-[10px] text-slate-600 mt-0.5">{ec.date} · {ec.author}</p>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+                {(pl.engineeringChanges ?? []).length > 5 && (
+                  <button
+                    onClick={() => (document.querySelector('[data-tab="changes"]') as HTMLButtonElement)?.click()}
+                    className="mt-3 text-xs text-teal-400 hover:text-teal-300 transition-colors"
+                  >
+                    +{(pl.engineeringChanges ?? []).length - 5} more changes →
+                  </button>
+                )}
+              </GlassCard>
+            )}
           </div>
         </div>
       )}
@@ -808,13 +846,20 @@ function PLNumberDetailView({
             </div>
             {(pl.linkedWorkIds ?? []).length > 0 ? (
               <div className="space-y-1.5">
-                {(pl.linkedWorkIds ?? []).map(id => (
-                  <div key={id} className="flex items-center gap-3 p-2.5 rounded-lg bg-slate-800/30 border border-slate-700/40 cursor-pointer hover:border-blue-500/30 transition-all" onClick={() => navigate(`/ledger`)}>
-                    <Briefcase className="w-4 h-4 text-blue-400 shrink-0" />
-                    <span className="font-mono text-xs text-blue-300">{id}</span>
-                    <ArrowRight className="w-3.5 h-3.5 text-slate-600 ml-auto" />
-                  </div>
-                ))}
+                {(pl.linkedWorkIds ?? []).map(id => {
+                  const isOpen = id.startsWith('WR-OPEN') || id.includes('-OPEN-');
+                  const isClosed = id.startsWith('WR-CLOSED') || id.includes('-CLOSED-');
+                  const statusVariant = isClosed ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30' : isOpen ? 'bg-slate-700/50 text-slate-400 border-slate-600/40' : 'bg-amber-500/10 text-amber-300 border-amber-500/30';
+                  const statusLabel = isClosed ? 'Closed' : isOpen ? 'Open' : 'In Progress';
+                  return (
+                    <div key={id} className="flex items-center gap-3 p-2.5 rounded-lg bg-slate-800/30 border border-slate-700/40 cursor-pointer hover:border-blue-500/30 transition-all" onClick={() => navigate(`/ledger?id=${id}`)}>
+                      <Briefcase className="w-4 h-4 text-blue-400 shrink-0" />
+                      <span className="font-mono text-xs text-blue-300 flex-1">{id}</span>
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full border font-semibold shrink-0 ${statusVariant}`}>{statusLabel}</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <p className="text-slate-500 text-sm">No work records linked to this PL.</p>
@@ -830,13 +875,20 @@ function PLNumberDetailView({
             </div>
             {(pl.linkedCaseIds ?? []).length > 0 ? (
               <div className="space-y-1.5">
-                {(pl.linkedCaseIds ?? []).map(id => (
-                  <div key={id} className="flex items-center gap-3 p-2.5 rounded-lg bg-slate-800/30 border border-slate-700/40 cursor-pointer hover:border-amber-500/30 transition-all" onClick={() => navigate(`/cases`)}>
-                    <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
-                    <span className="font-mono text-xs text-amber-300">{id}</span>
-                    <ArrowRight className="w-3.5 h-3.5 text-slate-600 ml-auto" />
-                  </div>
-                ))}
+                {(pl.linkedCaseIds ?? []).map(id => {
+                  const isClosed = id.includes('-CLOSED') || id.includes('RESOLVED');
+                  const isOpen = id.includes('-OPEN') || id.includes('ACTIVE');
+                  const caseStatus = isClosed ? 'Resolved' : isOpen ? 'Active' : 'Open';
+                  const caseVariant = isClosed ? 'bg-slate-700/50 text-slate-400 border-slate-600/40' : 'bg-amber-500/10 text-amber-300 border-amber-500/30';
+                  return (
+                    <div key={id} className="flex items-center gap-3 p-2.5 rounded-lg bg-slate-800/30 border border-slate-700/40 cursor-pointer hover:border-amber-500/30 transition-all" onClick={() => navigate(`/cases?id=${id}`)}>
+                      <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+                      <span className="font-mono text-xs text-amber-300 flex-1">{id}</span>
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full border font-semibold shrink-0 ${caseVariant}`}>{caseStatus}</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <p className="text-slate-500 text-sm">No cases linked to this PL.</p>
