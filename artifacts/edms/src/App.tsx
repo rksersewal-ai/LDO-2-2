@@ -23,6 +23,7 @@ import BannerManagement from './pages/BannerManagement';
 import RestrictedAccess from './pages/RestrictedAccess';
 import DesignSystem from './pages/DesignSystem';
 import DocumentIngestion from './pages/DocumentIngestion';
+import SearchExplorer from './pages/SearchExplorer';
 
 const ALL_ROLES = ['admin', 'supervisor', 'engineer', 'reviewer', 'viewer'] as const;
 const ADMIN_ONLY = ['admin'] as const;
@@ -44,6 +45,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={[...ALL_ROLES]}>
             <Dashboard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'search',
+        element: (
+          <ProtectedRoute allowedRoles={[...ALL_ROLES]}>
+            <SearchExplorer />
           </ProtectedRoute>
         ),
       },

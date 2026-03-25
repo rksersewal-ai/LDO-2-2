@@ -5,7 +5,7 @@ import {
   LayoutDashboard, FolderOpen, Component, Activity,
   Briefcase, CheckSquare, BarChart3, ShieldAlert,
   Settings, ServerCog, DatabaseBackup,
-  Megaphone, ClipboardList, FileBarChart, BookOpen
+  Megaphone, ClipboardList, FileBarChart, BookOpen, Telescope
 } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import type { UserRole } from '../../lib/auth';
@@ -27,6 +27,7 @@ const navGroups: NavGroup[] = [
     label: "Core",
     items: [
       { icon: LayoutDashboard, label: "Dashboard", path: "/" },
+      { icon: Telescope, label: "Search Explorer", path: "/search" },
       { icon: FolderOpen, label: "Document Hub", path: "/documents" },
     ]
   },

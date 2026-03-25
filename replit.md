@@ -16,8 +16,24 @@ Enterprise Document Management System for engineering documents, BOMs, and appro
 - **Data**: All mock/in-memory, no real backend. Main data files: `src/lib/mock.ts`, `src/lib/mockExtended.ts`, `src/lib/bomData.ts`
 - **Animation**: Framer Motion (`motion`) for sidebar and UI
 
-### Pages (19 total)
-`Login`, `Dashboard`, `DocumentHub`, `DocumentDetail`, `DocumentIngestion`, `BOMExplorer`, `BOMProductView`, `PLKnowledgeHub`, `PLDetail`, `WorkLedger`, `LedgerReports`, `Cases`, `Approvals`, `Reports`, `AdminWorkspace`, `OCRMonitor`, `AuditLog`, `Settings`, `BannerManagement`, `RestrictedAccess`, `DesignSystem`
+### Pages (21 total)
+`Login`, `Dashboard`, `DocumentHub`, `DocumentDetail`, `DocumentIngestion`, `BOMExplorer`, `BOMProductView`, `PLKnowledgeHub`, `PLDetail`, `WorkLedger`, `LedgerReports`, `Cases`, `Approvals`, `Reports`, `AdminWorkspace`, `OCRMonitor`, `AuditLog`, `Settings`, `BannerManagement`, `RestrictedAccess`, `DesignSystem`, `SearchExplorer`
+
+### Service Layer (`src/services/`)
+- `DocumentService.ts` — wraps MOCK_DOCUMENTS, seeds rich ocrText for 3 key docs
+- `PLService.ts` — merges PL_DATABASE (50+ entries) + MOCK_PL_RECORDS into PLNumber type
+- `WorkLedgerService.ts` — KPI, analytics, dedup; seeds 5 rich extra records; delete/verify/update methods
+- `SearchService.ts` — cross-entity search across docs/PL/work/cases
+
+### Custom Hooks (`src/hooks/`)
+- `useDocuments.ts`, `usePLItems.ts`, `useWorkRecords.ts` (with remove), `useCases.ts`
+
+### Key Page Features (as built)
+- **DocumentHub**: Sortable columns, category filter, linked PL icon, stat cards with icons
+- **DocumentDetail**: OCR full-text viewer with search highlight + copy, detected references with PL/doc links, related docs panel, viewer toolbar, rich history timeline
+- **PLKnowledgeHub**: 50+ records from PLService, status/category/safety filters, Create PL Record modal with 8-digit validation, safety vital toggle
+- **WorkLedger**: KPI stat cards, toggle-able analytics panel (bar charts), category filter pills, row click → detail expand, Create modal with category→type cascade + auto target days + duplicate detection + e-office fields, immutable VERIFIED records with lock icon, verify action
+- **SearchExplorer**: Debounced cross-entity search at /search, scope tabs (ALL/DOCUMENTS/PL/WORK/CASES), OCR snippet highlighting, recent searches (localStorage)
 
 ### BOM Data Structure (expanded)
 - `PL_DATABASE`: 40+ PL records across 4 products — WAP7 (38xxxxx), WAG-9HC (46xxxxx), DETC (52xxxxx), Traction Motor (60xxxxx)
