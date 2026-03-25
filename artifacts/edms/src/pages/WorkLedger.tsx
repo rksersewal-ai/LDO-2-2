@@ -705,20 +705,16 @@ export default function WorkLedger() {
         <div className="flex flex-wrap items-center gap-2 mb-4">
           <span className="text-[11px] text-slate-500 font-medium uppercase tracking-wide">Date:</span>
           <div className="flex items-center gap-1.5">
-            <Input
-              type="date"
+            <DatePicker
               value={dateFrom}
-              onChange={e => setDateFrom(e.target.value)}
-              className="py-1.5 px-2.5 text-xs w-36"
-              title="From date"
+              onChange={setDateFrom}
+              placeholder="From date"
             />
             <span className="text-slate-600 text-xs">—</span>
-            <Input
-              type="date"
+            <DatePicker
               value={dateTo}
-              onChange={e => setDateTo(e.target.value)}
-              className="py-1.5 px-2.5 text-xs w-36"
-              title="To date"
+              onChange={setDateTo}
+              placeholder="To date"
             />
             {(dateFrom || dateTo) && (
               <button onClick={() => { setDateFrom(''); setDateTo(''); }} className="text-[10px] text-slate-500 hover:text-teal-400 transition-colors px-1.5">✕ Clear</button>

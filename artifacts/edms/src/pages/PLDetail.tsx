@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { GlassCard, Badge, Button, Input, Select } from '../components/ui/Shared';
+import { DatePicker } from '../components/ui/DatePicker';
 import { MOCK_DOCUMENTS, MOCK_PL_RECORDS } from '../lib/mock';
 import { getPLRecord } from '../lib/bomData';
 import { usePLItem } from '../hooks/usePLItems';
@@ -76,6 +77,154 @@ function InfoRow({ label, value, mono }: { label: string; value?: string | null;
     <div className="flex flex-col gap-0.5">
       <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-500">{label}</span>
       <span className={`text-sm text-slate-200 ${mono ? 'font-mono text-teal-300' : ''}`}>{value}</span>
+    </div>
+  );
+}
+
+// ─── Document Linking Section (Two-Column Layout) ──────────────────────────────
+
+interface DocumentLinkingSectionProps {
+  pl: PLNumber;
+  onLinkChange: () => void;
+}
+
+function DocumentLinkingSection({ pl, onLinkChange }: DocumentLinkingSectionProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const linkedDocs = useMemo(() =>
+    MOCK_DOCUMENTS.filter(d => (pl.linkedDocumentIds ?? []).includes(d.id)),
+    [pl.linkedDocumentIds]
+  );
+  
+  const availableDocs = useMemo(() =>
+    MOCK_DOCUMENTS
+      .filter(d => !(pl.linkedDocumentIds ?? []).includes(d.id))
+      .filter(d => 
+        !searchQuery || 
+        d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        d.id.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      .sort((a, b) => a.name.localeCompare(b.name)),
+    [pl.linkedDocumentIds, searchQuery]
+  );
+
+  const handleLink = async (docId: string) => {
+    const updated = { linkedDocumentIds: [...(pl.linkedDocumentIds ?? []), docId] };
+    // This would call the PLService.update in a real app
+    onLinkChange();
+  };
+
+  const handleUnlink = async (docId: string) => {
+    const updated = { linkedDocumentIds: (pl.linkedDocumentIds ?? []).filter(id => id !== docId) };
+    // This would call the PLService.update in a real app
+    onLinkChange();
+  };
+
+  return (
+    <div className="grid grid-cols-2 gap-4">
+      {/* Left Column: Search & Available Documents */}
+      <GlassCard className="p-6 flex flex-col">
+        <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
+          <FileSearch className="w-4 h-4 text-teal-400" />
+          Search & Link Documents
+        </h3>
+        
+        <div className="mb-4">
+          <Input
+            placeholder="Search by name or ID..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="w-full"
+          />
+        </div>
+
+        <div className="flex-1 overflow-y-auto space-y-2 custom-scrollbar">
+          {availableDocs.length > 0 ? (
+            availableDocs.map(doc => (
+              <div
+                key={doc.id}
+                className="p-3 rounded-lg bg-slate-800/40 border border-slate-700/50 hover:border-teal-500/30 transition-all group"
+              >
+                <div className="flex items-start gap-2 mb-2">
+                  <FileText className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-slate-200 group-hover:text-teal-200 truncate">{doc.name}</p>
+                    <p className="text-[10px] text-slate-500 font-mono mt-0.5">{doc.id}</p>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="teal-outline"
+                  className="w-full text-xs"
+                  onClick={() => handleLink(doc.id)}
+                >
+                  <Plus className="w-3 h-3" /> Link
+                </Button>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-8 text-slate-500">
+              <FileSearch className="w-8 h-8 mx-auto mb-2 opacity-30" />
+              <p className="text-xs">
+                {searchQuery ? 'No matching documents' : 'All documents linked'}
+              </p>
+            </div>
+          )}
+        </div>
+      </GlassCard>
+
+      {/* Right Column: Linked Documents */}
+      <GlassCard className="p-6 flex flex-col">
+        <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
+          <FileText className="w-4 h-4 text-teal-400" />
+          Linked Documents
+          <span className="ml-auto text-xs text-slate-500 bg-slate-800/50 px-2 py-0.5 rounded-full">
+            {linkedDocs.length}
+          </span>
+        </h3>
+
+        <div className="flex-1 overflow-y-auto space-y-2 custom-scrollbar">
+          {linkedDocs.length > 0 ? (
+            linkedDocs.map(doc => (
+              <div
+                key={doc.id}
+                className="p-3 rounded-lg bg-slate-800/40 border border-teal-500/20 hover:border-teal-500/40 transition-all"
+              >
+                <div className="flex items-start gap-2 mb-2">
+                  <FileText className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-slate-200 truncate">{doc.name}</p>
+                    <p className="text-[10px] text-slate-500 font-mono mt-0.5">{doc.id}</p>
+                  </div>
+                </div>
+                <div className="flex gap-2 text-[10px]">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="flex-1 text-xs h-auto py-1"
+                    onClick={() => alert(`Opening ${doc.name} in preview`)}
+                  >
+                    <ExternalLink className="w-3 h-3" /> Preview
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    className="flex-1 text-xs h-auto py-1"
+                    onClick={() => handleUnlink(doc.id)}
+                  >
+                    <X className="w-3 h-3" /> Unlink
+                  </Button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-8 text-slate-500">
+              <FileText className="w-8 h-8 mx-auto mb-2 opacity-30" />
+              <p className="text-xs">No documents linked yet</p>
+              <p className="text-[10px] text-slate-600 mt-1">Search and link documents from the left panel</p>
+            </div>
+          )}
+        </div>
+      </GlassCard>
     </div>
   );
 }
@@ -405,7 +554,7 @@ function AddECForm({ onAdd, onCancel }: AddECFormProps) {
         </div>
         <div>
           <label className="block text-[10px] font-medium text-slate-500 mb-1">Date</label>
-          <Input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} className="w-full" />
+          <DatePicker value={form.date} onChange={v => setForm(f => ({ ...f, date: v }))} />
         </div>
         <div>
           <label className="block text-[10px] font-medium text-slate-500 mb-1">Author</label>
@@ -692,51 +841,9 @@ function PLNumberDetailView({
         </div>
       )}
 
-      {/* Documents Tab */}
+      {/* Documents Tab — Two-Column Document Linking */}
       {activeTab === 'documents' && (
-        <GlassCard className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-bold text-white">Linked Documents</h2>
-            <span className="text-xs text-slate-500">{linkedDocs.length} document{linkedDocs.length !== 1 ? 's' : ''}</span>
-          </div>
-          {linkedDocs.length > 0 ? (
-            <div className="space-y-2">
-              {linkedDocs.map(doc => (
-                <div
-                  key={doc.id}
-                  className="flex items-center gap-4 p-4 rounded-xl bg-slate-800/30 border border-slate-700/50 hover:border-teal-500/30 cursor-pointer transition-all group"
-                  onClick={() => navigate(`/documents/${doc.id}`)}
-                >
-                  <FileText className="w-9 h-9 p-2 rounded-lg bg-teal-500/10 text-teal-400 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-200 group-hover:text-teal-200 transition-colors">{doc.name}</p>
-                    <div className="flex gap-3 text-xs text-slate-500 mt-0.5 flex-wrap">
-                      <span className="font-mono text-teal-400">{doc.id}</span>
-                      <span>{doc.type}</span>
-                      <span>Rev {doc.revision}</span>
-                      <span>{doc.size}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0 flex-wrap">
-                    {doc.ocrStatus === 'Completed' || doc.ocrStatus === 'COMPLETED' ? (
-                      <span className="flex items-center gap-1 px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/30 rounded-full text-[10px] text-indigo-300 font-medium">
-                        <FileSearch className="w-2.5 h-2.5" /> OCR {doc.ocrConfidence}%
-                      </span>
-                    ) : null}
-                    <Badge variant={statusBadgeVariant(doc.status)}>{doc.status}</Badge>
-                    <ExternalLink className="w-4 h-4 text-slate-600 group-hover:text-teal-400 transition-colors" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-10">
-              <FileText className="w-10 h-10 mx-auto mb-3 text-slate-600 opacity-50" />
-              <p className="text-slate-400 text-sm">No documents linked to this PL record.</p>
-              <p className="text-slate-600 text-xs mt-1">Use the Link Documents button in the PL Hub to associate documents.</p>
-            </div>
-          )}
-        </GlassCard>
+        <DocumentLinkingSection pl={pl} onLinkChange={() => {}} />
       )}
 
       {/* Engineering Changes Tab */}

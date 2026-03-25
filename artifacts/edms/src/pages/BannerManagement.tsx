@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { GlassCard, Badge, Button, Input } from '../components/ui/Shared';
+import { DatePicker } from '../components/ui/DatePicker';
 import { MOCK_BANNERS } from '../lib/mockExtended';
 import { Megaphone, Plus, Edit3, Trash2, Eye, X, AlertCircle } from 'lucide-react';
 
@@ -9,6 +10,8 @@ export default function BannerManagement() {
   const [editBanner, setEditBanner] = useState<typeof MOCK_BANNERS[0] | null>(null);
   const [newTitle, setNewTitle] = useState('');
   const [newMessage, setNewMessage] = useState('');
+  const [newValidFrom, setNewValidFrom] = useState('');
+  const [newValidTo, setNewValidTo] = useState('');
 
   const toggleActive = (id: string) => {
     setBanners(b => b.map(x => x.id === id ? { ...x, active: !x.active } : x));
@@ -26,13 +29,15 @@ export default function BannerManagement() {
       message: newMessage,
       link: null,
       active: true,
-      validFrom: new Date().toISOString().split('T')[0],
-      validTo: '',
+      validFrom: newValidFrom || new Date().toISOString().split('T')[0],
+      validTo: newValidTo,
       order: banners.length + 1,
     };
     setBanners(b => [...b, nb]);
     setNewTitle('');
     setNewMessage('');
+    setNewValidFrom('');
+    setNewValidTo('');
     setShowForm(false);
   };
 
@@ -118,7 +123,7 @@ export default function BannerManagement() {
           <GlassCard className="p-6 w-full max-w-md">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-white">{editBanner ? 'Edit Announcement' : 'New Announcement'}</h2>
-              <button onClick={() => { setShowForm(false); setEditBanner(null); setNewTitle(''); setNewMessage(''); }} className="text-slate-500 hover:text-white">
+              <button onClick={() => { setShowForm(false); setEditBanner(null); setNewTitle(''); setNewMessage(''); setNewValidFrom(''); setNewValidTo(''); }} className="text-slate-500 hover:text-white">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -140,11 +145,11 @@ export default function BannerManagement() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs text-slate-400 mb-1 block">Valid From</label>
-                  <Input type="date" className="w-full" />
+                  <DatePicker value={newValidFrom} onChange={setNewValidFrom} placeholder="From date" />
                 </div>
                 <div>
                   <label className="text-xs text-slate-400 mb-1 block">Valid To</label>
-                  <Input type="date" className="w-full" />
+                  <DatePicker value={newValidTo} onChange={setNewValidTo} placeholder="To date" />
                 </div>
               </div>
             </div>
@@ -152,7 +157,7 @@ export default function BannerManagement() {
               <Button className="flex-1" onClick={handleCreate}>
                 {editBanner ? 'Save Changes' : 'Create Announcement'}
               </Button>
-              <Button variant="secondary" onClick={() => { setShowForm(false); setEditBanner(null); setNewTitle(''); setNewMessage(''); }}>Cancel</Button>
+              <Button variant="secondary" onClick={() => { setShowForm(false); setEditBanner(null); setNewTitle(''); setNewMessage(''); setNewValidFrom(''); setNewValidTo(''); }}>Cancel</Button>
             </div>
           </GlassCard>
         </div>

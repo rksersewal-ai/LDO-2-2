@@ -127,7 +127,7 @@ export function DatePicker({
       </button>
 
       {open && (
-        <div className="absolute z-50 top-full mt-1.5 left-0 w-72 bg-slate-900/95 backdrop-blur-2xl border border-teal-500/20 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden">
+        <div className="absolute z-[9999] top-full mt-1.5 left-0 w-72 bg-slate-900/95 backdrop-blur-2xl border border-teal-500/20 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
             {view === 'day' && (
