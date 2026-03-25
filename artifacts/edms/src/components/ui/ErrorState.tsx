@@ -1,0 +1,69 @@
+import React from 'react';
+import { AlertTriangle, RefreshCw, WifiOff, ServerCrash } from 'lucide-react';
+
+interface ErrorStateProps {
+  message?: string;
+  detail?: string;
+  variant?: 'network' | 'server' | 'notfound' | 'generic';
+  onRetry?: () => void;
+  className?: string;
+}
+
+export function ErrorState({
+  message,
+  detail,
+  variant = 'generic',
+  onRetry,
+  className = '',
+}: ErrorStateProps) {
+  const icons = {
+    network: <WifiOff className="w-8 h-8 text-amber-400" />,
+    server: <ServerCrash className="w-8 h-8 text-rose-400" />,
+    notfound: <AlertTriangle className="w-8 h-8 text-slate-400" />,
+    generic: <AlertTriangle className="w-8 h-8 text-rose-400" />,
+  };
+
+  const defaultMessages = {
+    network: 'Connection Error',
+    server: 'Server Error',
+    notfound: 'Not Found',
+    generic: 'Something Went Wrong',
+  };
+
+  const defaultDetails = {
+    network: 'Unable to reach the server. Check your connection and try again.',
+    server: 'The server returned an unexpected error. Please try again.',
+    notfound: 'The requested resource could not be found.',
+    generic: 'An unexpected error occurred. Please try again.',
+  };
+
+  return (
+    <div className={`flex flex-col items-center justify-center py-16 gap-4 text-center ${className}`}>
+      <div className="w-16 h-16 rounded-2xl bg-slate-900/60 border border-white/5 flex items-center justify-center">
+        {icons[variant]}
+      </div>
+      <div>
+        <p className="text-slate-200 font-semibold mb-1">{message ?? defaultMessages[variant]}</p>
+        <p className="text-slate-500 text-sm max-w-sm mx-auto">{detail ?? defaultDetails[variant]}</p>
+      </div>
+      {onRetry && (
+        <button
+          onClick={onRetry}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800/60 hover:bg-slate-700/60 text-slate-300 text-sm font-medium border border-slate-700/50 transition-colors"
+        >
+          <RefreshCw className="w-4 h-4" />
+          Try Again
+        </button>
+      )}
+    </div>
+  );
+}
+
+export function InlineError({ message, className = '' }: { message: string; className?: string }) {
+  return (
+    <div className={`flex items-center gap-2 px-3 py-2 rounded-xl bg-rose-900/20 border border-rose-500/20 text-rose-300 text-sm ${className}`}>
+      <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+      <span>{message}</span>
+    </div>
+  );
+}
