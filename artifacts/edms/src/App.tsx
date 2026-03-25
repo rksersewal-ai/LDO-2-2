@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router';
 import { AuthProvider } from './lib/auth';
 import { DocTabsProvider } from './contexts/DocTabsContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { RightPanelProvider } from './contexts/RightPanelContext';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import AppLayout from './components/layout/AppLayout';
 import Login from './pages/Login';
@@ -77,9 +78,11 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <DocTabsProvider>
-          <RouterProvider router={router} />
-        </DocTabsProvider>
+        <RightPanelProvider>
+          <DocTabsProvider>
+            <RouterProvider router={router} />
+          </DocTabsProvider>
+        </RightPanelProvider>
       </AuthProvider>
     </ThemeProvider>
   );

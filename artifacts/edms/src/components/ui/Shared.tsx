@@ -58,9 +58,9 @@ export function Button({
     "teal-outline": "bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 hover:border-teal-400/50",
   };
   const sizes: Record<string, string> = {
-    sm: "px-3 py-1.5 text-xs gap-1.5",
-    md: "px-4 py-2 text-sm gap-2",
-    lg: "px-5 py-2.5 text-sm gap-2",
+    sm: "h-9 px-3 py-2 text-xs gap-1.5",
+    md: "h-10 px-4 py-2.5 text-sm gap-2",
+    lg: "h-12 px-5 py-3 text-sm gap-2",
   };
   return (
     <button
@@ -75,7 +75,7 @@ export function Button({
 export function Input({ className = "", ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
-      className={`bg-slate-950/60 border border-slate-700/50 text-slate-200 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/30 transition-all placeholder:text-slate-600 ${className}`}
+      className={`h-10 bg-slate-950/60 border border-slate-700/50 text-slate-200 text-sm rounded-lg px-3 py-2.5 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/30 transition-all placeholder:text-slate-600 ${className}`}
       {...props}
     />
   );
@@ -84,7 +84,7 @@ export function Input({ className = "", ...props }: React.InputHTMLAttributes<HT
 export function Select({ className = "", children, ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <select
-      className={`bg-slate-950/60 border border-slate-700/50 text-slate-200 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/30 transition-all cursor-pointer ${className}`}
+      className={`h-10 bg-slate-950/60 border border-slate-700/50 text-slate-200 text-sm rounded-lg px-3 py-2.5 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/30 transition-all cursor-pointer ${className}`}
       {...props}
     >
       {children}

@@ -1,9 +1,11 @@
 import { Outlet, Navigate, useLocation, useNavigate } from 'react-router';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
+import { RightPanel } from './RightPanel';
 import { AlertCircle, Loader2, FileText, X } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import { useDocTabs } from '../../contexts/DocTabsContext';
+import { useRightPanel } from '../../contexts/RightPanelContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AppLayout() {
@@ -11,6 +13,7 @@ export default function AppLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { tabs, closeTab } = useDocTabs();
+  const { content: rightPanelContent, closePanel } = useRightPanel();
 
   if (isLoading) {
     return (
@@ -83,19 +86,27 @@ export default function AppLayout() {
             </div>
           )}
 
-          <div className="flex-1 overflow-auto p-6 pt-5 custom-scrollbar">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={location.pathname}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                transition={{ duration: 0.12, ease: 'easeOut' }}
-                className="h-full"
-              >
-                <Outlet />
-              </motion.div>
-            </AnimatePresence>
+          {/* Main content + right panel */}
+          <div className="flex-1 overflow-hidden flex">
+            <div className="flex-1 overflow-auto p-6 pt-5 custom-scrollbar">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={location.pathname}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.12, ease: 'easeOut' }}
+                  className="h-full"
+                >
+                  <Outlet />
+                </motion.div>
+              </AnimatePresence>
+            </div>
+            
+            {/* Right Utility Panel */}
+            {rightPanelContent && (
+              <RightPanel content={rightPanelContent} onClose={closePanel} />
+            )}
           </div>
         </main>
       </div>
