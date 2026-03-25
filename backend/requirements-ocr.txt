@@ -1,0 +1,22 @@
+# OCR Dependencies (optional)
+# Install with: pip install -r requirements-ocr.txt
+
+# Lightweight PDF text extraction (no OCR needed for regular PDFs)
+pdfplumber==0.10.4
+
+# Lightweight OCR engine (for scanned PDFs/images)
+easyocr==1.7.1
+
+# Heavy-duty OCR fallback (install if EasyOCR not sufficient)
+pytesseract==0.3.10
+
+# PDF to image conversion (for Tesseract)
+pdf2image==1.16.3
+
+# Image processing
+Pillow==11.0.0
+
+# Note: Tesseract binary must be installed separately:
+# Windows: https://github.com/UB-Mannheim/tesseract/wiki
+# Linux: sudo apt install tesseract-ocr
+# macOS: brew install tesseract
