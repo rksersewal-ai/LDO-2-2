@@ -1,0 +1,468 @@
+---
+name: web-application-guidelines
+description: comprehensive ui and frontend engineering standards for optimizing modern web applications, especially admin panels, saas products, internal tools, erp systems, industrial apps, and data-dense workflows. use when chatgpt needs to define or review website ui guidelines, application shell patterns, api call conventions, overload protection, crash protection, performance rules, reusable components, code simplification standards, or frontend architecture decisions for full web applications rather than isolated screens.
+---
+
+# Web Application Guidelines
+
+## Overview
+
+Use this skill to produce production-grade guidance for complete web applications, not just page mockups. Prioritize system design, resilience, clarity, consistency, maintainability, and user safety. Default to practical guidance that a senior frontend architect or design-system lead would apply to React, Vue, Angular, Next.js, or similar enterprise-grade applications.
+
+Treat every request as a whole-app problem across five layers:
+
+1. application shell and navigation
+2. interaction model and content density
+3. data fetching and command safety
+4. state, crash, and overload protection
+5. code simplification and reusable components
+
+When the user asks for guidelines, reviews, or architecture, respond with concrete standards, default values, naming conventions, and reusable patterns instead of vague design advice.
+
+## Default workflow
+
+1. Determine the application type.
+   - **erp / admin / industrial / backoffice / ops** → optimize for dense information, high task speed, keyboard support, predictable layouts, and clear recovery paths.
+   - **consumer-like saas** → keep the same architectural discipline, but reduce density and soften the visual tone.
+
+2. Determine the task mode.
+   - **browse / monitor** → emphasize scanning, filters, table ergonomics, sticky context, and refresh behavior.
+   - **create / edit** → emphasize form structure, validation, autosave strategy, and action safety.
+   - **operate / approve / dispatch / control** → emphasize status visibility, command confirmation, undo, and failure isolation.
+
+3. Produce guidance across all of these sections unless the user narrows scope:
+   - app shell
+   - typography and spacing
+   - navigation and panels
+   - api calls and command patterns
+   - overload protection
+   - crash protection
+   - reusable components
+   - code simplification rules
+   - review checklist
+
+4. End with implementation-ready recommendations.
+   Include naming conventions, component boundaries, state ownership, and safe defaults.
+
+## Non-negotiable principles
+
+- Optimize for task completion over decoration.
+- Keep layouts stable during loading, refresh, and error states.
+- Make critical actions obvious and dangerous actions deliberate.
+- Prefer one reliable shared pattern over many custom variants.
+- Protect the browser, server, and user from accidental overload.
+- Fail in small, recoverable zones instead of taking down the whole page.
+- Reduce branching and special cases by standardizing primitives.
+- Treat empty, loading, partial, slow, offline, and crashed states as first-class product states.
+
+## App shell standards
+
+### Page frame
+
+Use a consistent shell with these regions:
+
+1. **top bar** for workspace switcher, global search, alerts, profile, and environment badge
+2. **left navigation rail** for product areas and hierarchy
+3. **main content area** for the primary task
+4. **right utility panel** for contextual info, filters, inspector content, history, or secondary actions when needed
+5. **bottom toast layer** for non-blocking feedback
+
+Avoid redesigning the shell per page.
+
+### Recommended dimensions
+
+Use these defaults unless product constraints require change:
+
+- top bar height: **56 px**
+- left expanded nav: **248-280 px**
+- left collapsed nav: **72 px**
+- right utility panel: **320-400 px**
+- content max width for dense forms: **1280-1440 px**
+- page horizontal padding: **24 px desktop**, **16 px tablet**, **12 px small screens**
+- card radius: **10-14 px**
+- standard control height: **36 px**
+- dense table row: **36 px**
+- default table row: **44 px**
+- prominent action button height: **40 px**
+
+### Left navigation rules
+
+- Structure nav into at most 3 levels.
+- Keep level 1 persistent and predictable.
+- Use expanded mode by default on desktop.
+- Collapsed mode must preserve icon, tooltip, active indicator, and unread/status badge.
+- On collapse, do not remove wayfinding. Show active section, active child, and a quick expand affordance.
+- Keep collapse state persistent per user.
+- Do not auto-collapse on route change.
+- Support pinning favorites or recent modules for large ERP suites.
+
+### Right utility panel rules
+
+Use the right panel only for contextual secondary information:
+
+- page help
+- record details
+- audit trail
+- warnings and diagnostics
+- secondary filters
+- bulk selection summary
+- inspector / properties panel
+
+Do not hide primary actions in the right panel.
+Do not require the right panel to complete a common task.
+Allow open, close, resize, and sticky persistence per page type.
+
+### Header and page actions
+
+Each page header should contain:
+
+- title
+- short status or breadcrumb when useful
+- primary action
+- secondary actions grouped logically
+- refresh or sync action if the page depends on live data
+
+For tables and workflows, place page-level actions in the header and selection-level actions in a sticky bulk action bar.
+
+## Typography and spacing
+
+### Font scale
+
+Use one system font stack unless brand needs differ.
+
+Default sizes:
+
+- app title: **24 / 32**
+- page title: **20 / 28**
+- section title: **16 / 24**
+- field label: **12 / 16** or **13 / 18**
+- body default: **14 / 20**
+- dense body: **13 / 18**
+- supporting text: **12 / 16**
+- numeric emphasis in dashboards: **20 / 28** or **24 / 32**
+- micro metadata: **11 / 14** only for timestamps, tags, and helper meta
+
+Rules:
+
+- Default to 14 px body for applications.
+- Use 13 px only in dense tables and compact side panels.
+- Never go below 12 px for interactive controls.
+- Keep line length controlled; dense enterprise pages still need readable grouping.
+- Use tabular numerals for tables, finance, inventory, and operational metrics.
+
+### Spacing rhythm
+
+Use a restrained spacing scale:
+
+- 4, 8, 12, 16, 20, 24, 32, 40, 48
+
+Practical defaults:
+
+- control internal horizontal padding: **12-14 px**
+- gap between form fields: **12-16 px**
+- gap between sections: **24 px**
+- gap between cards: **16 px**
+- sticky toolbars padding: **12-16 px**
+
+## Interaction and content density
+
+- Dense interfaces are acceptable when structure is disciplined.
+- Prefer fewer scroll containers; nested scroll regions hurt usability.
+- Use sticky table headers, sticky first columns, and sticky action bars when tasks involve scanning or comparison.
+- Use inline editing only for low-risk, repeatable fields.
+- Use full form or drawer editing for complex or validated records.
+- Always separate informational colors from action colors.
+- Use motion sparingly and only to preserve orientation.
+
+## API call and command conventions
+
+For app-wide consistency, define a small command vocabulary. Prefer reusable wrappers over ad hoc fetch logic.
+
+### Common command names
+
+Use names like these across services and hooks:
+
+- `getList(params)`
+- `getById(id)`
+- `createOne(input)`
+- `updateOne(id, input)`
+- `patchOne(id, changes)`
+- `deleteOne(id)`
+- `runAction(id, action, payload)`
+- `bulkRun(ids, action, payload)`
+- `exportFile(params)`
+- `retryableQuery(key, fn)`
+- `safeMutation(key, fn)`
+- `cancelableTask(key, fn)`
+
+Rules:
+
+- Use verbs that describe intent, not transport details.
+- Do not expose raw endpoint shapes throughout the UI layer.
+- Keep request assembly in service modules, not in components.
+- Keep retry logic centralized.
+- Normalize API errors to one shared shape.
+- Pass cancellation signals for route changes, rapid filters, and typeahead calls.
+
+### Shared service contract
+
+All client-side service layers should support:
+
+- timeout handling
+- cancellation via abort signal
+- normalized error mapping
+- retry policy metadata
+- request deduplication where appropriate
+- concurrency limits for bulk workflows
+- typed success and failure responses
+- telemetry hooks for slow requests and repeated failures
+
+### Call safety defaults
+
+Use these defaults unless the product needs tighter control:
+
+- search/typeahead debounce: **250-400 ms**
+- resize/scroll throttle: **100-200 ms**
+- standard request timeout: **10-20 s**
+- file export timeout: **30-60 s**
+- retries for safe reads only: **1-3 attempts with backoff**
+- no silent retry for destructive mutations
+- cancel stale list requests when filters change
+- dedupe identical in-flight reads by request key
+
+## Overload protection patterns
+
+Protect both browser and backend from excessive work.
+
+### Required patterns
+
+- **debounce** user-generated high-frequency triggers such as search, auto-filter, and validation calls
+- **throttle** scroll, resize, and continuous telemetry
+- **dedupe** identical requests in flight
+- **batch** repeated small updates when users are editing fast
+- **paginate or virtualize** large datasets
+- **limit concurrency** for bulk actions and background refreshes
+- **defer non-critical work** below the fold
+- **backoff** polling or retries during degraded service
+- **pause hidden tabs** when real-time freshness is not critical
+
+### Overload protection commands
+
+Recommend shared wrappers with names like:
+
+- `withDebounce(fn, ms)`
+- `withThrottle(fn, ms)`
+- `withBackoff(fn, policy)`
+- `withTimeout(fn, ms)`
+- `withAbortOnNavigate(fn)`
+- `withDedup(key, fn)`
+- `withConcurrencyLimit(limit, jobs)`
+- `withCircuitBreaker(key, fn)`
+- `withVisibilityPause(fn)`
+
+These can be utility names, hook names, middleware names, or service wrappers depending on stack.
+
+### Data-heavy page rules
+
+- Never render thousands of DOM rows when virtualization is possible.
+- Never auto-refresh a heavy table while the user is editing in place.
+- Never trigger full-page refetch for a single row mutation if local patching is safe.
+- Never fire multiple dependent queries from sibling components if the parent can orchestrate once.
+
+## Crash protection patterns
+
+Design every page to survive partial failure.
+
+### Required protections
+
+- use error boundaries at route level and widget level
+- isolate risky charts, viewers, and third-party widgets
+- validate server payloads before deep rendering
+- guard null, undefined, and empty collections explicitly
+- keep route transitions cancelable
+- preserve user input during recoverable failures
+- show retry controls close to the failed zone
+- log failures with route, action, and correlation context
+
+### Crash protection commands
+
+Prefer standardized wrappers such as:
+
+- `guardRender(value, fallback)`
+- `guardState(schema, value)`
+- `safeParse(schema, payload)`
+- `safeAsync(fn, onError)`
+- `guardBoundary(name, component)`
+- `recoverableSection(name, loader, renderer)`
+- `assertNever(x)` for exhaustive branching
+- `toErrorView(error)` for shared ui mapping
+
+### Failure display rules
+
+- Full-page failure only when the page cannot function at all.
+- Section failure for local widgets, charts, side panels, and secondary datasets.
+- Inline failure for field-level validation or row actions.
+- Always prefer a usable degraded state over a blank page.
+- Provide retry, diagnostics, and next-step guidance.
+
+## State management standards
+
+- Keep server state and client UI state separate.
+- Avoid copying server state into local component state unless editing is in progress.
+- Keep form draft state scoped to the form boundary.
+- Lift state only when multiple siblings truly share it.
+- Keep selection state, filter state, and panel open state predictable and serializable.
+- Prefer a single source of truth for each concern.
+- Reset local state intentionally on record change; do not rely on accidental remounts.
+
+## Code simplification rules
+
+Use these rules aggressively when refactoring or reviewing code:
+
+1. Replace repeated page scaffolding with shared layout primitives.
+2. Replace repeated fetch + loading + error branches with shared query views.
+3. Replace repeated button groups with action bar components.
+4. Replace repeated field markup with typed field wrappers.
+5. Replace multi-boolean component modes with a single explicit status enum.
+6. Move transformation logic out of JSX or templates.
+7. Prefer pure mapping functions over inline nested conditionals.
+8. Extract business rules into services or policy modules, not presentational components.
+9. Keep components focused: one layout concern, one data concern, or one control concern.
+10. Delete dead variants and one-off custom styling once a shared primitive exists.
+
+### Anti-patterns to call out
+
+- components that fetch unrelated data on mount without an explicit contract
+- prop chains longer than 3 levels for common state
+- pages with duplicated filter logic in multiple widgets
+- components with more than one responsibility: fetching, transforming, layouting, and mutating all together
+- utility modules that hide side effects behind generic names
+- large switch statements embedded in render functions
+- mutation handlers that directly manipulate multiple caches without a shared abstraction
+
+## Reusable component system
+
+Prefer a small, strong component library instead of many page-specific widgets.
+
+### Core shell components
+
+- `AppShell`
+- `TopBar`
+- `SideNav`
+- `PageLayout`
+- `PageHeader`
+- `RightPanel`
+- `SplitLayout`
+- `StickyActionBar`
+
+### Data and status components
+
+- `QueryBoundary`
+- `LoadingBlock`
+- `EmptyState`
+- `ErrorState`
+- `StatCard`
+- `StatusBadge`
+- `DataTable`
+- `TableToolbar`
+- `FilterBar`
+- `PaginationBar`
+
+### Form and action components
+
+- `FormSection`
+- `FieldRow`
+- `FieldWrapper`
+- `ValidatedInput`
+- `AsyncSelect`
+- `CommandButton`
+- `ConfirmDialog`
+- `BulkActionDialog`
+- `SaveBar`
+
+### Utility and resilience components
+
+- `PermissionGate`
+- `FeatureFlagGate`
+- `UnsavedChangesGuard`
+- `ErrorBoundary`
+- `RetryPanel`
+- `ActivityTimeline`
+- `DiagnosticsPanel`
+
+Rules:
+
+- Each reusable component needs a narrow API and clear ownership.
+- Do not create new variants when composition can solve the problem.
+- Favor slots, render props, or composition over dozens of style props.
+- Shared components must encode accessibility and state behavior by default.
+- Add examples for empty, loading, error, long text, and permission denied states.
+
+## Performance rules
+
+- Virtualize long tables and trees.
+- Memoize only after identifying unstable props or expensive work.
+- Prefer coarse route-level code splitting and lazy-load heavy panels or charts.
+- Preload likely next-step data only when success likelihood is high.
+- Avoid layout thrash from measuring and remeasuring large blocks.
+- Keep charts opt-in on dense operational pages if they delay first actionability.
+- Track slow interactions, not just slow page loads.
+
+## Accessibility and safety
+
+- Ensure full keyboard access for navigation, tables, menus, dialogs, and form submission.
+- Preserve visible focus states.
+- Use semantic headings and landmarks.
+- Ensure status changes are announced for async actions when relevant.
+- Never rely on color alone for warnings or status.
+- Support reduced motion.
+- Ensure hit targets remain usable in dense layouts.
+
+## Output format
+
+When asked to create or review standards, structure the response like this unless the user requests otherwise:
+
+### 1. Summary
+A short description of the application type, task model, and optimization priorities.
+
+### 2. Shell and layout
+Concrete guidance for app frame, navigation, panels, page headers, and responsive behavior.
+
+### 3. Data and command model
+Common command names, fetching rules, mutation rules, retry policy, cancellation, and telemetry hooks.
+
+### 4. Protection layers
+Overload protection, crash protection, failure isolation, and degraded-mode behavior.
+
+### 5. Component system
+Shared primitives, naming, boundaries, and reusable patterns.
+
+### 6. Code simplification rules
+Refactor targets, anti-patterns, and maintainability standards.
+
+### 7. Implementation checklist
+A concise build-or-review checklist.
+
+## Implementation checklist
+
+Use this checklist in reviews:
+
+- Is the shell consistent across pages?
+- Does left navigation preserve wayfinding in collapsed mode?
+- Is the right panel optional and contextual rather than required?
+- Are loading, empty, partial, slow, and failed states designed intentionally?
+- Are requests cancellable, deduped, and bounded by timeout?
+- Are search and rapid interactions debounced or throttled appropriately?
+- Are bulk operations concurrency-limited and observable?
+- Are failures isolated to the smallest safe region?
+- Are service contracts shared instead of rebuilt inside components?
+- Are repeated ui patterns extracted into reusable primitives?
+- Is state ownership clear and minimal?
+- Can a user recover from failure without losing work?
+
+## Reference files
+
+Use these bundled references when the task needs more detail:
+
+- See `references/network-safety-patterns.md` for concrete call, retry, timeout, dedupe, circuit-breaker, and failure-mapping guidance.
+- See `references/component-system-patterns.md` for reusable app shell, data table, form, and shared component rules.
