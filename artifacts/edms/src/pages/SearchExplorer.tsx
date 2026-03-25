@@ -4,7 +4,7 @@ import {
   Search, FileText, Database, Briefcase, AlertTriangle,
   ArrowRight, Layers, Hash, Clock, Sparkles, Command,
   ScanText, CheckCircle, AlertCircle, ChevronRight,
-  Bookmark, BookmarkCheck, Trash2,
+  Bookmark, BookmarkCheck, Trash2, SlidersHorizontal, X,
 } from 'lucide-react';
 import { GlassCard } from '../components/ui/Shared';
 import { SearchService } from '../services/SearchService';
@@ -204,6 +204,10 @@ export default function SearchExplorer() {
     try { return JSON.parse(localStorage.getItem(SAVED_KEY) ?? '[]'); } catch { return []; }
   });
   const [inputFocused, setInputFocused] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [statusFilters, setStatusFilters] = useState<Set<string>>(new Set());
+  const [dateFilter, setDateFilter] = useState<'any' | '7d' | '30d' | '90d'>('any');
+  const [entityFilters, setEntityFilters] = useState<Set<string>>(new Set());
 
   const isSaved = savedSearches.some(s => s.q === debouncedQuery && s.scope === scope);
 
@@ -297,6 +301,35 @@ export default function SearchExplorer() {
     CASES: results?.cases.length ?? 0,
   };
 
+  // Helper to check if result matches filters
+  const matchesFilters = (result: SearchResult) => {
+    if (statusFilters.size > 0 && result.status && !statusFilters.has(result.status)) return false;
+    if (entityFilters.size > 0 && !entityFilters.has(result.type)) return false;
+    if (dateFilter !== 'any' && result.date) {
+      const now = new Date();
+      const resultDate = new Date(result.date);
+      const daysDiff = (now.getTime() - resultDate.getTime()) / (1000 * 60 * 60 * 24);
+      const maxDays = dateFilter === '7d' ? 7 : dateFilter === '30d' ? 30 : 90;
+      if (daysDiff > maxDays) return false;
+    }
+    return true;
+  };
+
+  // Filter results based on active filters
+  const filteredResults = results ? {
+    ...results,
+    documents: results.documents.filter(matchesFilters),
+    plItems: results.plItems.filter(matchesFilters),
+    work: results.work.filter(matchesFilters),
+    cases: results.cases.filter(matchesFilters),
+    total: (results.documents.filter(matchesFilters).length + 
+            results.plItems.filter(matchesFilters).length + 
+            results.work.filter(matchesFilters).length + 
+            results.cases.filter(matchesFilters).length),
+  } : null;
+
+  const hasActiveFilters = statusFilters.size > 0 || dateFilter !== 'any' || entityFilters.size > 0;
+
   const hasResults = results && results.total > 0;
   const hasQuery = debouncedQuery.trim().length > 0;
 
@@ -314,6 +347,108 @@ export default function SearchExplorer() {
           Full-text search across documents, PL records, work entries, and cases — including OCR-extracted text.
         </p>
       </div>
+
+      {/* Filter Panel */}
+      {showFilters && hasQuery && (
+        <GlassCard className="p-4 space-y-3">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <SlidersHorizontal className="w-4 h-4 text-teal-400" />
+              <h3 className="text-sm font-semibold text-white">Refine Results</h3>
+            </div>
+            <button onClick={() => setShowFilters(false)} className="text-slate-500 hover:text-white"><X className="w-4 h-4" /></button>
+          </div>
+          
+          {/* Status Filter */}
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Status</p>
+            <div className="flex flex-wrap gap-2">
+              {['Approved', 'In Progress', 'Draft', 'Verified', 'Closed', 'Obsolete'].map(status => (
+                <button
+                  key={status}
+                  onClick={() => {
+                    const next = new Set(statusFilters);
+                    if (next.has(status)) next.delete(status);
+                    else next.add(status);
+                    setStatusFilters(next);
+                  }}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
+                    statusFilters.has(status)
+                      ? 'bg-teal-500/20 border-teal-500/40 text-teal-300'
+                      : 'bg-slate-800/40 border-slate-700/40 text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  {status}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Date Filter */}
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Date Range</p>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { val: 'any' as const, label: 'Any Time' },
+                { val: '7d' as const, label: 'Last 7 Days' },
+                { val: '30d' as const, label: 'Last 30 Days' },
+                { val: '90d' as const, label: 'Last 90 Days' },
+              ].map(d => (
+                <button
+                  key={d.val}
+                  onClick={() => setDateFilter(d.val)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
+                    dateFilter === d.val
+                      ? 'bg-teal-500/20 border-teal-500/40 text-teal-300'
+                      : 'bg-slate-800/40 border-slate-700/40 text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  {d.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Entity Type Filter */}
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Type</p>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { val: 'document' as const, label: 'Documents' },
+                { val: 'pl' as const, label: 'PL Items' },
+                { val: 'work' as const, label: 'Work Records' },
+                { val: 'case' as const, label: 'Cases' },
+              ].map(type => (
+                <button
+                  key={type.val}
+                  onClick={() => {
+                    const next = new Set(entityFilters);
+                    if (next.has(type.val)) next.delete(type.val);
+                    else next.add(type.val);
+                    setEntityFilters(next);
+                  }}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
+                    entityFilters.has(type.val)
+                      ? 'bg-teal-500/20 border-teal-500/40 text-teal-300'
+                      : 'bg-slate-800/40 border-slate-700/40 text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  {type.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {hasActiveFilters && (
+            <button
+              onClick={() => { setStatusFilters(new Set()); setDateFilter('any'); setEntityFilters(new Set()); }}
+              className="text-xs text-teal-400 hover:text-teal-300 mt-2"
+            >
+              Clear all filters
+            </button>
+          )}
+        </GlassCard>
+      )}
 
       {/* Search Input */}
       <GlassCard className="p-4">
@@ -419,9 +554,9 @@ export default function SearchExplorer() {
           })()}
         </div>
 
-        {/* Scope Tabs */}
+        {/* Scope Tabs + Filter Button */}
         {hasQuery && (
-          <div className="flex gap-1 mt-3 border-t border-slate-700/40 pt-3 overflow-x-auto pb-0.5">
+          <div className="flex gap-1 mt-3 border-t border-slate-700/40 pt-3 overflow-x-auto pb-0.5 items-center">
             {SCOPE_OPTIONS.map(s => (
               <button
                 key={s}
@@ -442,6 +577,21 @@ export default function SearchExplorer() {
                 )}
               </button>
             ))}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`ml-auto flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                showFilters || hasActiveFilters
+                  ? 'bg-teal-500/15 text-teal-300 border border-teal-500/30'
+                  : 'text-slate-500 hover:text-slate-300 hover:bg-slate-700/40'
+              }`}
+              title="Filters"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              Filters
+              {hasActiveFilters && (
+                <span className="w-2 h-2 rounded-full bg-teal-400" />
+              )}
+            </button>
           </div>
         )}
       </GlassCard>
@@ -450,14 +600,15 @@ export default function SearchExplorer() {
       {loading && <LoadingState message="Searching all records..." size="sm" />}
 
       {/* Results */}
-      {!loading && hasResults && (
+      {!loading && hasResults && filteredResults && (
         <div className="space-y-6">
           {/* Summary */}
           <div className="flex items-center gap-2 px-1">
             <CheckCircle className="w-4 h-4 text-teal-400" />
             <span className="text-slate-400 text-sm">
-              Found <span className="text-teal-300 font-semibold">{results.total}</span> results for{' '}
+              Found <span className="text-teal-300 font-semibold">{filteredResults.total}</span> {hasActiveFilters && <span className="text-slate-500">filtered </span>}results for{' '}
               <span className="text-white font-semibold">"{debouncedQuery}"</span>
+              {hasActiveFilters && <span className="text-slate-500 ml-1">({results.total} total)</span>}
             </span>
             <button
               onClick={saveSearch}
@@ -479,7 +630,7 @@ export default function SearchExplorer() {
             <ResultGroup
               title="Documents"
               icon={<FileText className="w-3.5 h-3.5 text-blue-400" />}
-              results={results.documents.slice(0, 200)}
+              results={filteredResults.documents.slice(0, 200)}
               query={debouncedQuery}
               onNavigate={handleNavigate}
             />
@@ -490,7 +641,7 @@ export default function SearchExplorer() {
             <ResultGroup
               title="PL Items"
               icon={<Database className="w-3.5 h-3.5 text-indigo-400" />}
-              results={results.plItems.slice(0, 200)}
+              results={filteredResults.plItems.slice(0, 200)}
               query={debouncedQuery}
               onNavigate={handleNavigate}
             />
@@ -501,7 +652,7 @@ export default function SearchExplorer() {
             <ResultGroup
               title="Work Records"
               icon={<Briefcase className="w-3.5 h-3.5 text-amber-400" />}
-              results={results.work.slice(0, 200)}
+              results={filteredResults.work.slice(0, 200)}
               query={debouncedQuery}
               onNavigate={handleNavigate}
             />
@@ -512,7 +663,7 @@ export default function SearchExplorer() {
             <ResultGroup
               title="Cases"
               icon={<AlertTriangle className="w-3.5 h-3.5 text-rose-400" />}
-              results={results.cases.slice(0, 200)}
+              results={filteredResults.cases.slice(0, 200)}
               query={debouncedQuery}
               onNavigate={handleNavigate}
             />
