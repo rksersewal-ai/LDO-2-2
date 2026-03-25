@@ -1,16 +1,22 @@
 /**
  * API Client Service
  * Centralized HTTP client for all backend API calls with JWT authentication
+ * 
+ * Uses standardized response shapes:
+ * - ApiListResponse<T> for GET /endpoint/ (paginated lists)
+ * - ApiItemResponse<T> for GET /endpoint/:id (single items)
+ * - ApiMutationResponse<T> for POST/PATCH/PUT/DELETE
  */
 
 import axios, { AxiosInstance, AxiosError, AxiosResponse } from 'axios';
-
-interface ApiResponse<T = any> {
-  success: boolean;
-  data: T;
-  message?: string;
-  error?: string;
-}
+import type {
+  ApiListResponse,
+  ApiItemResponse,
+  ApiMutationResponse,
+  ApiDeleteResponse,
+  NormalizedListResult,
+  ListQueryParams,
+} from '../lib/types';
 
 interface ApiErrorResponse {
   detail?: string;
@@ -58,6 +64,51 @@ class ApiClient {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
+  // Response Normalization Helpers
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Normalize any list response to standard shape
+   * Handles both paginated and non-paginated responses
+   */
+  private normalizeListResponse<T>(
+    response: any,
+    pageSize: number = 15
+  ): NormalizedListResult<T> {
+    // Check if response is already in standard format
+    if ('results' in response && 'total' in response) {
+      const page = response.page || 1;
+      return {
+        items: response.results,
+        total: response.total,
+        page,
+        pageSize: response.pageSize || pageSize,
+        hasMore: page * (response.pageSize || pageSize) < response.total,
+      };
+    }
+
+    // Legacy format: array response
+    if (Array.isArray(response)) {
+      return {
+        items: response,
+        total: response.length,
+        page: 1,
+        pageSize: response.length,
+        hasMore: false,
+      };
+    }
+
+    // Default empty
+    return {
+      items: [],
+      total: 0,
+      page: 1,
+      pageSize,
+      hasMore: false,
+    };
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
   // Auth Endpoints
   // ─────────────────────────────────────────────────────────────────────────
 
@@ -101,18 +152,40 @@ class ApiClient {
   // Document Endpoints
   // ─────────────────────────────────────────────────────────────────────────
 
-  async getDocuments(filters?: Record<string, any>) {
+  /**
+   * Get paginated list of documents
+   * Returns: NormalizedListResult<Document>
+   */
+  async getDocuments(query?: ListQueryParams): Promise<NormalizedListResult<any>> {
     try {
-      const response = await this.client.get('/documents/', { params: filters });
-      return response.data;
+      const params = {
+        page: query?.page || 1,
+        page_size: query?.pageSize || 15,
+        ...(query?.search && { search: query.search }),
+        ...(query?.sort && { ordering: query.sort }),
+        ...(query?.filters && query.filters),
+      };
+
+      const response = await this.client.get('/documents/', { params });
+      return this.normalizeListResponse(response.data, params.page_size);
     } catch (error) {
       // Fallback to mock data if API unavailable
       console.warn('API unavailable, using mock data:', error);
       const { MOCK_DOCUMENTS } = await import('../lib/mock');
-      return { results: MOCK_DOCUMENTS, count: MOCK_DOCUMENTS.length };
+      return {
+        items: MOCK_DOCUMENTS,
+        total: MOCK_DOCUMENTS.length,
+        page: 1,
+        pageSize: 15,
+        hasMore: false,
+      };
     }
   }
 
+  /**
+   * Get single document by ID
+   * Returns: Document
+   */
   async getDocument(id: string) {
     const response = await this.client.get(`/documents/${id}/`);
     return response.data;
@@ -148,11 +221,27 @@ class ApiClient {
   // Work Records Endpoints
   // ─────────────────────────────────────────────────────────────────────────
 
-  async getWorkRecords(filters?: Record<string, any>) {
-    const response = await this.client.get('/work-records/', { params: filters });
-    return response.data;
+  /**
+   * Get paginated list of work records
+   * Returns: NormalizedListResult<WorkRecord>
+   */
+  async getWorkRecords(query?: ListQueryParams): Promise<NormalizedListResult<any>> {
+    const params = {
+      page: query?.page || 1,
+      page_size: query?.pageSize || 15,
+      ...(query?.search && { search: query.search }),
+      ...(query?.sort && { ordering: query.sort }),
+      ...(query?.filters && query.filters),
+    };
+
+    const response = await this.client.get('/work-records/', { params });
+    return this.normalizeListResponse(response.data, params.page_size);
   }
 
+  /**
+   * Get single work record by ID
+   * Returns: WorkRecord
+   */
   async getWorkRecord(id: string) {
     const response = await this.client.get(`/work-records/${id}/`);
     return response.data;
@@ -176,11 +265,27 @@ class ApiClient {
   // PL (Product/Locomotive) Endpoints
   // ─────────────────────────────────────────────────────────────────────────
 
-  async getPlItems(filters?: Record<string, any>) {
-    const response = await this.client.get('/pl-items/', { params: filters });
-    return response.data;
+  /**
+   * Get paginated list of PL items
+   * Returns: NormalizedListResult<PLNumber>
+   */
+  async getPlItems(query?: ListQueryParams): Promise<NormalizedListResult<any>> {
+    const params = {
+      page: query?.page || 1,
+      page_size: query?.pageSize || 15,
+      ...(query?.search && { search: query.search }),
+      ...(query?.sort && { ordering: query.sort }),
+      ...(query?.filters && query.filters),
+    };
+
+    const response = await this.client.get('/pl-items/', { params });
+    return this.normalizeListResponse(response.data, params.page_size);
   }
 
+  /**
+   * Get single PL item by ID
+   * Returns: PLNumber
+   */
   async getPlItem(id: string) {
     const response = await this.client.get(`/pl-items/${id}/`);
     return response.data;
@@ -200,11 +305,27 @@ class ApiClient {
   // Case/Discrepancy Endpoints
   // ─────────────────────────────────────────────────────────────────────────
 
-  async getCases(filters?: Record<string, any>) {
-    const response = await this.client.get('/cases/', { params: filters });
-    return response.data;
+  /**
+   * Get paginated list of cases
+   * Returns: NormalizedListResult<CaseRecord>
+   */
+  async getCases(query?: ListQueryParams): Promise<NormalizedListResult<any>> {
+    const params = {
+      page: query?.page || 1,
+      page_size: query?.pageSize || 15,
+      ...(query?.search && { search: query.search }),
+      ...(query?.sort && { ordering: query.sort }),
+      ...(query?.filters && query.filters),
+    };
+
+    const response = await this.client.get('/cases/', { params });
+    return this.normalizeListResponse(response.data, params.page_size);
   }
 
+  /**
+   * Get single case by ID
+   * Returns: CaseRecord
+   */
   async getCase(id: string) {
     const response = await this.client.get(`/cases/${id}/`);
     return response.data;
@@ -229,11 +350,27 @@ class ApiClient {
   // OCR Endpoints
   // ─────────────────────────────────────────────────────────────────────────
 
-  async getOcrJobs(filters?: Record<string, any>) {
-    const response = await this.client.get('/ocr/jobs/', { params: filters });
-    return response.data;
+  /**
+   * Get paginated list of OCR jobs
+   * Returns: NormalizedListResult<OcrJob>
+   */
+  async getOcrJobs(query?: ListQueryParams): Promise<NormalizedListResult<any>> {
+    const params = {
+      page: query?.page || 1,
+      page_size: query?.pageSize || 15,
+      ...(query?.search && { search: query.search }),
+      ...(query?.sort && { ordering: query.sort }),
+      ...(query?.filters && query.filters),
+    };
+
+    const response = await this.client.get('/ocr/jobs/', { params });
+    return this.normalizeListResponse(response.data, params.page_size);
   }
 
+  /**
+   * Get single OCR job by ID
+   * Returns: OcrJob
+   */
   async getOcrJob(id: string) {
     const response = await this.client.get(`/ocr/jobs/${id}/`);
     return response.data;
@@ -253,11 +390,27 @@ class ApiClient {
   // Approval Endpoints
   // ─────────────────────────────────────────────────────────────────────────
 
-  async getApprovals(filters?: Record<string, any>) {
-    const response = await this.client.get('/approvals/', { params: filters });
-    return response.data;
+  /**
+   * Get paginated list of approvals
+   * Returns: NormalizedListResult<Approval>
+   */
+  async getApprovals(query?: ListQueryParams): Promise<NormalizedListResult<any>> {
+    const params = {
+      page: query?.page || 1,
+      page_size: query?.pageSize || 15,
+      ...(query?.search && { search: query.search }),
+      ...(query?.sort && { ordering: query.sort }),
+      ...(query?.filters && query.filters),
+    };
+
+    const response = await this.client.get('/approvals/', { params });
+    return this.normalizeListResponse(response.data, params.page_size);
   }
 
+  /**
+   * Get single approval by ID
+   * Returns: Approval
+   */
   async getApproval(id: string) {
     const response = await this.client.get(`/approvals/${id}/`);
     return response.data;
@@ -277,22 +430,42 @@ class ApiClient {
   // Audit Log Endpoints
   // ─────────────────────────────────────────────────────────────────────────
 
-  async getAuditLog(filters?: Record<string, any>) {
-    const response = await this.client.get('/audit/log/', { params: filters });
-    return response.data;
+  /**
+   * Get paginated audit log entries
+   * Returns: NormalizedListResult<AuditLogEntry>
+   */
+  async getAuditLog(query?: ListQueryParams): Promise<NormalizedListResult<any>> {
+    const params = {
+      page: query?.page || 1,
+      page_size: query?.pageSize || 15,
+      ...(query?.search && { search: query.search }),
+      ...(query?.sort && { ordering: query.sort }),
+      ...(query?.filters && query.filters),
+    };
+
+    const response = await this.client.get('/audit/log/', { params });
+    return this.normalizeListResponse(response.data, params.page_size);
   }
 
   // ─────────────────────────────────────────────────────────────────────────
   // Search Endpoints
   // ─────────────────────────────────────────────────────────────────────────
 
-  async search(query: string, scope?: string) {
+  /**
+   * Search across all entities
+   * Returns: NormalizedListResult<SearchResult>
+   */
+  async search(query: string, scope?: string): Promise<NormalizedListResult<any>> {
     const response = await this.client.get('/search/', {
       params: { q: query, scope },
     });
-    return response.data;
+    return this.normalizeListResponse(response.data, 50);
   }
 
+  /**
+   * Get search history for current user
+   * Returns: SearchResult[]
+   */
   async getSearchHistory() {
     const response = await this.client.get('/search/history/');
     return response.data;

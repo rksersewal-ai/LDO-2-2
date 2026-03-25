@@ -245,3 +245,80 @@ export interface KPIStatus {
   color: string;
   isOnTime: boolean;
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// Standardized API Response Shapes
+// ─────────────────────────────────────────────────────────────────────────
+
+/**
+ * Standard paginated list response for all GET list operations
+ * Ensures consistency across all endpoints
+ */
+export interface ApiListResponse<T> {
+  results: T[];
+  total: number;
+  page?: number;
+  pageSize?: number;
+  hasMore?: boolean;
+}
+
+/**
+ * Standard single item response for GET/:id operations
+ */
+export interface ApiItemResponse<T> {
+  data: T;
+}
+
+/**
+ * Standard response for POST/PATCH/PUT operations
+ */
+export interface ApiMutationResponse<T> {
+  data: T;
+  message?: string;
+}
+
+/**
+ * Standard response for DELETE operations
+ */
+export interface ApiDeleteResponse {
+  success: boolean;
+  message?: string;
+}
+
+/**
+ * Standard error response shape
+ */
+export interface ApiErrorDetail {
+  field?: string;
+  message: string;
+  code?: string;
+}
+
+export interface ApiErrorResponse {
+  success: false;
+  message: string;
+  details?: ApiErrorDetail[];
+  errors?: Record<string, string[]>;
+}
+
+/**
+ * Query parameters for list operations
+ */
+export interface ListQueryParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  sort?: string;
+  filters?: Record<string, any>;
+}
+
+/**
+ * Normalized result from all list queries
+ */
+export interface NormalizedListResult<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+}

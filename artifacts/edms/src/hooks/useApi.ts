@@ -1,11 +1,16 @@
 /**
  * useApi Hook
- * Simplified API integration hook for React components
+ * Simplified API integration hook for React components with standardized API responses
+ * 
+ * All list endpoints return: NormalizedListResult<T>
+ * All item endpoints return: T
+ * All mutations return: T
  */
 
 import { useState, useCallback } from 'react';
 import { AxiosError } from 'axios';
 import apiClient from '../services/ApiClient';
+import type { NormalizedListResult, ListQueryParams } from '../lib/types';
 
 interface UseApiState<T> {
   data: T | null;
@@ -21,6 +26,7 @@ interface UseApiOptions {
 
 /**
  * Generic API hook for GET requests
+ * For list endpoints, ensures normalized response shape
  */
 export function useApiGet<T = any>(
   url: string,
@@ -90,19 +96,35 @@ export function useApiMutation<T = any, D = any>(
 }
 
 /**
- * API hook for document CRUD operations
+ * API hook for document list operations with pagination
+ * Uses standardized ApiClient methods that return NormalizedListResult<Document>
  */
-export function useDocuments() {
-  const { data: documents, loading, error, refetch } = useApiGet('/documents/');
+export function useDocumentList(query?: ListQueryParams) {
+  const [state, setState] = useState<UseApiState<NormalizedListResult<any>>>({
+    data: null,
+    loading: true,
+    error: null,
+  });
+
+  const fetch = useCallback(async () => {
+    setState(prev => ({ ...prev, loading: true, error: null }));
+    try {
+      const response = await apiClient.getDocuments(query);
+      setState(prev => ({ ...prev, data: response, loading: false }));
+    } catch (error) {
+      const err = error as AxiosError;
+      const message = apiClient.getErrorMessage(err);
+      setState(prev => ({ ...prev, error: message, loading: false }));
+    }
+  }, [query?.page, query?.pageSize, query?.search, query?.sort]);
+
   const createMutation = useApiMutation('post');
   const updateMutation = useApiMutation('patch');
   const deleteMutation = useApiMutation('delete');
 
   return {
-    documents,
-    loading,
-    error,
-    refetch,
+    ...state,
+    refetch: fetch,
     createDocument: (data: FormData) => createMutation.mutate('/documents/', data),
     updateDocument: (id: string, data: any) => updateMutation.mutate(`/documents/${id}/`, data),
     deleteDocument: (id: string) => deleteMutation.mutate(`/documents/${id}/`),
@@ -110,22 +132,72 @@ export function useDocuments() {
 }
 
 /**
- * API hook for work records CRUD operations
+ * API hook for work records list operations with pagination
+ * Uses standardized ApiClient methods that return NormalizedListResult<WorkRecord>
  */
-export function useWorkRecords() {
-  const { data: records, loading, error, refetch } = useApiGet('/work-records/');
+export function useWorkRecordList(query?: ListQueryParams) {
+  const [state, setState] = useState<UseApiState<NormalizedListResult<any>>>({
+    data: null,
+    loading: true,
+    error: null,
+  });
+
+  const fetch = useCallback(async () => {
+    setState(prev => ({ ...prev, loading: true, error: null }));
+    try {
+      const response = await apiClient.getWorkRecords(query);
+      setState(prev => ({ ...prev, data: response, loading: false }));
+    } catch (error) {
+      const err = error as AxiosError;
+      const message = apiClient.getErrorMessage(err);
+      setState(prev => ({ ...prev, error: message, loading: false }));
+    }
+  }, [query?.page, query?.pageSize, query?.search, query?.sort]);
+
   const createMutation = useApiMutation('post');
   const updateMutation = useApiMutation('patch');
   const deleteMutation = useApiMutation('delete');
 
   return {
-    records,
-    loading,
-    error,
-    refetch,
+    ...state,
+    refetch: fetch,
     createRecord: (data: any) => createMutation.mutate('/work-records/', data),
     updateRecord: (id: string, data: any) => updateMutation.mutate(`/work-records/${id}/`, data),
     deleteRecord: (id: string) => deleteMutation.mutate(`/work-records/${id}/`),
+  };
+}
+
+/**
+ * @deprecated Use useDocumentList or useWorkRecordList instead
+ * Legacy hook kept for backwards compatibility
+ */
+export function useDocuments() {
+  const list = useDocumentList();
+  return {
+    documents: list.data?.items || [],
+    loading: list.loading,
+    error: list.error,
+    refetch: list.refetch,
+    createDocument: list.createDocument,
+    updateDocument: list.updateDocument,
+    deleteDocument: list.deleteDocument,
+  };
+}
+
+/**
+ * @deprecated Use useWorkRecordList instead
+ * Legacy hook kept for backwards compatibility
+ */
+export function useWorkRecords() {
+  const list = useWorkRecordList();
+  return {
+    records: list.data?.items || [],
+    loading: list.loading,
+    error: list.error,
+    refetch: list.refetch,
+    createRecord: list.createRecord,
+    updateRecord: list.updateRecord,
+    deleteRecord: list.deleteRecord,
   };
 }
 
