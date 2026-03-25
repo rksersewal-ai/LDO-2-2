@@ -352,7 +352,7 @@ function CreatePLModal({ onClose, onSave }: { onClose: () => void; onSave: (data
 
 export default function PLKnowledgeHub() {
   const navigate = useNavigate();
-  const { data: plItems, loading, error, refetch, add } = usePLItems();
+  const { data: plItems, loading, error, refetch, add, update } = usePLItems();
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -389,8 +389,7 @@ export default function PLKnowledgeHub() {
   const activeFilters = [statusFilter, categoryFilter, safetyFilter].filter(f => f !== 'ALL').length;
 
   const handleLinkUpdate = (plId: string, linkedIds: string[]) => {
-    const item = plItems.find(p => p.id === plId);
-    if (!item) return;
+    update(plId, { linkedDocumentIds: linkedIds });
   };
 
   const handleCreate = async (data: CreatePLFormData) => {

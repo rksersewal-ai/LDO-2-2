@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Search, Bell, User, Type, LogOut, Minus, Plus, RotateCcw } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router';
 import { useAuth } from '../../lib/auth';
@@ -13,6 +13,8 @@ export function Header() {
   const [showTextControls, setShowTextControls] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [fontSize, setFontSize] = useState(14);
+  const [headerQuery, setHeaderQuery] = useState('');
+  const headerInputRef = useRef<HTMLInputElement>(null);
 
   const paths = location.pathname.split('/').filter(Boolean);
   const breadcrumbs = ['Home', ...paths.map(p => p.charAt(0).toUpperCase() + p.slice(1))];
@@ -50,13 +52,16 @@ export function Header() {
             <Search className="h-4 w-4 text-slate-500 group-focus-within:text-teal-400 transition-colors" />
           </div>
           <input
+            ref={headerInputRef}
             type="text"
+            value={headerQuery}
+            onChange={e => setHeaderQuery(e.target.value)}
             className="block w-72 md:w-80 pl-10 pr-12 py-2 border border-teal-500/20 rounded-xl leading-5 bg-slate-900/50 backdrop-blur-md text-slate-300 placeholder-slate-500 focus:outline-none focus:bg-slate-900 focus:border-teal-400/50 focus:ring-1 focus:ring-teal-400/50 text-sm transition-all"
             placeholder="Search documents, PLs, OCR text..."
-            onClick={() => navigate('/search')}
             onKeyDown={e => {
               if (e.key === 'Enter') {
-                const val = (e.target as HTMLInputElement).value.trim();
+                const val = headerQuery.trim();
+                setHeaderQuery('');
                 navigate(val ? `/search?q=${encodeURIComponent(val)}` : '/search');
               }
             }}

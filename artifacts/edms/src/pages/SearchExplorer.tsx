@@ -260,6 +260,8 @@ export default function SearchExplorer() {
   useEffect(() => {
     if (debouncedQuery.trim()) {
       setSearchParams({ q: debouncedQuery }, { replace: true });
+    } else {
+      setSearchParams({}, { replace: true });
     }
   }, [debouncedQuery, setSearchParams]);
 
