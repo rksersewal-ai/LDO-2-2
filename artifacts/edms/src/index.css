@@ -43,6 +43,80 @@
   --color-teal-primary: #14b8a6;
   --color-teal-glow: rgba(20, 184, 166, 0.15);
   --color-glass: rgba(15, 23, 42, 0.6);
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     Typography Scale — Normalized across all pages
+     ────────────────────────────────────────────────────────────────────────── */
+  
+  /* App/Page Title: Used on dashboard, main headings */
+  --font-size-app-title: 32px;
+  --line-height-app-title: 40px;
+  
+  /* Page Title: Used on page headers (Work Ledger, DocumentHub, etc) */
+  --font-size-page-title: 28px;
+  --line-height-page-title: 36px;
+  
+  /* Section Title: Used for grouped content (KPI Stats, Recent Items, etc) */
+  --font-size-section-title: 20px;
+  --line-height-section-title: 28px;
+  
+  /* Subsection Title: Used for card headers, filter groups */
+  --font-size-subsection-title: 16px;
+  --line-height-subsection-title: 24px;
+  
+  /* Body: Default text, descriptions, table content */
+  --font-size-body: 14px;
+  --line-height-body: 20px;
+  
+  /* Label: Form labels, card metadata, small text */
+  --font-size-label: 13px;
+  --line-height-label: 18px;
+  
+  /* Caption: Timestamps, hints, fine print */
+  --font-size-caption: 12px;
+  --line-height-caption: 16px;
+  
+  /* Micro: Only for timestamps, tags, badges, helper text */
+  --font-size-micro: 11px;
+  --line-height-micro: 14px;
+  
+  /* Mono (Data): For IDs, code, tabular numbers */
+  --font-size-mono-data: 13px;
+  --line-height-mono-data: 18px;
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     Spacing Scale — Consistent gap and padding across all pages
+     ────────────────────────────────────────────────────────────────────────── */
+  
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
+  --spacing-2xl: 24px;
+  --spacing-3xl: 32px;
+  --spacing-4xl: 40px;
+  --spacing-5xl: 48px;
+  
+  /* ─────────────────────────────────────────────────────────────────────────
+     Component Sizing — Consistent control heights and densities
+     ────────────────────────────────────────────────────────────────────────── */
+  
+  /* Dense table rows (e.g., WorkLedger, AuditLog) */
+  --height-table-row-dense: 36px;
+  
+  /* Normal table rows (e.g., DocumentHub grid items) */
+  --height-table-row: 44px;
+  
+  /* Form controls (buttons, inputs, selects) */
+  --height-control: 36px;
+  
+  /* Prominent action button (primary actions) */
+  --height-action-button: 40px;
+  
+  /* Control padding (horizontal) */
+  --padding-control-h: 12px;
+  --padding-control-v: 8px;
 }
 
 /* Light theme overrides */
