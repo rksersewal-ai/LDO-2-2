@@ -221,10 +221,20 @@ export default function SearchExplorer() {
   };
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const prevUrlQ = useRef(initialQuery);
 
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  // Sync query state when navigated externally (e.g., header Enter → /search?q=...)
+  useEffect(() => {
+    const urlQ = searchParams.get('q') ?? '';
+    if (urlQ !== prevUrlQ.current) {
+      prevUrlQ.current = urlQ;
+      setQuery(urlQ);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -258,8 +268,10 @@ export default function SearchExplorer() {
   }, [debouncedQuery, scope]);
 
   useEffect(() => {
-    if (debouncedQuery.trim()) {
-      setSearchParams({ q: debouncedQuery }, { replace: true });
+    const q = debouncedQuery.trim() ? debouncedQuery : '';
+    prevUrlQ.current = q;
+    if (q) {
+      setSearchParams({ q }, { replace: true });
     } else {
       setSearchParams({}, { replace: true });
     }
@@ -311,7 +323,7 @@ export default function SearchExplorer() {
             onChange={e => setQuery(e.target.value)}
             onFocus={() => setInputFocused(true)}
             onBlur={() => setTimeout(() => setInputFocused(false), 150)}
-            placeholder="Search documents, PL numbers, OCR text, work records..."
+            placeholder="Search documents, PLs, OCR text, work records, cases..."
             className="w-full pl-12 pr-20 py-3.5 text-sm bg-slate-900/60 border border-slate-700/50 focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/30 rounded-xl text-slate-200 placeholder-slate-600 outline-none transition-all"
           />
           {query && (
@@ -430,7 +442,7 @@ export default function SearchExplorer() {
             <ResultGroup
               title="Documents"
               icon={<FileText className="w-3.5 h-3.5 text-blue-400" />}
-              results={results.documents}
+              results={results.documents.slice(0, 200)}
               query={debouncedQuery}
               onNavigate={handleNavigate}
             />
@@ -441,7 +453,7 @@ export default function SearchExplorer() {
             <ResultGroup
               title="PL Items"
               icon={<Database className="w-3.5 h-3.5 text-indigo-400" />}
-              results={results.plItems}
+              results={results.plItems.slice(0, 200)}
               query={debouncedQuery}
               onNavigate={handleNavigate}
             />
@@ -452,7 +464,7 @@ export default function SearchExplorer() {
             <ResultGroup
               title="Work Records"
               icon={<Briefcase className="w-3.5 h-3.5 text-amber-400" />}
-              results={results.work}
+              results={results.work.slice(0, 200)}
               query={debouncedQuery}
               onNavigate={handleNavigate}
             />
@@ -463,7 +475,7 @@ export default function SearchExplorer() {
             <ResultGroup
               title="Cases"
               icon={<AlertTriangle className="w-3.5 h-3.5 text-rose-400" />}
-              results={results.cases}
+              results={results.cases.slice(0, 200)}
               query={debouncedQuery}
               onNavigate={handleNavigate}
             />
