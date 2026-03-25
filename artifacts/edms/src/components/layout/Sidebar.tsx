@@ -5,7 +5,8 @@ import {
   LayoutDashboard, FolderOpen, Component, Activity,
   Briefcase, CheckSquare, BarChart3, ShieldAlert,
   Settings, ServerCog, DatabaseBackup,
-  Megaphone, ClipboardList, FileBarChart, BookOpen, Telescope
+  Megaphone, ClipboardList, FileBarChart, BookOpen, Telescope,
+  Bell, FileCheck2, MonitorCheck,
 } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import type { UserRole } from '../../lib/auth';
@@ -47,6 +48,13 @@ const navGroups: NavGroup[] = [
     ]
   },
   {
+    label: "Tools",
+    items: [
+      { icon: Bell, label: "Alert Rules", path: "/alerts" },
+      { icon: FileCheck2, label: "Doc Templates", path: "/templates" },
+    ]
+  },
+  {
     label: "Reports",
     items: [
       { icon: BarChart3, label: "Reports", path: "/reports", roles: ['admin', 'supervisor'] },
@@ -58,6 +66,7 @@ const navGroups: NavGroup[] = [
     items: [
       { icon: ServerCog, label: "Admin", path: "/admin", roles: ['admin'] },
       { icon: Activity, label: "OCR Monitor", path: "/ocr", roles: ['admin'] },
+      { icon: MonitorCheck, label: "System Health", path: "/health", roles: ['admin'] },
       { icon: ClipboardList, label: "Audit Log", path: "/audit", roles: ['admin'] },
       { icon: Megaphone, label: "Banners", path: "/banners", roles: ['admin'] },
       { icon: Settings, label: "Settings", path: "/settings", roles: ['admin'] },

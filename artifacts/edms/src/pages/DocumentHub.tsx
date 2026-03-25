@@ -1,13 +1,14 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { GlassCard, Badge, Button, Input, FilterPills, PageHeader } from '../components/ui/Shared';
 import { MOCK_DOCUMENTS } from '../lib/mock';
+import { ExportImportService } from '../services/ExportImportService';
 import {
   FileText, Search, Upload, Download, Eye,
   Grid, List, ChevronRight, FileImage, File,
   Plus, SlidersHorizontal, ArrowUpDown, ArrowUp, ArrowDown,
   ScanText, Link as LinkIcon, CheckSquare, Square, X,
-  CheckCheck, Minus, Send, FolderOpen, ToggleLeft, ToggleRight,
+  CheckCheck, Minus, Send, FolderOpen, ToggleLeft, ToggleRight, Columns3,
 } from 'lucide-react';
 
 const statusVariant = (s: string) => {
@@ -66,6 +67,14 @@ export default function DocumentHub() {
   const [showObsolete, setShowObsolete] = useState(true);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [toast, setToast] = useState<string | null>(null);
+  const [docPage, setDocPage] = useState(1);
+  const DOC_PAGE_SIZE = 15;
+  const [showColMenu, setShowColMenu] = useState(false);
+  const ALL_COLS = ['id', 'name', 'category', 'type', 'revision', 'status', 'ocr', 'linkedPL', 'date'] as const;
+  type ColKey = typeof ALL_COLS[number];
+  const COL_LABELS: Record<ColKey, string> = { id: 'Doc ID', name: 'Name', category: 'Category', type: 'Type', revision: 'Rev', status: 'Status', ocr: 'OCR', linkedPL: 'Linked PL', date: 'Updated' };
+  const [visibleCols, setVisibleCols] = useState<Set<ColKey>>(new Set(ALL_COLS));
+  const toggleCol = (c: ColKey) => setVisibleCols(v => { const n = new Set(v); if (n.has(c)) { if (n.size > 2) n.delete(c); } else n.add(c); return n; });
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -120,6 +129,11 @@ export default function DocumentHub() {
     return docs;
   }, [search, statusFilter, ocrFilter, typeFilter, categoryFilter, sortField, sortDir, showObsolete]);
 
+  useEffect(() => { setDocPage(1); }, [filtered]);
+
+  const totalDocPages = Math.max(1, Math.ceil(filtered.length / DOC_PAGE_SIZE));
+  const paginated = filtered.slice((docPage - 1) * DOC_PAGE_SIZE, docPage * DOC_PAGE_SIZE);
+
   const stats = {
     total: MOCK_DOCUMENTS.length,
     approved: MOCK_DOCUMENTS.filter(d => d.status === 'Approved').length,
@@ -159,8 +173,11 @@ export default function DocumentHub() {
         subtitle="Manage, search, and track all engineering documents linked to PL records"
         actions={
           <div className="flex items-center gap-2">
-            <Button variant="secondary" size="sm">
-              <Download className="w-3.5 h-3.5" /> Export
+            <Button variant="secondary" size="sm" onClick={() => ExportImportService.downloadDocumentsCSV()}>
+              <Download className="w-3.5 h-3.5" /> CSV
+            </Button>
+            <Button variant="secondary" size="sm" onClick={() => ExportImportService.exportDocumentsExcel()}>
+              <Download className="w-3.5 h-3.5" /> Excel
             </Button>
             <Button variant="secondary" size="sm">
               <Upload className="w-3.5 h-3.5" /> Bulk Upload
@@ -231,6 +248,34 @@ export default function DocumentHub() {
                 <span className="w-4 h-4 rounded-full bg-teal-500 text-white text-[9px] flex items-center justify-center">{activeFilters}</span>
               )}
             </button>
+            {/* Column visibility toggle */}
+            {viewMode === 'table' && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowColMenu(v => !v)}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border transition-colors ${showColMenu ? 'bg-teal-500/15 border-teal-500/40 text-teal-300' : 'bg-slate-800/60 border-slate-700/50 text-slate-400 hover:text-slate-200'}`}
+                >
+                  <Columns3 className="w-3.5 h-3.5" /> Columns
+                </button>
+                {showColMenu && (
+                  <div className="absolute right-0 top-full mt-1 z-50 w-44 bg-slate-900/95 backdrop-blur-xl border border-white/8 rounded-xl shadow-2xl shadow-black/60 p-2">
+                    <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-600 mb-1">Visible Columns</p>
+                    {ALL_COLS.map(c => (
+                      <button
+                        key={c}
+                        onClick={() => toggleCol(c)}
+                        className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-700/50 text-left transition-colors"
+                      >
+                        <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 ${visibleCols.has(c) ? 'bg-teal-500/30 border-teal-500/60' : 'border-slate-600'}`}>
+                          {visibleCols.has(c) && <CheckCheck className="w-2.5 h-2.5 text-teal-400" />}
+                        </div>
+                        <span className="text-xs text-slate-300">{COL_LABELS[c]}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             <div className="flex border border-slate-700/60 rounded-xl overflow-hidden">
               <button onClick={() => setViewMode('table')} className={`px-3 py-2 transition-colors ${viewMode === 'table' ? 'bg-teal-500/20 text-teal-300' : 'text-slate-500 hover:text-slate-300'}`} title="Table view">
                 <List className="w-4 h-4" />
@@ -310,7 +355,7 @@ export default function DocumentHub() {
         )}
 
         <div className="text-xs text-slate-500 mb-3 font-medium flex items-center gap-2">
-          <span>Showing <span className="text-teal-400 font-semibold">{filtered.length}</span> of {MOCK_DOCUMENTS.length} documents</span>
+          <span>Showing <span className="text-teal-400 font-semibold">{Math.min((docPage - 1) * DOC_PAGE_SIZE + 1, filtered.length)}–{Math.min(docPage * DOC_PAGE_SIZE, filtered.length)}</span> of <span className="text-slate-400 font-semibold">{filtered.length}</span> documents</span>
           {!showObsolete && <span className="text-rose-400/70">· obsolete hidden</span>}
           {search && <span>matching "<span className="text-slate-300">{search}</span>"</span>}
         </div>
@@ -336,44 +381,20 @@ export default function DocumentHub() {
                       )}
                     </button>
                   </th>
-                  <th className="pb-3 pl-1 font-semibold text-[11px] uppercase tracking-wide">Document ID</th>
-                  <th className="pb-3 pr-4 font-semibold text-[11px] uppercase tracking-wide">
-                    <button onClick={() => handleSort('name')} className="flex items-center gap-1 hover:text-slate-300 transition-colors">
-                      Name <SortIcon field="name" />
-                    </button>
-                  </th>
-                  <th className="pb-3 font-semibold text-[11px] uppercase tracking-wide">
-                    <button onClick={() => handleSort('category')} className="flex items-center gap-1 hover:text-slate-300 transition-colors">
-                      Category <SortIcon field="category" />
-                    </button>
-                  </th>
-                  <th className="pb-3 font-semibold text-[11px] uppercase tracking-wide">
-                    <button onClick={() => handleSort('type')} className="flex items-center gap-1 hover:text-slate-300 transition-colors">
-                      Type <SortIcon field="type" />
-                    </button>
-                  </th>
-                  <th className="pb-3 font-semibold text-[11px] uppercase tracking-wide">
-                    <button onClick={() => handleSort('revision')} className="flex items-center gap-1 hover:text-slate-300 transition-colors">
-                      Rev <SortIcon field="revision" />
-                    </button>
-                  </th>
-                  <th className="pb-3 font-semibold text-[11px] uppercase tracking-wide">
-                    <button onClick={() => handleSort('status')} className="flex items-center gap-1 hover:text-slate-300 transition-colors">
-                      Status <SortIcon field="status" />
-                    </button>
-                  </th>
-                  <th className="pb-3 font-semibold text-[11px] uppercase tracking-wide">OCR</th>
-                  <th className="pb-3 font-semibold text-[11px] uppercase tracking-wide">Linked PL</th>
-                  <th className="pb-3 font-semibold text-[11px] uppercase tracking-wide">
-                    <button onClick={() => handleSort('date')} className="flex items-center gap-1 hover:text-slate-300 transition-colors">
-                      Updated <SortIcon field="date" />
-                    </button>
-                  </th>
+                  {visibleCols.has('id') && <th className="pb-3 pl-1 font-semibold text-[11px] uppercase tracking-wide">Document ID</th>}
+                  {visibleCols.has('name') && <th className="pb-3 pr-4 font-semibold text-[11px] uppercase tracking-wide"><button onClick={() => handleSort('name')} className="flex items-center gap-1 hover:text-slate-300 transition-colors">Name <SortIcon field="name" /></button></th>}
+                  {visibleCols.has('category') && <th className="pb-3 font-semibold text-[11px] uppercase tracking-wide"><button onClick={() => handleSort('category')} className="flex items-center gap-1 hover:text-slate-300 transition-colors">Category <SortIcon field="category" /></button></th>}
+                  {visibleCols.has('type') && <th className="pb-3 font-semibold text-[11px] uppercase tracking-wide"><button onClick={() => handleSort('type')} className="flex items-center gap-1 hover:text-slate-300 transition-colors">Type <SortIcon field="type" /></button></th>}
+                  {visibleCols.has('revision') && <th className="pb-3 font-semibold text-[11px] uppercase tracking-wide"><button onClick={() => handleSort('revision')} className="flex items-center gap-1 hover:text-slate-300 transition-colors">Rev <SortIcon field="revision" /></button></th>}
+                  {visibleCols.has('status') && <th className="pb-3 font-semibold text-[11px] uppercase tracking-wide"><button onClick={() => handleSort('status')} className="flex items-center gap-1 hover:text-slate-300 transition-colors">Status <SortIcon field="status" /></button></th>}
+                  {visibleCols.has('ocr') && <th className="pb-3 font-semibold text-[11px] uppercase tracking-wide">OCR</th>}
+                  {visibleCols.has('linkedPL') && <th className="pb-3 font-semibold text-[11px] uppercase tracking-wide">Linked PL</th>}
+                  {visibleCols.has('date') && <th className="pb-3 font-semibold text-[11px] uppercase tracking-wide"><button onClick={() => handleSort('date')} className="flex items-center gap-1 hover:text-slate-300 transition-colors">Updated <SortIcon field="date" /></button></th>}
                   <th className="pb-3" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/[0.03]">
-                {filtered.map(doc => {
+                {paginated.map(doc => {
                   const isSelected = selectedIds.has(doc.id);
                   return (
                     <tr
@@ -389,40 +410,46 @@ export default function DocumentHub() {
                           }
                         </button>
                       </td>
-                      <td className="py-3 pl-1">
-                        <div className="flex items-center gap-2">
-                          <FileIcon type={doc.type} />
-                          <span className="font-mono text-teal-400 text-xs">{doc.id}</span>
-                        </div>
-                      </td>
-                      <td className="py-3 pr-4">
-                        <span className="text-slate-200 font-medium">{doc.name}</span>
-                        <div className="text-[11px] text-slate-500">{doc.author} · {doc.size}</div>
-                      </td>
-                      <td className="py-3">
-                        <span className="px-2 py-0.5 bg-indigo-500/10 text-indigo-300 rounded-md text-xs border border-indigo-500/20">{doc.category}</span>
-                      </td>
-                      <td className="py-3">
-                        <span className="px-2 py-0.5 bg-slate-800/80 text-slate-400 rounded-md text-xs border border-slate-700/40">{doc.type}</span>
-                      </td>
-                      <td className="py-3 text-slate-400 font-mono text-xs">{doc.revision}</td>
-                      <td className="py-3">
-                        <Badge variant={statusVariant(doc.status)}>{doc.status}</Badge>
-                      </td>
-                      <td className="py-3">
-                        <Badge variant={ocrVariant(doc.ocrStatus)}>{doc.ocrStatus}</Badge>
-                      </td>
-                      <td className="py-3 font-mono text-xs">
-                        {doc.linkedPL && doc.linkedPL !== 'N/A' ? (
-                          <span className="flex items-center gap-1 text-teal-400">
-                            <LinkIcon className="w-3 h-3" />
-                            {doc.linkedPL}
-                          </span>
-                        ) : (
-                          <span className="text-slate-600">—</span>
-                        )}
-                      </td>
-                      <td className="py-3 text-slate-500 text-xs">{doc.date}</td>
+                      {visibleCols.has('id') && (
+                        <td className="py-3 pl-1">
+                          <div className="flex items-center gap-2">
+                            <FileIcon type={doc.type} />
+                            <span className="font-mono text-teal-400 text-xs">{doc.id}</span>
+                          </div>
+                        </td>
+                      )}
+                      {visibleCols.has('name') && (
+                        <td className="py-3 pr-4">
+                          <span className="text-slate-200 font-medium">{doc.name}</span>
+                          <div className="text-[11px] text-slate-500">{doc.author} · {doc.size}</div>
+                        </td>
+                      )}
+                      {visibleCols.has('category') && (
+                        <td className="py-3">
+                          <span className="px-2 py-0.5 bg-indigo-500/10 text-indigo-300 rounded-md text-xs border border-indigo-500/20">{doc.category}</span>
+                        </td>
+                      )}
+                      {visibleCols.has('type') && (
+                        <td className="py-3">
+                          <span className="px-2 py-0.5 bg-slate-800/80 text-slate-400 rounded-md text-xs border border-slate-700/40">{doc.type}</span>
+                        </td>
+                      )}
+                      {visibleCols.has('revision') && <td className="py-3 text-slate-400 font-mono text-xs">{doc.revision}</td>}
+                      {visibleCols.has('status') && <td className="py-3"><Badge variant={statusVariant(doc.status)}>{doc.status}</Badge></td>}
+                      {visibleCols.has('ocr') && <td className="py-3"><Badge variant={ocrVariant(doc.ocrStatus)}>{doc.ocrStatus}</Badge></td>}
+                      {visibleCols.has('linkedPL') && (
+                        <td className="py-3 font-mono text-xs">
+                          {doc.linkedPL && doc.linkedPL !== 'N/A' ? (
+                            <span className="flex items-center gap-1 text-teal-400">
+                              <LinkIcon className="w-3 h-3" />
+                              {doc.linkedPL}
+                            </span>
+                          ) : (
+                            <span className="text-slate-600">—</span>
+                          )}
+                        </td>
+                      )}
+                      {visibleCols.has('date') && <td className="py-3 text-slate-500 text-xs">{doc.date}</td>}
                       <td className="py-3 pr-3">
                         <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-teal-400 transition-colors" />
                       </td>
@@ -452,7 +479,7 @@ export default function DocumentHub() {
         ) : (
           /* Grid view */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filtered.map(doc => {
+            {paginated.map(doc => {
               const isSelected = selectedIds.has(doc.id);
               return (
                 <div
@@ -518,6 +545,45 @@ export default function DocumentHub() {
                 </Button>
               </div>
             )}
+          </div>
+        )}
+        {/* Pagination Controls */}
+        {totalDocPages > 1 && (
+          <div className="flex items-center justify-between pt-4 mt-4 border-t border-white/5">
+            <span className="text-xs text-slate-500">Page <span className="text-slate-400 font-semibold">{docPage}</span> of {totalDocPages}</span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setDocPage(1)}
+                disabled={docPage === 1}
+                className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-teal-300 hover:bg-slate-800/60 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              >«</button>
+              <button
+                onClick={() => setDocPage(p => Math.max(1, p - 1))}
+                disabled={docPage === 1}
+                className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-teal-300 hover:bg-slate-800/60 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              >‹ Prev</button>
+              {Array.from({ length: Math.min(5, totalDocPages) }, (_, i) => {
+                const start = Math.max(1, Math.min(docPage - 2, totalDocPages - 4));
+                const pg = start + i;
+                return (
+                  <button
+                    key={pg}
+                    onClick={() => setDocPage(pg)}
+                    className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all ${pg === docPage ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40' : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/60'}`}
+                  >{pg}</button>
+                );
+              })}
+              <button
+                onClick={() => setDocPage(p => Math.min(totalDocPages, p + 1))}
+                disabled={docPage === totalDocPages}
+                className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-teal-300 hover:bg-slate-800/60 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              >Next ›</button>
+              <button
+                onClick={() => setDocPage(totalDocPages)}
+                disabled={docPage === totalDocPages}
+                className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-teal-300 hover:bg-slate-800/60 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              >»</button>
+            </div>
           </div>
         )}
       </GlassCard>

@@ -253,6 +253,8 @@ interface RightPanelProps {
 
 function RightPanel({ doc, ocrJob, ocrStatusOverride, onNavigate, activeSection, onSectionChange }: RightPanelProps) {
   const navigate = useNavigate();
+  const [panelToast, setPanelToast] = useState<string | null>(null);
+  const showToast = (msg: string) => { setPanelToast(msg); setTimeout(() => setPanelToast(null), 3000); };
 
   const plRecord = doc?.linkedPL && doc.linkedPL !== 'N/A'
     ? PL_DATABASE[doc.linkedPL.replace('PL-', '')]
@@ -284,6 +286,11 @@ function RightPanel({ doc, ocrJob, ocrStatusOverride, onNavigate, activeSection,
 
   return (
     <div className="flex flex-col h-full">
+      {panelToast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl bg-slate-900/95 backdrop-blur-xl border border-teal-500/30 shadow-2xl text-xs text-slate-200 slide-in-right">
+          <span>{panelToast}</span>
+        </div>
+      )}
       <div className="grid grid-cols-3 gap-1 mb-3 shrink-0">
         {sections.map(s => {
           const Icon = s.icon;
@@ -454,9 +461,13 @@ function RightPanel({ doc, ocrJob, ocrStatusOverride, onNavigate, activeSection,
         )}
 
         {activeSection === 'history' && (
-          <div className="space-y-2">
+          <div className="space-y-1">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-widest">Revision History</span>
+              <span className="text-[10px] text-slate-600">{revHistory.length} revisions</span>
+            </div>
             {revHistory.map((r, i) => (
-              <div key={i} className="flex gap-3">
+              <div key={i} className="flex gap-3 group">
                 <div className="flex flex-col items-center">
                   <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ${i === 0 ? 'bg-teal-500/30 border border-teal-500/60 text-teal-300' : 'bg-slate-800 border border-slate-700 text-slate-500'}`}>
                     {i === 0 ? '●' : '○'}
@@ -464,15 +475,31 @@ function RightPanel({ doc, ocrJob, ocrStatusOverride, onNavigate, activeSection,
                   {i < revHistory.length - 1 && <div className="w-px flex-1 bg-slate-700/40 my-1" />}
                 </div>
                 <div className="flex-1 pb-3">
-                  <div className="flex items-center gap-2 mb-0.5">
+                  <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                     <span className="font-mono text-xs text-teal-400 font-semibold">Rev {r.rev}</span>
                     {i === 0 && <span className="text-[10px] px-1.5 py-0.5 bg-teal-500/15 text-teal-400 rounded-full border border-teal-500/25">Current</span>}
                   </div>
-                  <p className="text-[10px] text-slate-400 mb-0.5">{r.note}</p>
-                  <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
+                  <p className="text-[10px] text-slate-400 mb-1">{r.note}</p>
+                  <div className="flex items-center gap-1.5 text-[10px] text-slate-500 mb-1.5">
                     <Calendar className="w-3 h-3" />{r.date}
                     <span>·</span><span>{r.author}</span>
                   </div>
+                  {i > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-800/60 border border-slate-700/40 text-[10px] text-slate-400 hover:text-teal-300 hover:border-teal-500/30 transition-colors"
+                        onClick={() => showToast(`Comparing Rev ${revHistory[0].rev} with Rev ${r.rev}…`)}
+                      >
+                        Compare with Current
+                      </button>
+                      <button
+                        className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/25 text-[10px] text-amber-400 hover:bg-amber-500/20 transition-colors"
+                        onClick={() => showToast(`Rollback to Rev ${r.rev} initiated — pending approval.`)}
+                      >
+                        Rollback
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

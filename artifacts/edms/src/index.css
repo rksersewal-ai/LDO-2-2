@@ -45,6 +45,65 @@
   --color-glass: rgba(15, 23, 42, 0.6);
 }
 
+/* Light theme overrides */
+.light-theme {
+  --background: 210 20% 97%;
+  --foreground: 220 40% 12%;
+  --border: 210 20% 82%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 40% 12%;
+  --card-border: 210 20% 85%;
+  --sidebar: 210 20% 93%;
+  --sidebar-foreground: 220 40% 12%;
+  --sidebar-border: 210 20% 80%;
+  --sidebar-primary: 172 76% 35%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 172 40% 88%;
+  --sidebar-accent-foreground: 172 60% 25%;
+  --primary: 172 76% 36%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 20% 90%;
+  --secondary-foreground: 220 40% 20%;
+  --muted: 210 20% 93%;
+  --muted-foreground: 215 20% 45%;
+  --input: 210 20% 82%;
+  --ring: 172 76% 40%;
+  --color-glass: rgba(255, 255, 255, 0.65);
+}
+
+.light-theme body {
+  background-color: hsl(210, 20%, 96%);
+  color: hsl(220, 40%, 12%);
+}
+
+.light-theme .glass-card {
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.light-theme .glass-card-teal {
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(20, 184, 166, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+}
+
+/* Light theme text color overrides using data-attribute */
+.light-theme [class*="text-slate-100"],
+.light-theme [class*="text-slate-200"],
+.light-theme [class*="text-white"] { color: hsl(220, 40%, 12%); }
+.light-theme [class*="text-slate-300"],
+.light-theme [class*="text-slate-400"] { color: hsl(220, 20%, 35%); }
+.light-theme [class*="text-slate-500"],
+.light-theme [class*="text-slate-600"] { color: hsl(220, 15%, 55%); }
+
+.light-theme [class*="bg-slate-950"],
+.light-theme [class*="bg-slate-900"] { background-color: rgba(255,255,255,0.6) !important; }
+.light-theme [class*="bg-slate-800"] { background-color: rgba(0,0,0,0.05) !important; }
+
+.light-theme ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); }
+.light-theme ::-webkit-scrollbar-thumb { background: rgba(20, 184, 166, 0.3); }
+
 @layer base {
   * {
     border-color: hsl(var(--border));

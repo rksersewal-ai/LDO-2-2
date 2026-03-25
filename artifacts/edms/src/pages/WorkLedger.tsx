@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { GlassCard, Badge, Button, Input, Select } from '../components/ui/Shared';
 import { DatePicker } from '../components/ui/DatePicker';
@@ -16,7 +16,8 @@ import {
   Clock, Lock, Shield, BarChart3, Layers,
   Unlock, Calendar, Hash, ZapOff, TrendingUp,
   AlertCircle, ChevronDown, Truck, CheckSquare,
-  Download, Upload,
+  Download, Upload, Copy, Check, FileSpreadsheet,
+  ChevronLeft, ChevronRight as ChevronRightIcon, User as UserIcon,
 } from 'lucide-react';
 import { useNavigate } from 'react-router';
 
@@ -567,6 +568,24 @@ export default function WorkLedger() {
   const [showForm, setShowForm] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showAnalytics, setShowAnalytics] = useState(false);
+  const [showMine, setShowMine] = useState(false);
+  const [showOverdue, setShowOverdue] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(15);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importPreview, setImportPreview] = useState<Record<string, string>[]>([]);
+  const [importing, setImporting] = useState(false);
+  const importInputRef = useRef<HTMLInputElement>(null);
+
+  const copyId = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(id).then(() => {
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 1500);
+    });
+  };
 
   const filtered = useMemo(() => {
     return records.filter(w => {
@@ -586,9 +605,20 @@ export default function WorkLedger() {
       const matchCategory = categoryFilter === 'ALL' || w.workCategory === categoryFilter;
       const matchDateFrom = !dateFrom || w.date >= dateFrom;
       const matchDateTo = !dateTo || w.date <= dateTo;
-      return matchSearch && matchStatus && matchCategory && matchDateFrom && matchDateTo;
+      const matchMine = !showMine || w.userId === user?.id || w.userName === user?.name;
+      const matchOverdue = !showOverdue || (() => {
+        if (w.status === 'VERIFIED' || w.status === 'CLOSED') return false;
+        const kpi = getKPIStatus(w);
+        return !kpi.isOnTime;
+      })();
+      return matchSearch && matchStatus && matchCategory && matchDateFrom && matchDateTo && matchMine && matchOverdue;
     });
-  }, [records, search, statusFilter, categoryFilter, dateFrom, dateTo]);
+  }, [records, search, statusFilter, categoryFilter, dateFrom, dateTo, showMine, showOverdue, user]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const paginated = filtered.slice((page - 1) * pageSize, page * pageSize);
+
+  useEffect(() => { setPage(1); }, [search, statusFilter, categoryFilter, dateFrom, dateTo, showMine, showOverdue]);
 
   const stats = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
@@ -630,12 +660,23 @@ export default function WorkLedger() {
           <h1 className="text-3xl font-bold text-white mb-1">Work Ledger</h1>
           <p className="text-slate-400 text-sm">Track and manage engineering work records with immutable audit history.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="secondary" onClick={() => setShowAnalytics(v => !v)}>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button variant="secondary" size="sm" onClick={() => setShowAnalytics(v => !v)}>
             <BarChart3 className="w-4 h-4" /> {showAnalytics ? 'Hide' : 'Analytics'}
           </Button>
+          <Button variant="secondary" size="sm" onClick={() => ExportImportService.downloadWorkRecordsCSV(filtered)} title="Export CSV">
+            <Download className="w-4 h-4" /> CSV
+          </Button>
+          <Button variant="secondary" size="sm" onClick={() => ExportImportService.exportWorkRecordsExcel(filtered)} title="Export Excel">
+            <FileSpreadsheet className="w-4 h-4" /> Excel
+          </Button>
           {canCreate && (
-            <Button onClick={() => setShowForm(v => !v)}>
+            <Button variant="secondary" size="sm" onClick={() => setShowImportModal(true)}>
+              <Upload className="w-4 h-4" /> Import
+            </Button>
+          )}
+          {canCreate && (
+            <Button size="sm" onClick={() => setShowForm(v => !v)}>
               <Plus className="w-4 h-4" /> {showForm ? 'Cancel' : 'Log Work Activity'}
             </Button>
           )}
@@ -743,8 +784,28 @@ export default function WorkLedger() {
           ))}
         </div>
 
-        <div className="text-xs text-slate-500 mb-3 font-medium">
-          Showing <span className="text-teal-400 font-semibold">{filtered.length}</span> of {records.length} records
+        {/* Quick Filters */}
+        <div className="flex items-center gap-2 mb-3 flex-wrap">
+          <span className="text-[11px] text-slate-600 font-medium uppercase tracking-wide">Quick:</span>
+          <button
+            onClick={() => setShowMine(v => !v)}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-all ${showMine ? 'bg-teal-500/20 border-teal-500/40 text-teal-300' : 'bg-slate-800/40 border-slate-700/40 text-slate-500 hover:text-slate-300'}`}
+          >
+            <UserIcon className="w-3 h-3" /> My Records
+          </button>
+          <button
+            onClick={() => setShowOverdue(v => !v)}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-all ${showOverdue ? 'bg-rose-500/20 border-rose-500/40 text-rose-300' : 'bg-slate-800/40 border-slate-700/40 text-slate-500 hover:text-slate-300'}`}
+          >
+            <AlertCircle className="w-3 h-3" /> Overdue
+          </button>
+          {(showMine || showOverdue) && (
+            <button onClick={() => { setShowMine(false); setShowOverdue(false); }} className="text-[11px] text-slate-600 hover:text-slate-400 transition-colors">✕ Clear</button>
+          )}
+          <span className="ml-auto text-xs text-slate-500">
+            Showing <span className="text-teal-400 font-semibold">{filtered.length}</span> of {records.length} records
+            {totalPages > 1 && <> · Page <span className="text-teal-400 font-semibold tabular-nums">{page}/{totalPages}</span></>}
+          </span>
         </div>
 
         <div className="overflow-x-auto -mx-1">
@@ -764,7 +825,7 @@ export default function WorkLedger() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.03]">
-              {filtered.map(w => (
+              {paginated.map(w => (
                 <tr
                   key={w.id}
                   className={`cursor-pointer transition-colors group ${selectedId === w.id ? 'bg-teal-500/5 border-l-2 border-teal-500/30' : 'hover:bg-slate-800/30'}`}
@@ -774,6 +835,13 @@ export default function WorkLedger() {
                     <div className="flex items-center gap-1.5">
                       {w.isLocked ? <Lock className="w-3 h-3 text-slate-600" /> : <Unlock className="w-3 h-3 text-slate-700" />}
                       <span className="font-mono text-teal-400 text-xs">{w.id}</span>
+                      <button
+                        onClick={e => copyId(w.id, e)}
+                        title="Copy ID"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity ml-0.5 text-slate-600 hover:text-teal-400"
+                      >
+                        {copiedId === w.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                      </button>
                     </div>
                   </td>
                   <td className="py-3 max-w-[240px]">
@@ -828,7 +896,125 @@ export default function WorkLedger() {
             </div>
           )}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-4 border-t border-white/5 mt-2">
+            <span className="text-xs text-slate-500 tabular-nums">
+              {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, filtered.length)} of {filtered.length}
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="w-7 h-7 rounded-lg bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              {Array.from({ length: Math.min(7, totalPages) }, (_, i) => {
+                const p = totalPages <= 7 ? i + 1 : i + Math.max(1, Math.min(page - 3, totalPages - 6));
+                return (
+                  <button
+                    key={p}
+                    onClick={() => setPage(p)}
+                    className={`w-7 h-7 rounded-lg text-xs font-medium transition-colors ${p === page ? 'bg-teal-500/20 border border-teal-500/40 text-teal-300' : 'bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:text-white'}`}
+                  >
+                    {p}
+                  </button>
+                );
+              })}
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="w-7 h-7 rounded-lg bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+              >
+                <ChevronRightIcon className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </GlassCard>
+
+      {/* Import Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <GlassCard className="w-full max-w-2xl p-6 relative">
+            <button onClick={() => { setShowImportModal(false); setImportFile(null); setImportPreview([]); }} className="absolute top-4 right-4">
+              <X className="w-4 h-4 text-slate-500 hover:text-white" />
+            </button>
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-9 h-9 rounded-xl bg-teal-500/10 flex items-center justify-center"><Upload className="w-4 h-4 text-teal-400" /></div>
+              <div>
+                <h3 className="text-sm font-semibold text-white">Import Work Records</h3>
+                <p className="text-xs text-slate-500">Upload a CSV or Excel file with work records</p>
+              </div>
+            </div>
+            <input ref={importInputRef} type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={async e => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              setImportFile(file);
+              try {
+                const rows = await ExportImportService.parseCSVFile(file);
+                setImportPreview(rows.slice(0, 5));
+              } catch { toast.error('Could not parse file'); }
+            }} />
+            {!importFile ? (
+              <div
+                onClick={() => importInputRef.current?.click()}
+                className="border-2 border-dashed border-slate-700 rounded-xl p-10 text-center cursor-pointer hover:border-teal-500/40 transition-colors"
+              >
+                <Upload className="w-8 h-8 mx-auto mb-3 text-slate-600" />
+                <p className="text-sm text-slate-400 mb-1">Click to upload CSV or Excel file</p>
+                <p className="text-xs text-slate-600">Supported: .csv, .xlsx, .xls</p>
+              </div>
+            ) : (
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm text-slate-300">{importFile.name}</span>
+                  <button onClick={() => { setImportFile(null); setImportPreview([]); }} className="text-xs text-slate-500 hover:text-rose-400">Remove</button>
+                </div>
+                {importPreview.length > 0 && (
+                  <div className="overflow-x-auto mb-4">
+                    <p className="text-xs text-slate-500 mb-2">Preview (first {importPreview.length} rows):</p>
+                    <table className="w-full text-xs text-left">
+                      <thead><tr>{Object.keys(importPreview[0]).slice(0, 6).map(h => <th key={h} className="py-1 pr-4 text-slate-500 font-medium uppercase text-[10px]">{h}</th>)}</tr></thead>
+                      <tbody>{importPreview.map((row, i) => <tr key={i} className="border-t border-white/5">{Object.values(row).slice(0, 6).map((v, j) => <td key={j} className="py-1.5 pr-4 text-slate-400 truncate max-w-[120px]">{String(v)}</td>)}</tr>)}</tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+            <div className="flex items-center gap-3 mt-5">
+              <Button
+                size="sm"
+                disabled={!importFile || importing}
+                onClick={async () => {
+                  if (!importFile) return;
+                  setImporting(true);
+                  try {
+                    const rows = await ExportImportService.parseCSVFile(importFile);
+                    let count = 0;
+                    for (const row of rows) {
+                      const data = ExportImportService.mapRowToWorkRecord(row, user?.id ?? '', user?.name ?? '');
+                      if (data.description) { await add(data as Omit<WorkRecord, 'id' | 'createdAt'>); count++; }
+                    }
+                    toast.success(`Imported ${count} work records`);
+                    setShowImportModal(false);
+                    setImportFile(null);
+                    setImportPreview([]);
+                  } catch { toast.error('Import failed'); } finally { setImporting(false); }
+                }}
+              >
+                {importing ? 'Importing...' : `Import${importPreview.length ? ` (~${importPreview.length}+ rows)` : ''}`}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => { ExportImportService.downloadBlob(ExportImportService.getImportTemplate(), 'work-records-template.xlsx'); }}>
+                <Download className="w-3.5 h-3.5" /> Download Template
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => { setShowImportModal(false); setImportFile(null); setImportPreview([]); }}>Cancel</Button>
+            </div>
+          </GlassCard>
+        </div>
+      )}
 
       {/* Record Detail */}
       {selectedRecord && (

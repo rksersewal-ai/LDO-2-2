@@ -1,0 +1,48 @@
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { PreferencesService } from '../services/PreferencesService';
+
+type Theme = 'dark' | 'light';
+
+interface ThemeContextType {
+  theme: Theme;
+  toggleTheme: () => void;
+  setTheme: (t: Theme) => void;
+}
+
+const ThemeContext = createContext<ThemeContextType>({
+  theme: 'dark',
+  toggleTheme: () => {},
+  setTheme: () => {},
+});
+
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [theme, setThemeState] = useState<Theme>(() => {
+    const prefs = PreferencesService.get();
+    return prefs.theme === 'light' ? 'light' : 'dark';
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'light') {
+      root.classList.add('light-theme');
+      root.classList.remove('dark-theme');
+    } else {
+      root.classList.remove('light-theme');
+      root.classList.add('dark-theme');
+    }
+    PreferencesService.set({ theme });
+  }, [theme]);
+
+  const setTheme = (t: Theme) => setThemeState(t);
+  const toggleTheme = () => setThemeState(prev => prev === 'dark' ? 'light' : 'dark');
+
+  return (
+    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+export function useTheme() {
+  return useContext(ThemeContext);
+}
