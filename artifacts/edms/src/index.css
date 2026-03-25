@@ -218,4 +218,13 @@
   .form-control {
     @apply h-10 px-3 py-2.5 text-sm;
   }
+
+  /* Hide scrollbars while keeping functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }

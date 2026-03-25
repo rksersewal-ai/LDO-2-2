@@ -3,11 +3,12 @@ import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { RightPanel } from './RightPanel';
 import { PageContainer } from './PageContainer';
-import { Loader2, FileText, X } from 'lucide-react';
+import { Loader2, FileText, X, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import { useDocTabs } from '../../contexts/DocTabsContext';
 import { useRightPanel } from '../../contexts/RightPanelContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRef, useState, useEffect } from 'react';
 
 export default function AppLayout() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -15,6 +16,31 @@ export default function AppLayout() {
   const navigate = useNavigate();
   const { tabs, closeTab } = useDocTabs();
   const { content: rightPanelContent, closePanel } = useRightPanel();
+  const tabsContainerRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkScroll = () => {
+    if (tabsContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = tabsContainerRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  useEffect(() => {
+    checkScroll();
+    window.addEventListener('resize', checkScroll);
+    return () => window.removeEventListener('resize', checkScroll);
+  }, [tabs.length]);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (tabsContainerRef.current) {
+      const amount = 200;
+      tabsContainerRef.current.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
+      setTimeout(checkScroll, 300);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -56,27 +82,54 @@ export default function AppLayout() {
 
           {/* Multi-document tab strip — only shown when 2+ docs are open */}
           {tabs.length > 1 && (
-            <div className="flex items-center gap-1 px-3 py-1 bg-slate-900/60 border-b border-white/5 overflow-x-auto shrink-0">
-              {tabs.map(tab => (
-                <div
-                  key={tab.id}
-                  onClick={() => navigate(`/documents/${tab.id}`)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-t-xl cursor-pointer text-xs font-medium whitespace-nowrap transition-all group border-b-2 ${
-                    activeDocId === tab.id
-                      ? 'bg-slate-800/70 text-teal-300 border-teal-500'
-                      : 'bg-slate-900/40 text-slate-500 hover:text-slate-300 border-transparent hover:bg-slate-800/40'
-                  }`}
+            <div className="flex items-center bg-slate-900/60 border-b border-white/5 shrink-0">
+              {/* Left scroll button */}
+              {canScrollLeft && (
+                <button
+                  onClick={() => scroll('left')}
+                  className="p-1.5 text-slate-500 hover:text-slate-300 hover:bg-slate-800/50 transition-colors shrink-0"
                 >
-                  <FileText className="w-3.5 h-3.5 shrink-0" />
-                  <span className="max-w-[180px] truncate">{tab.name}</span>
-                  <button
-                    onClick={(e) => handleCloseTab(tab.id, e)}
-                    className="ml-1 opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-rose-500/20 hover:text-rose-400 transition-all text-slate-600"
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+              )}
+
+              {/* Tabs container */}
+              <div
+                ref={tabsContainerRef}
+                onScroll={checkScroll}
+                className="flex items-center gap-1 px-3 py-1 overflow-x-auto scrollbar-hide flex-1"
+              >
+                {tabs.map(tab => (
+                  <div
+                    key={tab.id}
+                    onClick={() => navigate(`/documents/${tab.id}`)}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-t-xl cursor-pointer text-xs font-medium whitespace-nowrap transition-all group border-b-2 ${
+                      activeDocId === tab.id
+                        ? 'bg-slate-800/70 text-teal-300 border-teal-500'
+                        : 'bg-slate-900/40 text-slate-500 hover:text-slate-300 border-transparent hover:bg-slate-800/40'
+                    }`}
                   >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              ))}
+                    <FileText className="w-3.5 h-3.5 shrink-0" />
+                    <span className="max-w-[180px] truncate">{tab.name}</span>
+                    <button
+                      onClick={(e) => handleCloseTab(tab.id, e)}
+                      className="ml-1 opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-rose-500/20 hover:text-rose-400 transition-all text-slate-600"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Right scroll button */}
+              {canScrollRight && (
+                <button
+                  onClick={() => scroll('right')}
+                  className="p-1.5 text-slate-500 hover:text-slate-300 hover:bg-slate-800/50 transition-colors shrink-0"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              )}
             </div>
           )}
 

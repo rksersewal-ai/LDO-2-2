@@ -6,7 +6,7 @@ import {
   Briefcase, CheckSquare, BarChart3, ShieldAlert,
   Settings, ServerCog, DatabaseBackup,
   Megaphone, ClipboardList, FileBarChart, BookOpen, Telescope,
-  Bell, FileCheck2, MonitorCheck,
+  Bell, FileCheck2, MonitorCheck, ChevronRight,
 } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import type { UserRole } from '../../lib/auth';
@@ -85,9 +85,16 @@ export function Sidebar() {
       initial={false}
       animate={{ width: isExpanded ? 260 : 72 }}
       transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
-      className="h-[calc(100vh-2rem)] ml-4 my-4 flex flex-col bg-slate-900/60 backdrop-blur-2xl border border-teal-500/20 shadow-2xl shadow-teal-950/50 rounded-2xl overflow-hidden z-40 shrink-0"
+      className="relative h-[calc(100vh-2rem)] ml-4 my-4 flex flex-col bg-slate-900/60 backdrop-blur-2xl border border-teal-500/20 shadow-2xl shadow-teal-950/50 rounded-2xl overflow-hidden z-40 shrink-0 group"
     >
-      <div className="flex items-center p-4 gap-3 cursor-pointer border-b border-white/5 min-h-[52px]" onClick={() => setIsExpanded(!isExpanded)}>
+      {/* Collapse indicator for collapsed state */}
+      {!isExpanded && (
+        <div className="absolute right-1.5 top-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1.5 rounded-lg text-teal-400 bg-teal-500/10">
+          <ChevronRight className="w-4 h-4" />
+        </div>
+      )}
+      
+      <div className="flex items-center p-4 gap-3 cursor-pointer border-b border-white/5 min-h-[52px] hover:bg-slate-800/30 transition-colors" onClick={() => setIsExpanded(!isExpanded)}>
         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-400 to-emerald-600 flex items-center justify-center shrink-0 shadow-lg shadow-teal-500/20">
           <span className="text-white font-bold text-sm">L2</span>
         </div>

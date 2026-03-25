@@ -117,25 +117,80 @@ export function StatCard({ label, value, sub, accent = false }: { label: string;
   );
 }
 
+/**
+ * PageHeader component for consistent page title and actions layout
+ * 
+ * @example
+ * <PageHeader
+ *   title="Documents"
+ *   subtitle="Manage uploaded files and versions"
+ *   primaryAction={{ label: 'Upload', onClick: ... }}
+ *   secondaryActions={[
+ *     { label: 'Export', icon: Download },
+ *     { label: 'Settings', icon: Settings }
+ *   ]}
+ * />
+ */
+export interface PageHeaderAction {
+  label: string;
+  icon?: React.ReactNode;
+  onClick?: () => void;
+  variant?: 'primary' | 'secondary' | 'ghost';
+}
+
 export function PageHeader({
   title,
   subtitle,
-  actions,
+  primaryAction,
+  secondaryActions,
   breadcrumb,
 }: {
   title: string;
   subtitle?: string;
-  actions?: React.ReactNode;
+  primaryAction?: PageHeaderAction;
+  secondaryActions?: PageHeaderAction[];
   breadcrumb?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 pb-2">
-      <div>
-        {breadcrumb && <div className="mb-1">{breadcrumb}</div>}
-        <h1 className="text-2xl font-bold text-white tracking-tight">{title}</h1>
-        {subtitle && <p className="text-slate-400 text-sm mt-0.5">{subtitle}</p>}
+    <div className="flex flex-col gap-4 mb-6">
+      {breadcrumb && <div className="text-sm text-slate-400">{breadcrumb}</div>}
+      
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-white tracking-tight mb-1">{title}</h1>
+          {subtitle && <p className="text-slate-400 text-sm">{subtitle}</p>}
+        </div>
+
+        {/* Actions */}
+        {(primaryAction || secondaryActions) && (
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {secondaryActions?.map((action, i) => (
+              <Button
+                key={i}
+                variant={action.variant || 'secondary'}
+                size="md"
+                onClick={action.onClick}
+                className="flex items-center gap-2"
+              >
+                {action.icon && <span className="w-4 h-4">{action.icon}</span>}
+                {action.label}
+              </Button>
+            ))}
+            
+            {primaryAction && (
+              <Button
+                variant={primaryAction.variant || 'primary'}
+                size="md"
+                onClick={primaryAction.onClick}
+                className="flex items-center gap-2"
+              >
+                {primaryAction.icon && <span className="w-4 h-4">{primaryAction.icon}</span>}
+                {primaryAction.label}
+              </Button>
+            )}
+          </div>
+        )}
       </div>
-      {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
     </div>
   );
 }
