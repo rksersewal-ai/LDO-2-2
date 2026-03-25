@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Search, Bell, User, Type, LogOut, Minus, Plus, RotateCcw, Sun, Moon } from 'lucide-react';
+import { Search, Bell, User, Type, LogOut, Minus, Plus, RotateCcw, Sun, Moon, AlertCircle, X } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router';
 import { useAuth } from '../../lib/auth';
 import { NotificationPanel } from './NotificationPanel';
@@ -17,11 +17,19 @@ export function Header() {
   const [showProfile, setShowProfile] = useState(false);
   const [fontSize, setFontSize] = useState(14);
   const [commandOpen, setCommandOpen] = useState(false);
+  const [showBanner, setShowBanner] = useState(true);
   const headerInputRef = useRef<HTMLInputElement>(null);
 
   const paths = location.pathname.split('/').filter(Boolean);
   const breadcrumbs = ['Home', ...paths.map(p => p.charAt(0).toUpperCase() + p.slice(1))];
   const unreadCount = MOCK_NOTIFICATIONS.filter(n => !n.read).length;
+
+  // Breadcrumb navigation helper
+  const getBreadcrumbPath = (index: number): string => {
+    if (index === 0) return '/';
+    const pathSegments = paths.slice(0, index);
+    return '/' + pathSegments.join('/');
+  };
 
   const adjustFontSize = (delta: number) => {
     const next = Math.max(12, Math.min(18, fontSize + delta));
@@ -46,13 +54,37 @@ export function Header() {
   return (
     <>
       <CommandPalette open={commandOpen} onClose={() => setCommandOpen(false)} />
+      
+      {/* Dismissible Announcement Banner */}
+      {showBanner && (
+        <div className="bg-gradient-to-r from-teal-900 to-emerald-900 border-b border-teal-500/30 text-teal-100 text-xs px-4 py-2.5 flex items-center justify-between gap-3 z-20 relative shrink-0">
+          <div className="flex items-center gap-2 flex-1">
+            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+            <span className="font-semibold">System Maintenance:</span>
+            <span>OCR Engine Restart scheduled for 03:00 AM UTC. Expect minor delays in processing.</span>
+          </div>
+          <button onClick={() => setShowBanner(false)} className="shrink-0 p-1 hover:bg-teal-800/40 rounded-lg transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+      
       <header className="h-14 px-6 flex items-center justify-between z-30 relative border-b border-white/[0.04] shrink-0">
         <div className="flex items-center gap-3">
           <div className="flex items-center text-xs text-slate-500 font-medium">
             {breadcrumbs.map((crumb, i) => (
               <div key={i} className="flex items-center">
                 {i > 0 && <span className="mx-1.5 text-slate-700">/</span>}
-                <span className={i === breadcrumbs.length - 1 ? 'text-slate-300 font-semibold' : 'hover:text-slate-300 transition-colors cursor-default'}>{crumb}</span>
+                {i === breadcrumbs.length - 1 ? (
+                  <span className="text-slate-300 font-semibold">{crumb}</span>
+                ) : (
+                  <button
+                    onClick={() => navigate(getBreadcrumbPath(i))}
+                    className="hover:text-slate-200 transition-colors cursor-pointer"
+                  >
+                    {crumb}
+                  </button>
+                )}
               </div>
             ))}
           </div>
