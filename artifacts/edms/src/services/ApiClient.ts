@@ -46,7 +46,7 @@ class ApiClient {
   };
 
   constructor() {
-    this.baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+    this.baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8765/api';
     
     this.client = axios.create({
       baseURL: this.baseURL,
