@@ -4,11 +4,14 @@ import {
   Search, FileText, Database, Briefcase, AlertTriangle,
   ArrowRight, Layers, Hash, Clock, Sparkles, Command,
   ScanText, CheckCircle, AlertCircle, ChevronRight,
+  Bookmark, BookmarkCheck, Trash2,
 } from 'lucide-react';
 import { GlassCard } from '../components/ui/Shared';
 import { SearchService } from '../services/SearchService';
 import type { CrossEntityResults, SearchResult } from '../services/SearchService';
 import { LoadingState } from '../components/ui/LoadingState';
+
+const SAVED_KEY = 'edms_saved_searches';
 
 const RECENT_KEY = 'edms_recent_searches';
 const SCOPE_OPTIONS = ['ALL', 'DOCUMENTS', 'PL', 'WORK', 'CASES'] as const;
@@ -196,6 +199,25 @@ export default function SearchExplorer() {
   const [recentSearches, setRecentSearches] = useState<string[]>(() => {
     try { return JSON.parse(localStorage.getItem(RECENT_KEY) ?? '[]'); } catch { return []; }
   });
+  const [savedSearches, setSavedSearches] = useState<{ q: string; scope: Scope; label: string }[]>(() => {
+    try { return JSON.parse(localStorage.getItem(SAVED_KEY) ?? '[]'); } catch { return []; }
+  });
+
+  const isSaved = savedSearches.some(s => s.q === debouncedQuery && s.scope === scope);
+
+  const saveSearch = () => {
+    if (!debouncedQuery.trim() || isSaved) return;
+    const entry = { q: debouncedQuery, scope, label: `${debouncedQuery}${scope !== 'ALL' ? ` (${SCOPE_LABELS[scope]})` : ''}` };
+    const updated = [entry, ...savedSearches].slice(0, 12);
+    setSavedSearches(updated);
+    localStorage.setItem(SAVED_KEY, JSON.stringify(updated));
+  };
+
+  const deleteSaved = (idx: number) => {
+    const updated = savedSearches.filter((_, i) => i !== idx);
+    setSavedSearches(updated);
+    localStorage.setItem(SAVED_KEY, JSON.stringify(updated));
+  };
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -328,6 +350,19 @@ export default function SearchExplorer() {
               Found <span className="text-teal-300 font-semibold">{results.total}</span> results for{' '}
               <span className="text-white font-semibold">"{debouncedQuery}"</span>
             </span>
+            <button
+              onClick={saveSearch}
+              disabled={isSaved}
+              title={isSaved ? 'Already saved' : 'Save this search'}
+              className={`ml-auto flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${
+                isSaved
+                  ? 'bg-teal-500/10 border-teal-500/30 text-teal-400 cursor-default'
+                  : 'bg-slate-800/60 border-slate-700/50 text-slate-400 hover:text-teal-300 hover:border-teal-500/30'
+              }`}
+            >
+              {isSaved ? <BookmarkCheck className="w-3.5 h-3.5" /> : <Bookmark className="w-3.5 h-3.5" />}
+              {isSaved ? 'Saved' : 'Save Search'}
+            </button>
           </div>
 
           {/* Document Results */}
@@ -416,6 +451,40 @@ export default function SearchExplorer() {
               </div>
             ) : (
               <p className="text-slate-600 text-sm">No recent searches yet.</p>
+            )}
+          </GlassCard>
+
+          {/* Saved Searches */}
+          <GlassCard className="p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <Bookmark className="w-4 h-4 text-teal-400" />
+              <h3 className="text-sm font-semibold text-slate-300">Saved Searches</h3>
+            </div>
+            {savedSearches.length > 0 ? (
+              <div className="space-y-1">
+                {savedSearches.map((s, i) => (
+                  <div key={i} className="flex items-center gap-2 group px-3 py-2 rounded-lg hover:bg-slate-700/40 transition-colors">
+                    <button
+                      onClick={() => { setQuery(s.q); setScope(s.scope); }}
+                      className="flex-1 flex items-center gap-2 text-left"
+                    >
+                      <BookmarkCheck className="w-3.5 h-3.5 text-teal-500/60 group-hover:text-teal-400 transition-colors flex-shrink-0" />
+                      <span className="text-sm text-slate-400 group-hover:text-slate-200 transition-colors truncate">{s.label}</span>
+                    </button>
+                    <button
+                      onClick={() => deleteSaved(i)}
+                      className="w-5 h-5 flex items-center justify-center rounded text-slate-700 hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-all"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-slate-600 text-sm">No saved searches yet.</p>
+                <p className="text-xs text-slate-700">Run a search and click <span className="text-teal-500/70">Save Search</span> to bookmark it here.</p>
+              </div>
             )}
           </GlassCard>
 

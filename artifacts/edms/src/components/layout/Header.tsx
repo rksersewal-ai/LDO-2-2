@@ -51,11 +51,15 @@ export function Header() {
           </div>
           <input
             type="text"
-            className="block w-72 md:w-80 pl-10 pr-12 py-2 border border-teal-500/20 rounded-xl leading-5 bg-slate-900/50 backdrop-blur-md text-slate-300 placeholder-slate-500 focus:outline-none focus:bg-slate-900 focus:border-teal-400/50 focus:ring-1 focus:ring-teal-400/50 text-sm transition-all cursor-pointer"
+            className="block w-72 md:w-80 pl-10 pr-12 py-2 border border-teal-500/20 rounded-xl leading-5 bg-slate-900/50 backdrop-blur-md text-slate-300 placeholder-slate-500 focus:outline-none focus:bg-slate-900 focus:border-teal-400/50 focus:ring-1 focus:ring-teal-400/50 text-sm transition-all"
             placeholder="Search documents, PLs, OCR text..."
-            readOnly
             onClick={() => navigate('/search')}
-            onFocus={() => navigate('/search')}
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                const val = (e.target as HTMLInputElement).value.trim();
+                navigate(val ? `/search?q=${encodeURIComponent(val)}` : '/search');
+              }
+            }}
           />
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
             <span className="text-slate-500 text-xs border border-slate-700 rounded px-1.5 py-0.5 font-semibold">⌘K</span>

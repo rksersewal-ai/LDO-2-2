@@ -1,4 +1,5 @@
 import type { SearchResult } from '../lib/types';
+export type { SearchResult };
 import { DocumentService } from './DocumentService';
 import { PLService } from './PLService';
 import { WorkLedgerService } from './WorkLedgerService';
