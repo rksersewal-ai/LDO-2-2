@@ -25,6 +25,7 @@ interface DatePickerProps {
   minDate?: string;
   maxDate?: string;
   disabled?: boolean;
+  required?: boolean;
 }
 
 export function DatePicker({
@@ -36,6 +37,7 @@ export function DatePicker({
   minDate,
   maxDate,
   disabled = false,
+  required = false,
 }: DatePickerProps) {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<'day' | 'month' | 'year'>('day');
@@ -101,7 +103,12 @@ export function DatePicker({
 
   return (
     <div className={`relative ${className}`} ref={containerRef}>
-      {label && <label className="text-xs font-medium text-slate-400 mb-1.5 block">{label}</label>}
+      {label && (
+        <label className="text-xs font-medium text-slate-400 mb-1.5 block">
+          {label}
+          {required && <span className="ml-1 text-rose-400">*</span>}
+        </label>
+      )}
       <button
         type="button"
         disabled={disabled}

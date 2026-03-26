@@ -4,20 +4,19 @@ import { GlassCard, Badge, Button, Input, Select } from '../components/ui/Shared
 import { DatePicker } from '../components/ui/DatePicker';
 import { LoadingState } from '../components/ui/LoadingState';
 import { ErrorState } from '../components/ui/ErrorState';
-import { SafeSection } from '../components/ui/SafeSection';
-import { useAbortOnNavigate } from '../hooks/useAbortOnNavigate';
 import { useWorkRecords } from '../hooks/useWorkRecords';
+import { usePLItems } from '../hooks/usePLItems';
 import { useAuth } from '../lib/auth';
 import { WorkLedgerService, getTargetDays, checkDuplicates, getKPIStatus } from '../services/WorkLedgerService';
 import { ExportImportService } from '../services/ExportImportService';
 import { WORK_TYPE_DEFINITIONS, SECTION_TYPES, CONCERNED_OFFICERS } from '../lib/constants';
-import type { WorkRecord, WorkCategory } from '../lib/types';
+import type { PLNumber, WorkRecord, WorkCategory } from '../lib/types';
 import {
   Plus, FileSearch, Briefcase, ChevronRight, X,
-  FileText, Link as LinkIcon, AlertTriangle, CheckCircle,
+  FileText, AlertTriangle, CheckCircle,
   Clock, Lock, Shield, BarChart3, Layers,
-  Unlock, Calendar, Hash, ZapOff, TrendingUp,
-  AlertCircle, ChevronDown, Truck, CheckSquare,
+  Unlock, Hash, ZapOff, TrendingUp,
+  AlertCircle, ChevronDown, CheckSquare, Search, ExternalLink,
   Download, Upload, Copy, Check, FileSpreadsheet,
   ChevronLeft, ChevronRight as ChevronRightIcon, User as UserIcon,
 } from 'lucide-react';
@@ -32,7 +31,7 @@ const STATUS_VARIANT: Record<WorkRecord['status'], 'success' | 'warning' | 'dang
 
 const STATUS_LABEL: Record<WorkRecord['status'], string> = {
   OPEN: 'Open',
-  SUBMITTED: 'In Progress',
+  SUBMITTED: 'Pending Verification',
   VERIFIED: 'Verified',
   CLOSED: 'Closed',
 };
@@ -123,18 +122,12 @@ interface CreateFormData {
   description: string;
   remarks: string;
   plNumber: string;
-  referenceNumber: string;
-  drawingNumber: string;
-  specificationNumber: string;
   tenderNumber: string;
-  otherNumber: string;
   eOfficeNumber: string;
-  eOfficeFileNo: string;
   sectionType: string;
   concernedOfficer: string;
   consentGiven: string;
   date: string;
-  dispatchDate: string;
   closingDate: string;
 }
 
@@ -144,18 +137,12 @@ const EMPTY_FORM: CreateFormData = {
   description: '',
   remarks: '',
   plNumber: '',
-  referenceNumber: '',
-  drawingNumber: '',
-  specificationNumber: '',
   tenderNumber: '',
-  otherNumber: '',
   eOfficeNumber: '',
-  eOfficeFileNo: '',
   sectionType: 'General',
   concernedOfficer: '',
   consentGiven: 'N/A',
   date: new Date().toISOString().split('T')[0],
-  dispatchDate: '',
   closingDate: '',
 };
 
@@ -167,14 +154,205 @@ function calcDaysBetween(start: string, end: string): number | undefined {
   return Math.round((e - s) / (1000 * 60 * 60 * 24));
 }
 
+function PlLookupField({
+  plItems,
+  loading,
+  value,
+  onSelect,
+}: {
+  plItems: PLNumber[];
+  loading: boolean;
+  value: string;
+  onSelect: (plNumber: string) => void;
+}) {
+  const navigate = useNavigate();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [query, setQuery] = useState(value);
+  const [open, setOpen] = useState(false);
+
+  const selectedPl = useMemo(
+    () => plItems.find(pl => pl.plNumber === value) ?? null,
+    [plItems, value]
+  );
+
+  useEffect(() => {
+    if (!value) {
+      setQuery('');
+      return;
+    }
+
+    if (selectedPl && query !== selectedPl.plNumber) {
+      setQuery(selectedPl.plNumber);
+    }
+  }, [query, selectedPl, value]);
+
+  useEffect(() => {
+    const handlePointerDown = (event: MouseEvent) => {
+      if (containerRef.current?.contains(event.target as Node)) {
+        return;
+      }
+      setOpen(false);
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => document.removeEventListener('mousedown', handlePointerDown);
+  }, []);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const sorted = [...plItems].sort((a, b) => a.plNumber.localeCompare(b.plNumber));
+
+    const matches = !q
+      ? sorted
+      : sorted.filter(pl =>
+          pl.plNumber.toLowerCase().includes(q) ||
+          pl.name.toLowerCase().includes(q) ||
+          pl.description.toLowerCase().includes(q) ||
+          pl.category.toLowerCase().includes(q) ||
+          pl.controllingAgency.toLowerCase().includes(q)
+        );
+
+    return matches.slice(0, 10);
+  }, [plItems, query]);
+
+  const handleChange = (next: string) => {
+    setQuery(next);
+    setOpen(true);
+
+    const exact = plItems.find(pl =>
+      pl.plNumber.toLowerCase() === next.trim().toLowerCase()
+    );
+
+    onSelect(exact?.plNumber ?? '');
+  };
+
+  const handleSelect = (pl: PLNumber) => {
+    onSelect(pl.plNumber);
+    setQuery(pl.plNumber);
+    setOpen(false);
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <label className="text-xs font-medium text-slate-400">Linked PL Number</label>
+        {selectedPl && (
+          <button
+            type="button"
+            onClick={() => navigate(`/pl/${selectedPl.plNumber}`)}
+            className="inline-flex items-center gap-1 text-[11px] font-medium text-cyan-300 hover:text-cyan-200 transition-colors"
+          >
+            View PL Details
+            <ExternalLink className="w-3 h-3" />
+          </button>
+        )}
+      </div>
+
+      <div ref={containerRef} className="relative" data-no-context-palette="true">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-cyan-200/55" />
+        <Input
+          value={query}
+          onChange={event => handleChange(event.target.value)}
+          onFocus={() => setOpen(true)}
+          placeholder="Search PL number or component name..."
+          className="w-full pl-10 pr-10 font-mono"
+        />
+        {query && (
+          <button
+            type="button"
+            onClick={() => {
+              setQuery('');
+              onSelect('');
+              setOpen(false);
+            }}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-200 transition-colors"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
+
+        {open && (
+          <div className="absolute inset-x-0 top-full z-40 mt-2 overflow-hidden rounded-2xl border border-cyan-400/15 bg-slate-950/96 shadow-2xl backdrop-blur-xl">
+            {loading ? (
+              <div className="px-4 py-3 text-xs text-slate-500">Loading PL records...</div>
+            ) : filtered.length === 0 ? (
+              <div className="px-4 py-3 text-xs text-slate-500">No PL records match this search.</div>
+            ) : (
+              filtered.map(pl => (
+                <button
+                  key={pl.id}
+                  type="button"
+                  onMouseDown={event => {
+                    event.preventDefault();
+                    handleSelect(pl);
+                  }}
+                  className={`flex w-full items-start gap-3 px-4 py-3 text-left transition-colors ${
+                    selectedPl?.id === pl.id ? 'bg-cyan-400/10' : 'hover:bg-cyan-400/6'
+                  }`}
+                >
+                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-cyan-400/15 bg-cyan-400/6 text-cyan-300">
+                    <Hash className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs text-cyan-300">{pl.plNumber}</span>
+                      <Badge size="sm" variant={pl.status === 'ACTIVE' ? 'success' : pl.status === 'UNDER_REVIEW' ? 'warning' : 'danger'}>
+                        {pl.status}
+                      </Badge>
+                    </div>
+                    <p className="truncate text-sm text-slate-200">{pl.name}</p>
+                    <p className="truncate text-[11px] text-slate-500">
+                      {pl.category} · {pl.controllingAgency} · {pl.description}
+                    </p>
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        )}
+      </div>
+
+      {selectedPl && (
+        <div className="rounded-2xl border border-cyan-400/14 bg-cyan-400/[0.04] px-4 py-3">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-sm text-cyan-300">{selectedPl.plNumber}</span>
+                <Badge size="sm" variant={selectedPl.status === 'ACTIVE' ? 'success' : selectedPl.status === 'UNDER_REVIEW' ? 'warning' : 'danger'}>
+                  {selectedPl.status}
+                </Badge>
+              </div>
+              <p className="mt-1 text-sm font-medium text-slate-100">{selectedPl.name}</p>
+            </div>
+            <div className="grid gap-1 text-right text-[11px] text-slate-400 sm:text-left">
+              <span>Category: <span className="text-slate-200">{selectedPl.category}</span></span>
+              <span>Agency: <span className="text-slate-200">{selectedPl.controllingAgency}</span></span>
+              {selectedPl.vendorType && (
+                <span>Vendor Type: <span className="text-slate-200">{selectedPl.vendorType}</span></span>
+              )}
+            </div>
+          </div>
+          {selectedPl.description && (
+            <p className="mt-3 text-xs leading-5 text-slate-400">{selectedPl.description}</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function CreateWorkModal({
   onClose,
   onSave,
   existing,
+  plItems,
+  plItemsLoading,
 }: {
   onClose: () => void;
   onSave: (data: Omit<WorkRecord, 'id' | 'createdAt'>) => Promise<WorkRecord>;
   existing: WorkRecord[];
+  plItems: PLNumber[];
+  plItemsLoading: boolean;
 }) {
   const [form, setForm] = useState<CreateFormData>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
@@ -200,6 +378,11 @@ function CreateWorkModal({
     if (!form.workType) errs.workType = 'Work Type is required';
     if (!form.description.trim()) errs.description = 'Description is required';
     if (!form.eOfficeNumber.trim()) errs.eOfficeNumber = 'e-Office Case No. is required';
+    if (!form.date) errs.date = 'Start date is required';
+    if (!form.closingDate) errs.closingDate = 'Closing date is required';
+    if (form.date && form.closingDate && form.closingDate < form.date) {
+      errs.closingDate = 'Closing date cannot be before the start date';
+    }
     return errs;
   };
 
@@ -207,32 +390,27 @@ function CreateWorkModal({
     const errs = validate();
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
     setSaving(true);
-    const autodays = calcDaysBetween(form.dispatchDate || form.date, form.closingDate);
+    const autodays = calcDaysBetween(form.date, form.closingDate);
     try {
       const saved = await onSave({
         userId: 'USR-001',
         userName: 'A. Kowalski',
         date: form.date,
+        completionDate: form.closingDate,
         workCategory: form.workCategory,
         workType: form.workType,
         description: form.description,
         remarks: form.remarks || undefined,
         plNumber: form.plNumber || undefined,
-        referenceNumber: form.referenceNumber || undefined,
-        drawingNumber: form.drawingNumber || undefined,
-        specificationNumber: form.specificationNumber || undefined,
         tenderNumber: form.tenderNumber || undefined,
-        otherNumber: form.otherNumber || undefined,
         eOfficeNumber: form.eOfficeNumber || undefined,
-        eOfficeFileNo: form.eOfficeFileNo || undefined,
         sectionType: form.sectionType,
         concernedOfficer: form.concernedOfficer || undefined,
         consentGiven: form.consentGiven,
         targetDays,
-        status: 'OPEN',
+        status: 'SUBMITTED',
         isLocked: false,
-        dispatchDate: form.dispatchDate || undefined,
-        closingDate: form.closingDate || undefined,
+        closingDate: form.closingDate,
         daysTaken: autodays,
       } as Omit<WorkRecord, 'id' | 'createdAt'>);
       toast.success('Work record logged', { description: `${saved.id} — ${form.workType}` });
@@ -276,13 +454,13 @@ function CreateWorkModal({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs font-medium text-slate-400 mb-1.5 block">Work Category *</label>
-              <Select value={form.workCategory} onChange={e => setForm(f => ({ ...f, workCategory: e.target.value as WorkCategory, workType: '' }))} className="w-full">
+              <Select value={form.workCategory} onChange={e => setForm(f => ({ ...f, workCategory: e.target.value as WorkCategory, workType: '' }))} className="w-full work-ledger-select">
                 {WORK_CATEGORIES.map(c => <option key={c} value={c}>{CATEGORY_LABEL[c]}</option>)}
               </Select>
             </div>
             <div>
               <label className="text-xs font-medium text-slate-400 mb-1.5 block">Work Type *</label>
-              <Select value={form.workType} onChange={e => setForm(f => ({ ...f, workType: e.target.value }))} className={`w-full ${errors.workType ? 'border-rose-500/50' : ''}`}>
+              <Select value={form.workType} onChange={e => setForm(f => ({ ...f, workType: e.target.value }))} className={`w-full work-ledger-select ${errors.workType ? 'border-rose-500/50' : ''}`}>
                 <option value="">— Select Type —</option>
                 {typesForCategory.map(t => <option key={t.code} value={t.label}>{t.label}</option>)}
               </Select>
@@ -316,36 +494,22 @@ function CreateWorkModal({
             {errors.description && <p className="text-[10px] text-rose-400 mt-1">{errors.description}</p>}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs font-medium text-slate-400 mb-1.5 block">Linked PL Number</label>
-              <Input value={form.plNumber} onChange={e => setForm(f => ({ ...f, plNumber: e.target.value }))} placeholder="e.g. 38110000" className="w-full font-mono" />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-slate-400 mb-1.5 block">Reference No.</label>
-              <Input value={form.referenceNumber} onChange={e => setForm(f => ({ ...f, referenceNumber: e.target.value }))} placeholder="e.g. REF-2026-001" className="w-full font-mono" />
-            </div>
-          </div>
+          <PlLookupField
+            plItems={plItems}
+            loading={plItemsLoading}
+            value={form.plNumber}
+            onSelect={plNumber => setForm(f => ({ ...f, plNumber }))}
+          />
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs font-medium text-slate-400 mb-1.5 block">Drawing Number</label>
-              <Input value={form.drawingNumber} onChange={e => setForm(f => ({ ...f, drawingNumber: e.target.value }))} placeholder="e.g. DWG-BOG-ASM-001" className="w-full font-mono text-xs" />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-slate-400 mb-1.5 block">Specification Number</label>
-              <Input value={form.specificationNumber} onChange={e => setForm(f => ({ ...f, specificationNumber: e.target.value }))} placeholder="e.g. SPEC-BRK-001" className="w-full font-mono text-xs" />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label className="text-xs font-medium text-slate-400 mb-1.5 block">Tender Number</label>
               <Input value={form.tenderNumber} onChange={e => setForm(f => ({ ...f, tenderNumber: e.target.value }))} placeholder="e.g. CLW/TENDER/2026/001" className="w-full font-mono text-xs" />
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-400 mb-1.5 block">Other Reference No.</label>
-              <Input value={form.otherNumber} onChange={e => setForm(f => ({ ...f, otherNumber: e.target.value }))} placeholder="e.g. EXT-REF-2026-001" className="w-full font-mono text-xs" />
+              <label className="text-xs font-medium text-slate-400 mb-1.5 block">e-Office Case No. <span className="text-rose-400">*</span></label>
+              <Input value={form.eOfficeNumber} onChange={e => setForm(f => ({ ...f, eOfficeNumber: e.target.value }))} placeholder="e.g. CLW/DESIGN/2026/0001" className={`w-full font-mono text-xs ${errors.eOfficeNumber ? 'border-rose-500/50' : ''}`} />
+              {errors.eOfficeNumber && <p className="text-[10px] text-rose-400 mt-1">{errors.eOfficeNumber}</p>}
             </div>
           </div>
 
@@ -362,42 +526,38 @@ function CreateWorkModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-medium text-slate-400 mb-1.5 block">e-Office Case No. <span className="text-rose-400">*</span></label>
-              <Input value={form.eOfficeNumber} onChange={e => setForm(f => ({ ...f, eOfficeNumber: e.target.value }))} placeholder="e.g. CLW/DESIGN/2026/0001" className={`w-full font-mono text-xs ${errors.eOfficeNumber ? 'border-rose-500/50' : ''}`} />
-              {errors.eOfficeNumber && <p className="text-[10px] text-rose-400 mt-1">{errors.eOfficeNumber}</p>}
-            </div>
-            <div>
-              <label className="text-xs font-medium text-slate-400 mb-1.5 block">e-Office File No.</label>
-              <Input value={form.eOfficeFileNo} onChange={e => setForm(f => ({ ...f, eOfficeFileNo: e.target.value }))} placeholder="e.g. CLW-DWG-2026-001" className="w-full font-mono text-xs" />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
               <label className="text-xs font-medium text-slate-400 mb-1.5 block">Section</label>
-              <Select value={form.sectionType} onChange={e => setForm(f => ({ ...f, sectionType: e.target.value }))} className="w-full">
+              <Select value={form.sectionType} onChange={e => setForm(f => ({ ...f, sectionType: e.target.value }))} className="w-full work-ledger-select">
                 {SECTION_TYPES.map(s => <option key={s} value={s}>{s}</option>)}
               </Select>
             </div>
             <div>
               <label className="text-xs font-medium text-slate-400 mb-1.5 block">Concerned Officer</label>
-              <Select value={form.concernedOfficer} onChange={e => setForm(f => ({ ...f, concernedOfficer: e.target.value }))} className="w-full">
+              <Select value={form.concernedOfficer} onChange={e => setForm(f => ({ ...f, concernedOfficer: e.target.value }))} className="w-full work-ledger-select">
                 <option value="">— Select —</option>
                 {CONCERNED_OFFICERS.map(o => <option key={o} value={o}>{o}</option>)}
               </Select>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className={`grid gap-3 ${consentApplicable ? 'grid-cols-3' : 'grid-cols-2'}`}>
             <DatePicker
               label="Date Received / Started"
               value={form.date}
               onChange={v => setForm(f => ({ ...f, date: v }))}
+              required
+            />
+            <DatePicker
+              label="Closing / Completion Date"
+              value={form.closingDate}
+              onChange={v => setForm(f => ({ ...f, closingDate: v }))}
+              minDate={form.date}
+              required
             />
             {consentApplicable && (
               <div>
                 <label className="text-xs font-medium text-slate-400 mb-1.5 block">Consent Given</label>
-                <Select value={form.consentGiven} onChange={e => setForm(f => ({ ...f, consentGiven: e.target.value }))} className="w-full">
+                <Select value={form.consentGiven} onChange={e => setForm(f => ({ ...f, consentGiven: e.target.value }))} className="w-full work-ledger-select">
                   <option value="N/A">N/A</option>
                   <option value="Y">Yes</option>
                   <option value="N">No</option>
@@ -406,41 +566,9 @@ function CreateWorkModal({
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <DatePicker
-              label="Date of Dispatch"
-              value={form.dispatchDate}
-              onChange={v => setForm(f => ({ ...f, dispatchDate: v }))}
-              placeholder="Optional"
-            />
-            <DatePicker
-              label="Closing / Completion Date"
-              value={form.closingDate}
-              onChange={v => setForm(f => ({ ...f, closingDate: v }))}
-              placeholder="Optional"
-              minDate={form.dispatchDate || form.date}
-            />
-          </div>
-
-          {(form.dispatchDate || form.closingDate) && (
-            <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-slate-800/40 border border-slate-700/40">
-              <Clock className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-              <div className="flex items-center gap-4 text-xs">
-                {form.dispatchDate && (
-                  <span className="text-slate-400"><span className="text-slate-600">Dispatched:</span> <span className="text-teal-300 font-mono">{form.dispatchDate}</span></span>
-                )}
-                {form.closingDate && (
-                  <span className="text-slate-400"><span className="text-slate-600">Closed:</span> <span className="text-teal-300 font-mono">{form.closingDate}</span></span>
-                )}
-                {(() => {
-                  const d = calcDaysBetween(form.dispatchDate || form.date, form.closingDate);
-                  return d !== undefined ? (
-                    <span className={`font-semibold ${d <= targetDays ? 'text-emerald-400' : 'text-rose-400'}`}>
-                      {d}d taken {d <= targetDays ? '✓' : `(+${d - targetDays}d over)`}
-                    </span>
-                  ) : null;
-                })()}
-              </div>
+          {(errors.date || errors.closingDate) && (
+            <div className="rounded-xl border border-rose-500/20 bg-rose-500/8 px-3 py-2 text-[11px] text-rose-300">
+              {errors.date || errors.closingDate}
             </div>
           )}
         </div>
@@ -482,11 +610,10 @@ function RecordDetail({ record, onVerify, onClose, canVerify }: { record: WorkRe
           { label: 'Type', value: record.workType },
           { label: 'Assignee', value: record.userName },
           { label: 'Section', value: record.userSection ?? record.sectionType ?? '—' },
-          { label: 'Date Received', value: record.date },
-          { label: 'Dispatch Date', value: record.dispatchDate ?? '—', icon: <Truck className="w-3 h-3 text-amber-400" /> },
+          { label: 'Date Started', value: record.date },
           { label: 'Closing Date', value: record.closingDate ?? record.completionDate ?? 'Pending', icon: <CheckSquare className="w-3 h-3 text-emerald-400" /> },
           { label: 'Target Days', value: record.targetDays ? `${record.targetDays}d` : '—' },
-          { label: 'Days Taken', value: record.daysTaken != null ? `${record.daysTaken}d` : record.dispatchDate && record.closingDate ? `${calcDaysBetween(record.dispatchDate, record.closingDate) ?? '—'}d` : '—' },
+          { label: 'Days Taken', value: record.daysTaken != null ? `${record.daysTaken}d` : record.closingDate ? `${calcDaysBetween(record.date, record.closingDate) ?? '—'}d` : '—' },
         ])().map(f => (
           <div key={f.label}>
             <p className="text-[10px] text-slate-500 mb-0.5 flex items-center gap-1">
@@ -510,14 +637,9 @@ function RecordDetail({ record, onVerify, onClose, canVerify }: { record: WorkRe
             <Hash className="w-3 h-3 text-teal-400" /> {record.eOfficeNumber}
           </span>
         )}
-        {record.referenceNumber && (
-          <span className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-800/50 border border-slate-700/40 rounded-lg text-xs text-slate-400">
-            <FileText className="w-3 h-3 text-blue-400" /> {record.referenceNumber}
-          </span>
-        )}
         {record.plNumber && (
           <button
-            onClick={() => navigate(`/pl/${record.plNumber!.replace('PL-', '')}`)}
+            onClick={() => navigate(`/pl/${record.plNumber}`)}
             className="flex items-center gap-1.5 px-2.5 py-1 bg-indigo-500/10 border border-indigo-500/30 rounded-lg text-xs text-indigo-300 hover:bg-indigo-500/15 transition-colors"
           >
             <Layers className="w-3 h-3" /> {record.plNumber}
@@ -556,8 +678,8 @@ function RecordDetail({ record, onVerify, onClose, canVerify }: { record: WorkRe
 }
 
 export default function WorkLedger() {
-  const navigate = useNavigate();
-  const { data: records, loading, error, refetch, add, verify, remove } = useWorkRecords();
+  const { data: records, loading, error, refetch, add, verify } = useWorkRecords();
+  const { data: plItems, loading: plItemsLoading } = usePLItems();
   const { user, hasPermission } = useAuth();
   const canCreate = hasPermission(['admin', 'supervisor', 'engineer']);
   const canVerify = hasPermission(['admin', 'supervisor']);
@@ -599,10 +721,8 @@ export default function WorkLedger() {
         (w.plNumber ?? '').toLowerCase().includes(q) ||
         (w.workType ?? '').toLowerCase().includes(q) ||
         (w.eOfficeNumber ?? '').toLowerCase().includes(q) ||
-        (w.drawingNumber ?? '').toLowerCase().includes(q) ||
-        (w.specificationNumber ?? '').toLowerCase().includes(q) ||
         (w.tenderNumber ?? '').toLowerCase().includes(q) ||
-        (w.referenceNumber ?? '').toLowerCase().includes(q);
+        (w.concernedOfficer ?? '').toLowerCase().includes(q);
       const matchStatus = statusFilter === 'ALL' || w.status === statusFilter;
       const matchCategory = categoryFilter === 'ALL' || w.workCategory === categoryFilter;
       const matchDateFrom = !dateFrom || w.date >= dateFrom;
@@ -691,6 +811,8 @@ export default function WorkLedger() {
           onClose={() => setShowForm(false)}
           onSave={handleCreate}
           existing={records}
+          plItems={plItems}
+          plItemsLoading={plItemsLoading}
         />
       )}
 
@@ -728,7 +850,7 @@ export default function WorkLedger() {
           <div className="relative flex-1 min-w-[220px]">
             <FileSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
             <Input
-              placeholder="Search ID, description, type, PL, eOffice, drawing, spec, tender..."
+              placeholder="Search ID, description, type, PL, eOffice, tender, officer..."
               className="pl-9 w-full"
               value={search}
               onChange={e => setSearch(e.target.value)}

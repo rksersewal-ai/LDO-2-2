@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useDrag, useDrop, DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -7,16 +7,21 @@ import {
   Box, Layers, Cpu, Shield, Search, ChevronRight, ChevronDown,
   GripVertical, X, ExternalLink, FileText, ArrowLeft,
   GitBranch, Eye, AlertCircle, Hash, ChevronUp,
-  Plus, Package, CheckCircle, Info,
+  Plus, CheckCircle, Info, MoveDiagonal, Sparkles,
 } from 'lucide-react';
-import { PRODUCTS, BOM_TREES, PL_DATABASE, searchTree, countNodes, cloneTree, findNode } from '../lib/bomData';
+import { PRODUCTS, BOM_TREES, PL_DATABASE, searchTree, countNodes, cloneTree, findNode, removeNode } from '../lib/bomData';
 import type { BOMNode } from '../lib/bomData';
 import { GlassCard, Badge, Button, Input, Select, PageHeader } from '../components/ui/Shared';
 import { DatePicker } from '../components/ui/DatePicker';
+import { BomDraftService } from '../services/BomDraftService';
 
 const BOM_ITEM_TYPE = 'BOM_NODE';
 
-interface DragItem { id: string; parentId: string | null; index: number; }
+type MovePlacement = 'before' | 'inside' | 'after' | 'root';
+
+interface DragItem {
+  id: string;
+}
 
 function NodeIcon({ type }: { type: string }) {
   if (type === 'assembly') return <Box className="w-4 h-4 text-blue-400 shrink-0" />;
@@ -33,68 +38,212 @@ function tagColor(tag: string) {
   return 'bg-slate-800/80 text-slate-400 border-slate-700/50';
 }
 
+function containsNode(nodes: BOMNode[], id: string): boolean {
+  return nodes.some((node) => node.id === id || containsNode(node.children, id));
+}
+
+function canMoveToTarget(tree: BOMNode[], dragId: string, targetId: string | null) {
+  if (!targetId) return true;
+  if (dragId === targetId) return false;
+  const dragged = findNode(tree, dragId);
+  if (!dragged) return false;
+  return !containsNode(dragged.children, targetId);
+}
+
+function moveNodeAcrossHierarchy(tree: BOMNode[], dragId: string, targetId: string | null, placement: MovePlacement) {
+  if (targetId && !canMoveToTarget(tree, dragId, targetId)) {
+    return tree;
+  }
+
+  const removal = removeNode(tree, dragId);
+  if (!removal.removed) {
+    return tree;
+  }
+
+  const nextTree = removal.tree;
+  const draggedNode = removal.removed;
+
+  if (placement === 'root' || !targetId) {
+    nextTree.push(draggedNode);
+    return nextTree;
+  }
+
+  if (placement === 'inside') {
+    const targetNode = findNode(nextTree, targetId);
+    if (!targetNode) return tree;
+    targetNode.children.push(draggedNode);
+    return nextTree;
+  }
+
+  const insertRelativeToTarget = (nodes: BOMNode[]): boolean => {
+    for (let index = 0; index < nodes.length; index += 1) {
+      if (nodes[index].id === targetId) {
+        const insertionIndex = placement === 'before' ? index : index + 1;
+        nodes.splice(insertionIndex, 0, draggedNode);
+        return true;
+      }
+
+      if (insertRelativeToTarget(nodes[index].children)) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  return insertRelativeToTarget(nextTree) ? nextTree : tree;
+}
+
+function reorderWithinParent(tree: BOMNode[], parentId: string | null, fromIndex: number, toIndex: number) {
+  if (fromIndex === toIndex) return tree;
+
+  const nextTree = cloneTree(tree);
+
+  if (parentId === null) {
+    const [item] = nextTree.splice(fromIndex, 1);
+    nextTree.splice(toIndex, 0, item);
+    return nextTree;
+  }
+
+  const parent = findNode(nextTree, parentId);
+  if (!parent) {
+    return tree;
+  }
+
+  const [item] = parent.children.splice(fromIndex, 1);
+  parent.children.splice(toIndex, 0, item);
+  return nextTree;
+}
+
+function resolvePlacement(pointerY: number, bounds: DOMRect): MovePlacement {
+  const relativeY = pointerY - bounds.top;
+  const threshold = bounds.height * 0.32;
+
+  if (relativeY < threshold) return 'before';
+  if (relativeY > bounds.height - threshold) return 'after';
+  return 'inside';
+}
+
+function placementLabel(placement: MovePlacement | null) {
+  if (placement === 'before') return 'Place above';
+  if (placement === 'inside') return 'Nest here';
+  if (placement === 'after') return 'Place below';
+  if (placement === 'root') return 'Promote to top level';
+  return '';
+}
+
 function DraggableBOMRow({
-  node, index, parentId, level, siblingCount, isExpanded, toggleExpand,
-  selectedId, onSelect, searchMatches, onMove, children,
+  node,
+  index,
+  parentId,
+  siblingCount,
+  isExpanded,
+  toggleExpand,
+  selectedId,
+  onSelect,
+  searchMatches,
+  onMoveNode,
+  onReorderWithinParent,
+  canAcceptDrop,
+  children,
 }: {
-  node: BOMNode; index: number; parentId: string | null; level: number; siblingCount: number;
-  isExpanded: boolean; toggleExpand: (id: string) => void;
-  selectedId: string | null; onSelect: (node: BOMNode) => void;
-  searchMatches: Set<string>; onMove: (parentId: string | null, from: number, to: number) => void;
+  node: BOMNode;
+  index: number;
+  parentId: string | null;
+  siblingCount: number;
+  isExpanded: boolean;
+  toggleExpand: (id: string) => void;
+  selectedId: string | null;
+  onSelect: (nodeId: string) => void;
+  searchMatches: Set<string>;
+  onMoveNode: (dragId: string, targetId: string | null, placement: MovePlacement) => void;
+  onReorderWithinParent: (parentId: string | null, from: number, to: number) => void;
+  canAcceptDrop: (dragId: string, targetId: string) => boolean;
   children?: React.ReactNode;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
+  const rowRef = useRef<HTMLDivElement>(null);
   const plRecord = PL_DATABASE[node.id];
   const isSelected = selectedId === node.id;
   const isMatch = searchMatches.size > 0 && searchMatches.has(node.id);
   const hasChildren = node.children.length > 0;
+  const [dropPlacement, setDropPlacement] = useState<MovePlacement | null>(null);
 
-  const [{ isDragging }, drag, preview] = useDrag<DragItem, void, { isDragging: boolean }>({
+  const [{ isDragging }, dragHandleRef] = useDrag<DragItem, void, { isDragging: boolean }>({
     type: BOM_ITEM_TYPE,
-    item: { id: node.id, parentId, index },
-    collect: monitor => ({ isDragging: monitor.isDragging() }),
+    item: { id: node.id },
+    collect: (monitor) => ({ isDragging: monitor.isDragging() }),
   });
 
-  const [{ isOver, canDrop }, drop] = useDrop<DragItem, void, { isOver: boolean; canDrop: boolean }>({
+  const [{ isOver, canDrop }, dropRef] = useDrop<DragItem, void, { isOver: boolean; canDrop: boolean }>({
     accept: BOM_ITEM_TYPE,
-    canDrop: item => item.parentId === parentId && item.id !== node.id,
+    canDrop: (item) => canAcceptDrop(item.id, node.id),
     hover: (item, monitor) => {
-      if (!ref.current || item.parentId !== parentId || item.index === index) return;
-      const hoverBoundingRect = ref.current.getBoundingClientRect();
-      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+      if (!rowRef.current || !canAcceptDrop(item.id, node.id)) {
+        setDropPlacement(null);
+        return;
+      }
+
       const clientOffset = monitor.getClientOffset();
       if (!clientOffset) return;
-      const hoverClientY = clientOffset.y - hoverBoundingRect.top;
-      if (item.index < index && hoverClientY < hoverMiddleY) return;
-      if (item.index > index && hoverClientY > hoverMiddleY) return;
-      onMove(parentId, item.index, index);
-      item.index = index;
+
+      setDropPlacement(resolvePlacement(clientOffset.y, rowRef.current.getBoundingClientRect()));
     },
-    collect: monitor => ({
+    drop: (item, monitor) => {
+      if (!rowRef.current || !monitor.isOver({ shallow: true }) || !canAcceptDrop(item.id, node.id)) {
+        return;
+      }
+
+      const clientOffset = monitor.getClientOffset();
+      const placement = clientOffset
+        ? resolvePlacement(clientOffset.y, rowRef.current.getBoundingClientRect())
+        : 'inside';
+
+      onMoveNode(item.id, node.id, placement);
+      setDropPlacement(null);
+    },
+    collect: (monitor) => ({
       isOver: monitor.isOver({ shallow: true }),
       canDrop: monitor.canDrop(),
     }),
   });
 
-  preview(drop(ref));
+  useEffect(() => {
+    if (!isOver) {
+      setDropPlacement(null);
+    }
+  }, [isOver]);
+
+  dragHandleRef(dropRef(rowRef));
+
+  const showDropSuggestion = isOver && canDrop && dropPlacement;
 
   return (
-    <div ref={ref} style={{ opacity: isDragging ? 0.4 : 1 }}>
+    <div ref={rowRef} style={{ opacity: isDragging ? 0.42 : 1 }}>
       <div
-        className={`flex items-center gap-1.5 px-2 py-2.5 rounded-xl cursor-pointer transition-all group min-h-[44px] ${
-          isSelected ? 'bg-teal-500/15 border border-teal-500/25' : 'hover:bg-slate-800/50 border border-transparent'
-        } ${isMatch ? 'ring-1 ring-teal-500/40' : ''} ${isOver && canDrop ? 'border-teal-400/50 bg-teal-500/8' : ''}`}
-        onClick={() => onSelect(node)}
+        className={`relative flex items-center gap-1.5 rounded-xl border px-2 py-2.5 transition-all group min-h-[46px] ${
+          isSelected ? 'bg-teal-500/15 border-teal-500/25' : 'hover:bg-slate-800/50 border-transparent'
+        } ${isMatch ? 'ring-1 ring-teal-500/40' : ''} ${showDropSuggestion ? 'bg-teal-500/10 border-teal-400/40 shadow-[0_0_0_1px_rgba(94,234,212,0.08)]' : ''}`}
+        onClick={() => onSelect(node.id)}
       >
-        {/* Drag handle + keyboard up/down controls */}
-        <div className="shrink-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity -ml-1" onClick={e => e.stopPropagation()}>
-          <div ref={drag as unknown as React.Ref<HTMLDivElement>} className="cursor-grab active:cursor-grabbing p-1 text-slate-500 hover:text-teal-400 transition-colors" title="Drag to reorder">
+        {showDropSuggestion && dropPlacement === 'before' && <div className="absolute inset-x-3 top-0 h-px bg-teal-300/80 shadow-[0_0_10px_rgba(94,234,212,0.6)]" />}
+        {showDropSuggestion && dropPlacement === 'after' && <div className="absolute inset-x-3 bottom-0 h-px bg-teal-300/80 shadow-[0_0_10px_rgba(94,234,212,0.6)]" />}
+        {showDropSuggestion && (
+          <div className="absolute right-3 -top-2 rounded-full border border-teal-400/40 bg-slate-950/95 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-teal-300 shadow-lg">
+            {placementLabel(dropPlacement)}
+          </div>
+        )}
+
+        <div className="shrink-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity -ml-1" onClick={(event) => event.stopPropagation()}>
+          <div className="cursor-grab active:cursor-grabbing p-1 text-slate-500 hover:text-teal-400 transition-colors" title="Drag to restructure the hierarchy">
             <GripVertical className="w-3.5 h-3.5" />
           </div>
           <div className="flex flex-col gap-px">
             <button
               disabled={index === 0}
-              onClick={e => { e.stopPropagation(); onMove(parentId, index, index - 1); }}
+              onClick={(event) => {
+                event.stopPropagation();
+                onReorderWithinParent(parentId, index, index - 1);
+              }}
               className="p-0.5 text-slate-600 hover:text-teal-400 disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
               aria-label="Move up"
             >
@@ -102,7 +251,10 @@ function DraggableBOMRow({
             </button>
             <button
               disabled={index >= siblingCount - 1}
-              onClick={e => { e.stopPropagation(); onMove(parentId, index, index + 1); }}
+              onClick={(event) => {
+                event.stopPropagation();
+                onReorderWithinParent(parentId, index, index + 1);
+              }}
               className="p-0.5 text-slate-600 hover:text-teal-400 disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
               aria-label="Move down"
             >
@@ -111,10 +263,9 @@ function DraggableBOMRow({
           </div>
         </div>
 
-        {/* Expand toggle */}
         <div className="shrink-0 w-5">
           {hasChildren ? (
-            <button onClick={e => { e.stopPropagation(); toggleExpand(node.id); }} className="text-slate-500 hover:text-teal-400 transition-colors">
+            <button onClick={(event) => { event.stopPropagation(); toggleExpand(node.id); }} className="text-slate-500 hover:text-teal-400 transition-colors">
               {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
             </button>
           ) : (
@@ -138,7 +289,7 @@ function DraggableBOMRow({
           </div>
         </div>
 
-        {node.tags.slice(0, 1).map(tag => (
+        {node.tags.slice(0, 1).map((tag) => (
           <span key={tag} className={`shrink-0 px-1.5 py-0.5 border rounded-md text-[9px] font-medium ${tagColor(tag)}`}>{tag}</span>
         ))}
       </div>
@@ -152,14 +303,71 @@ function DraggableBOMRow({
   );
 }
 
-function BOMTreeLevel({
-  nodes, parentId, level, expanded, toggleExpand,
-  selectedId, onSelect, searchMatches, onMove,
+function RootDropZone({
+  label,
+  hint,
+  onMoveNode,
 }: {
-  nodes: BOMNode[]; parentId: string | null; level: number; expanded: Set<string>;
-  toggleExpand: (id: string) => void; selectedId: string | null;
-  onSelect: (node: BOMNode) => void; searchMatches: Set<string>;
-  onMove: (parentId: string | null, from: number, to: number) => void;
+  label: string;
+  hint: string;
+  onMoveNode: (dragId: string, targetId: string | null, placement: MovePlacement) => void;
+}) {
+  const [{ isOver, canDrop }, dropRef] = useDrop<DragItem, void, { isOver: boolean; canDrop: boolean }>({
+    accept: BOM_ITEM_TYPE,
+    canDrop: () => true,
+    drop: (item, monitor) => {
+      if (monitor.isOver({ shallow: true })) {
+        onMoveNode(item.id, null, 'root');
+      }
+    },
+    collect: (monitor) => ({
+      isOver: monitor.isOver({ shallow: true }),
+      canDrop: monitor.canDrop(),
+    }),
+  });
+
+  return (
+    <div
+      ref={node => {
+        dropRef(node);
+      }}
+      className={`rounded-xl border border-dashed px-3 py-2 text-[11px] transition-all ${
+        isOver && canDrop
+          ? 'border-teal-400/50 bg-teal-500/10 text-teal-300 shadow-[0_0_0_1px_rgba(94,234,212,0.08)]'
+          : 'border-white/8 bg-slate-950/25 text-slate-500'
+      }`}
+    >
+      <div className="flex items-center gap-2">
+        <MoveDiagonal className="w-3.5 h-3.5" />
+        <span className="font-semibold tracking-wide">{label}</span>
+      </div>
+      <p className="mt-1 text-[10px] text-inherit/80">{hint}</p>
+    </div>
+  );
+}
+
+function BOMTreeLevel({
+  nodes,
+  parentId,
+  expanded,
+  toggleExpand,
+  selectedId,
+  onSelect,
+  searchMatches,
+  onMoveNode,
+  onReorderWithinParent,
+  canAcceptDrop,
+}: {
+  nodes: BOMNode[];
+  parentId: string | null;
+  expanded: Set<string>;
+  toggleExpand: (id: string) => void;
+  selectedId: string | null;
+  onSelect: (nodeId: string) => void;
+  searchMatches: Set<string>;
+  onMoveNode: (dragId: string, targetId: string | null, placement: MovePlacement) => void;
+  onReorderWithinParent: (parentId: string | null, from: number, to: number) => void;
+  canAcceptDrop: (dragId: string, targetId: string) => boolean;
 }) {
   return (
     <>
@@ -169,26 +377,28 @@ function BOMTreeLevel({
           node={node}
           index={index}
           parentId={parentId}
-          level={level}
           siblingCount={nodes.length}
           isExpanded={expanded.has(node.id)}
           toggleExpand={toggleExpand}
           selectedId={selectedId}
           onSelect={onSelect}
           searchMatches={searchMatches}
-          onMove={onMove}
+          onMoveNode={onMoveNode}
+          onReorderWithinParent={onReorderWithinParent}
+          canAcceptDrop={canAcceptDrop}
         >
           {node.children.length > 0 && expanded.has(node.id) && (
             <BOMTreeLevel
               nodes={node.children}
               parentId={node.id}
-              level={level + 1}
               expanded={expanded}
               toggleExpand={toggleExpand}
               selectedId={selectedId}
               onSelect={onSelect}
               searchMatches={searchMatches}
-              onMove={onMove}
+              onMoveNode={onMoveNode}
+              onReorderWithinParent={onReorderWithinParent}
+              canAcceptDrop={canAcceptDrop}
             />
           )}
         </DraggableBOMRow>
@@ -210,7 +420,6 @@ function DetailPanel({ node, onClose }: { node: BOMNode; onClose: () => void }) 
       transition={{ duration: 0.2, ease: 'easeOut' }}
       className="w-80 flex-shrink-0 flex flex-col glass-card rounded-2xl overflow-hidden"
     >
-      {/* Panel header */}
       <div className="flex items-center justify-between p-4 border-b border-white/5">
         <div className="flex items-center gap-2 min-w-0">
           <NodeIcon type={node.type} />
@@ -221,9 +430,7 @@ function DetailPanel({ node, onClose }: { node: BOMNode; onClose: () => void }) 
         </button>
       </div>
 
-      {/* Panel content */}
       <div className="flex-1 overflow-y-auto p-4 space-y-5 custom-scrollbar">
-        {/* PL identity */}
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-2">PL Identity</p>
           <div className="glass-card rounded-xl p-3 space-y-2.5">
@@ -239,29 +446,27 @@ function DetailPanel({ node, onClose }: { node: BOMNode; onClose: () => void }) 
                 { label: 'Revision', value: node.revision, mono: true },
                 { label: 'Quantity', value: `${node.quantity} ${node.unitOfMeasure}` },
                 { label: 'Find No.', value: node.findNumber, mono: true },
-              ].map(f => (
-                <div key={f.label}>
-                  <p className="text-[10px] text-slate-500">{f.label}</p>
-                  <p className={`text-xs font-medium text-slate-200 capitalize ${f.mono ? 'font-mono' : ''}`}>{f.value}</p>
+              ].map((field) => (
+                <div key={field.label}>
+                  <p className="text-[10px] text-slate-500">{field.label}</p>
+                  <p className={`text-xs font-medium text-slate-200 capitalize ${field.mono ? 'font-mono' : ''}`}>{field.value}</p>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Tags */}
         {node.tags.length > 0 && (
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-2">Tags</p>
             <div className="flex flex-wrap gap-1.5">
-              {node.tags.map(tag => (
+              {node.tags.map((tag) => (
                 <span key={tag} className={`px-2 py-0.5 border rounded-md text-[10px] font-medium ${tagColor(tag)}`}>{tag}</span>
               ))}
             </div>
           </div>
         )}
 
-        {/* PL Record */}
         {plRecord && (
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-2">PL Record</p>
@@ -279,32 +484,31 @@ function DetailPanel({ node, onClose }: { node: BOMNode; onClose: () => void }) 
                 ...(plRecord.weight ? [{ label: 'Weight', value: plRecord.weight }] : []),
                 ...(plRecord.supplier ? [{ label: 'Supplier', value: plRecord.supplier }] : []),
                 ...(plRecord.source ? [{ label: 'Source', value: plRecord.source }] : []),
-              ].map(f => (
-                <div key={f.label}>
-                  <p className="text-[10px] text-slate-500">{f.label}</p>
-                  <p className="text-xs text-slate-200">{f.value}</p>
+              ].map((field) => (
+                <div key={field.label}>
+                  <p className="text-[10px] text-slate-500">{field.label}</p>
+                  <p className="text-xs text-slate-200">{field.value}</p>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* Linked docs */}
         {plRecord && plRecord.linkedDocuments.length > 0 && (
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-2">
-              Linked Documents ({plRecord.linkedDocuments.length})
-            </p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-2">Linked Documents ({plRecord.linkedDocuments.length})</p>
             <div className="space-y-1.5">
-              {plRecord.linkedDocuments.slice(0, 3).map(doc => (
+              {plRecord.linkedDocuments.slice(0, 3).map((doc) => (
                 <div key={doc.docId} className="flex items-center gap-2 p-2 rounded-lg bg-slate-900/40 border border-white/5">
                   <FileText className="w-3.5 h-3.5 text-teal-500 shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-[10px] text-slate-300 truncate">{doc.title}</p>
                     <p className="text-[9px] text-slate-500">{doc.type} · Rev {doc.revision}</p>
                   </div>
-                  <Badge variant={doc.status === 'Approved' ? 'success' : doc.status === 'In Review' ? 'warning' : 'default'}
-                    className="text-[9px] px-1.5">
+                  <Badge
+                    variant={doc.status === 'Approved' ? 'success' : doc.status === 'In Review' ? 'warning' : 'default'}
+                    className="text-[9px] px-1.5"
+                  >
                     {doc.status}
                   </Badge>
                 </div>
@@ -313,18 +517,15 @@ function DetailPanel({ node, onClose }: { node: BOMNode; onClose: () => void }) 
           </div>
         )}
 
-        {/* Child nodes quick view */}
         {node.children.length > 0 && (
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-2">
-              Children ({node.children.length})
-            </p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-2">Children ({node.children.length})</p>
             <div className="space-y-1">
-              {node.children.map(c => (
-                <div key={c.id} className="flex items-center gap-2 p-2 rounded-lg bg-slate-900/40 border border-white/5">
-                  <NodeIcon type={c.type} />
-                  <span className="text-xs text-slate-300 flex-1 truncate">{c.name}</span>
-                  <span className="font-mono text-[10px] text-teal-400">{c.id}</span>
+              {node.children.map((child) => (
+                <div key={child.id} className="flex items-center gap-2 p-2 rounded-lg bg-slate-900/40 border border-white/5">
+                  <NodeIcon type={child.type} />
+                  <span className="text-xs text-slate-300 flex-1 truncate">{child.name}</span>
+                  <span className="font-mono text-[10px] text-teal-400">{child.id}</span>
                 </div>
               ))}
             </div>
@@ -332,7 +533,6 @@ function DetailPanel({ node, onClose }: { node: BOMNode; onClose: () => void }) 
         )}
       </div>
 
-      {/* CTA footer */}
       <div className="p-4 border-t border-white/5 space-y-2">
         {plRecord ? (
           <Button className="w-full" onClick={() => navigate(`/pl/${node.id}`)}>
@@ -352,14 +552,18 @@ function DetailPanel({ node, onClose }: { node: BOMNode; onClose: () => void }) 
   );
 }
 
-function getAllNodeIds(nodes: BOMNode[]): { id: string; name: string; type: string }[] {
+function getAllAssemblyTargets(nodes: BOMNode[]): { id: string; name: string; type: string }[] {
   const result: { id: string; name: string; type: string }[] = [];
-  function collect(arr: BOMNode[]) {
-    for (const n of arr) {
-      if (n.type !== 'part') result.push({ id: n.id, name: n.name, type: n.type });
-      collect(n.children);
+
+  function collect(items: BOMNode[]) {
+    for (const item of items) {
+      if (item.type !== 'part') {
+        result.push({ id: item.id, name: item.name, type: item.type });
+      }
+      collect(item.children);
     }
   }
+
   collect(nodes);
   return result;
 }
@@ -373,14 +577,16 @@ interface AddNodeForm {
   findNumber: string;
   revision: string;
   effectiveDate: string;
-  usedInProducts: string[];
 }
 
 function AddNodeModal({
-  bom, products, onClose, onAdd,
+  bom,
+  workspaceName,
+  onClose,
+  onAdd,
 }: {
   bom: BOMNode[];
-  products: typeof PRODUCTS;
+  workspaceName: string;
   onClose: () => void;
   onAdd: (node: BOMNode, parentId: string | null) => void;
 }) {
@@ -393,20 +599,20 @@ function AddNodeModal({
     findNumber: '10',
     revision: 'A',
     effectiveDate: '',
-    usedInProducts: products.map(p => p.id),
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [plLookupResult, setPlLookupResult] = useState<typeof PL_DATABASE[string] | null | 'not-found'>(null);
 
-  const parentOptions = [{ id: 'ROOT', name: 'Top Level (no parent)', type: 'root' }, ...getAllNodeIds(bom)];
+  const parentOptions = [{ id: 'ROOT', name: 'Top Level (no parent)', type: 'root' }, ...getAllAssemblyTargets(bom)];
 
   const lookupPL = () => {
     if (!form.plNumber.trim()) return;
+
     const pl = PL_DATABASE[form.plNumber.trim()];
     if (pl) {
       setPlLookupResult(pl);
-      setForm(f => ({
-        ...f,
+      setForm((current) => ({
+        ...current,
         name: pl.name,
         nodeType: pl.type === 'assembly' ? 'assembly' : pl.type === 'sub-assembly' ? 'sub-assembly' : 'part',
         revision: pl.revision,
@@ -417,16 +623,20 @@ function AddNodeModal({
   };
 
   const validate = () => {
-    const errs: Record<string, string> = {};
-    if (!form.plNumber.trim()) errs.plNumber = 'PL Number is required';
-    if (!form.name.trim()) errs.name = 'Name is required';
-    if (form.quantity < 1) errs.quantity = 'Quantity must be at least 1';
-    return errs;
+    const nextErrors: Record<string, string> = {};
+    if (!/^\d{8}$/.test(form.plNumber.trim())) nextErrors.plNumber = 'Enter an 8-digit PL number.';
+    if (!form.name.trim()) nextErrors.name = 'Name is required';
+    if (form.quantity < 1) nextErrors.quantity = 'Quantity must be at least 1';
+    return nextErrors;
   };
 
   const handleSubmit = () => {
-    const errs = validate();
-    if (Object.keys(errs).length > 0) { setErrors(errs); return; }
+    const nextErrors = validate();
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
+      return;
+    }
+
     const newNode: BOMNode = {
       id: form.plNumber.trim(),
       name: form.name.trim(),
@@ -438,6 +648,7 @@ function AddNodeModal({
       tags: plLookupResult && plLookupResult !== 'not-found' ? plLookupResult.tags.slice(0, 2) : [],
       children: [],
     };
+
     onAdd(newNode, form.parentId === 'ROOT' ? null : form.parentId);
     onClose();
   };
@@ -447,8 +658,8 @@ function AddNodeModal({
       <GlassCard className="w-full max-w-2xl p-6 shadow-2xl max-h-[92vh] overflow-auto">
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h2 className="text-lg font-bold text-white">Add BOM Node</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Look up a PL number to auto-fill details, then place it in the BOM tree</p>
+            <h2 className="text-lg font-bold text-white">Add PL Node</h2>
+            <p className="text-xs text-slate-500 mt-0.5">Place a new PL anywhere in {workspaceName}. You can also drag it later to promote, demote, or re-nest it.</p>
           </div>
           <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-300 hover:bg-slate-700/50 transition-colors">
             <X className="w-4 h-4" />
@@ -456,13 +667,12 @@ function AddNodeModal({
         </div>
 
         <div className="space-y-4">
-          {/* PL Lookup */}
           <div>
-            <label className="text-xs font-medium text-slate-400 mb-1.5 block">PL Number * (8 digits)</label>
+            <label className="text-xs font-medium text-slate-400 mb-1.5 block">PL Number *</label>
             <div className="flex gap-2">
               <Input
                 value={form.plNumber}
-                onChange={e => { setForm(f => ({ ...f, plNumber: e.target.value })); setPlLookupResult(null); }}
+                onChange={(event) => { setForm((current) => ({ ...current, plNumber: event.target.value.replace(/\D/g, '').slice(0, 8) })); setPlLookupResult(null); }}
                 placeholder="e.g. 38110000"
                 className={`flex-1 font-mono ${errors.plNumber ? 'border-rose-500/50' : ''}`}
                 maxLength={8}
@@ -474,7 +684,6 @@ function AddNodeModal({
             {errors.plNumber && <p className="text-[10px] text-rose-400 mt-1">{errors.plNumber}</p>}
           </div>
 
-          {/* PL Lookup result */}
           {plLookupResult && plLookupResult !== 'not-found' && (
             <div className="flex items-start gap-3 p-3 rounded-xl bg-teal-900/20 border border-teal-500/20">
               <CheckCircle className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" />
@@ -489,10 +698,11 @@ function AddNodeModal({
               </div>
             </div>
           )}
+
           {plLookupResult === 'not-found' && (
             <div className="flex items-center gap-2 p-3 rounded-xl bg-amber-900/20 border border-amber-500/20">
               <Info className="w-4 h-4 text-amber-400 shrink-0" />
-              <p className="text-xs text-amber-300">PL number not in database. You can still create the node manually — go to PL Hub to create the record first for full metadata.</p>
+              <p className="text-xs text-amber-300">The PL is not in the current catalog. You can still place the node now and bind it to the real backend PL record later.</p>
             </div>
           )}
 
@@ -500,7 +710,7 @@ function AddNodeModal({
             <label className="text-xs font-medium text-slate-400 mb-1.5 block">Component Name *</label>
             <Input
               value={form.name}
-              onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+              onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
               placeholder="e.g. Bogie Frame Assembly"
               className={`w-full ${errors.name ? 'border-rose-500/50' : ''}`}
             />
@@ -510,7 +720,7 @@ function AddNodeModal({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs font-medium text-slate-400 mb-1.5 block">Node Type</label>
-              <Select value={form.nodeType} onChange={e => setForm(f => ({ ...f, nodeType: e.target.value as AddNodeForm['nodeType'] }))} className="w-full">
+              <Select value={form.nodeType} onChange={(event) => setForm((current) => ({ ...current, nodeType: event.target.value as AddNodeForm['nodeType'] }))} className="w-full">
                 <option value="assembly">Assembly</option>
                 <option value="sub-assembly">Sub-Assembly</option>
                 <option value="part">Part</option>
@@ -518,73 +728,40 @@ function AddNodeModal({
             </div>
             <div>
               <label className="text-xs font-medium text-slate-400 mb-1.5 block">Revision</label>
-              <Input value={form.revision} onChange={e => setForm(f => ({ ...f, revision: e.target.value }))} placeholder="e.g. A" className="w-full font-mono" />
+              <Input value={form.revision} onChange={(event) => setForm((current) => ({ ...current, revision: event.target.value }))} placeholder="e.g. A" className="w-full font-mono" />
             </div>
           </div>
 
-          {/* Assembly level / Parent */}
           <div>
-            <label className="text-xs font-medium text-slate-400 mb-1.5 block">Place Under (Assembly Level)</label>
-            <Select value={form.parentId} onChange={e => setForm(f => ({ ...f, parentId: e.target.value }))} className="w-full">
-              {parentOptions.map(p => (
-                <option key={p.id} value={p.id}>
-                  {p.type === 'root' ? '⊤ Top Level' : `↳ ${p.name} (${p.id})`}
+            <label className="text-xs font-medium text-slate-400 mb-1.5 block">Place Under</label>
+            <Select value={form.parentId} onChange={(event) => setForm((current) => ({ ...current, parentId: event.target.value }))} className="w-full">
+              {parentOptions.map((parent) => (
+                <option key={parent.id} value={parent.id}>
+                  {parent.type === 'root' ? '⊤ Top Level' : `↳ ${parent.name} (${parent.id})`}
                 </option>
               ))}
             </Select>
-            <p className="text-[10px] text-slate-600 mt-1">The system will automatically link PL details using the PL number provided.</p>
+            <p className="text-[10px] text-slate-600 mt-1">This only chooses the initial placement. The magnetic drag hints will still let you move it anywhere later.</p>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs font-medium text-slate-400 mb-1.5 block">Quantity</label>
-              <Input type="number" min={1} value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: Number(e.target.value) }))} className={`w-full ${errors.quantity ? 'border-rose-500/50' : ''}`} />
+              <Input type="number" min={1} value={form.quantity} onChange={(event) => setForm((current) => ({ ...current, quantity: Number(event.target.value) }))} className={`w-full ${errors.quantity ? 'border-rose-500/50' : ''}`} />
               {errors.quantity && <p className="text-[10px] text-rose-400 mt-1">{errors.quantity}</p>}
             </div>
             <div>
               <label className="text-xs font-medium text-slate-400 mb-1.5 block">Find Number</label>
-              <Input value={form.findNumber} onChange={e => setForm(f => ({ ...f, findNumber: e.target.value }))} placeholder="e.g. 10" className="w-full font-mono" />
+              <Input value={form.findNumber} onChange={(event) => setForm((current) => ({ ...current, findNumber: event.target.value }))} placeholder="e.g. 10" className="w-full font-mono" />
             </div>
           </div>
 
           <DatePicker
             label="Effective From Date"
             value={form.effectiveDate}
-            onChange={v => setForm(f => ({ ...f, effectiveDate: v }))}
+            onChange={(value) => setForm((current) => ({ ...current, effectiveDate: value }))}
             placeholder="Optional"
           />
-
-          {/* Used In Products */}
-          <div>
-            <label className="text-xs font-medium text-slate-400 mb-2 block">
-              Used In Products
-              <span className="text-slate-600 ml-1 font-normal">(node will be added to all selected product BOMs)</span>
-            </label>
-            <div className="space-y-1.5">
-              {products.map(p => (
-                <label key={p.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-800/30 border border-slate-700/40 hover:border-teal-500/20 cursor-pointer transition-all">
-                  <input
-                    type="checkbox"
-                    checked={form.usedInProducts.includes(p.id)}
-                    onChange={e => setForm(f => ({
-                      ...f,
-                      usedInProducts: e.target.checked
-                        ? [...f.usedInProducts, p.id]
-                        : f.usedInProducts.filter(x => x !== p.id),
-                    }))}
-                    className="accent-teal-500 w-4 h-4"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-slate-200">{p.name}</p>
-                    <p className="text-[10px] text-slate-500">{p.category} · {p.lifecycle}</p>
-                  </div>
-                  <Badge variant={p.lifecycle === 'Production' ? 'success' : p.lifecycle === 'In Development' ? 'info' : 'default'} className="text-[9px] px-1.5 shrink-0">
-                    {p.lifecycle}
-                  </Badge>
-                </label>
-              ))}
-            </div>
-          </div>
         </div>
 
         <div className="flex gap-3 mt-6 pt-5 border-t border-slate-700/50">
@@ -601,26 +778,45 @@ function AddNodeModal({
 function BOMProductViewInner() {
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
+  const draft = productId ? BomDraftService.getById(productId) : null;
+  const product = draft?.product ?? PRODUCTS.find((item) => item.id === productId);
+  const resolvedTree = draft?.tree ?? (productId ? (BOM_TREES[productId] ?? null) : null);
 
-  const product = PRODUCTS.find(p => p.id === productId);
-  const initialTree = productId ? (BOM_TREES[productId] ?? null) : null;
-
-  const [bom, setBom] = useState<BOMNode[]>(initialTree ? cloneTree(initialTree) : []);
-  const [selectedNode, setSelectedNode] = useState<BOMNode | null>(null);
+  const [bom, setBom] = useState<BOMNode[]>(resolvedTree ? cloneTree(resolvedTree) : []);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [showAddNode, setShowAddNode] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(() => {
-    const s = new Set<string>();
-    if (initialTree?.[0]) s.add(initialTree[0].id);
-    return s;
+    const next = new Set<string>();
+    if (resolvedTree?.[0]) next.add(resolvedTree[0].id);
+    return next;
   });
 
+  useEffect(() => {
+    setBom(resolvedTree ? cloneTree(resolvedTree) : []);
+    setSelectedNodeId(null);
+    setSearch('');
+    setShowAddNode(false);
+    setExpanded(() => {
+      const next = new Set<string>();
+      if (resolvedTree?.[0]) next.add(resolvedTree[0].id);
+      return next;
+    });
+  }, [productId]);
+
+  useEffect(() => {
+    if (draft && bom.length > 0) {
+      BomDraftService.saveTree(draft.id, bom);
+    }
+  }, [bom, draft]);
+
+  const selectedNode = selectedNodeId ? findNode(bom, selectedNodeId) : null;
   const searchMatches = search.trim() ? searchTree(bom, search) : new Set<string>();
   const stats = countNodes(bom);
 
   const toggleExpand = useCallback((id: string) => {
-    setExpanded(prev => {
-      const next = new Set(prev);
+    setExpanded((current) => {
+      const next = new Set(current);
       if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
@@ -628,7 +824,12 @@ function BOMProductViewInner() {
 
   const expandAll = useCallback(() => {
     const ids = new Set<string>();
-    function collect(nodes: BOMNode[]) { for (const n of nodes) { ids.add(n.id); collect(n.children); } }
+    const collect = (nodes: BOMNode[]) => {
+      for (const node of nodes) {
+        ids.add(node.id);
+        collect(node.children);
+      }
+    };
     collect(bom);
     setExpanded(ids);
   }, [bom]);
@@ -638,40 +839,43 @@ function BOMProductViewInner() {
   }, [bom]);
 
   const handleAddNode = useCallback((node: BOMNode, parentId: string | null) => {
-    setBom(prev => {
-      const cloned = cloneTree(prev);
+    setBom((current) => {
+      const next = cloneTree(current);
       if (parentId === null) {
-        cloned.push(node);
+        next.push(node);
       } else {
-        const parent = findNode(cloned, parentId);
+        const parent = findNode(next, parentId);
         if (parent) parent.children.push(node);
       }
-      return cloned;
+      return next;
     });
-    setExpanded(prev => {
-      const next = new Set(prev);
+
+    setExpanded((current) => {
+      const next = new Set(current);
       if (parentId) next.add(parentId);
       return next;
     });
   }, []);
 
-  const onMove = useCallback((parentId: string | null, fromIndex: number, toIndex: number) => {
-    setBom(prev => {
-      const cloned = cloneTree(prev);
-      if (parentId === null) {
-        const [item] = cloned.splice(fromIndex, 1);
-        cloned.splice(toIndex, 0, item);
-        return cloned;
-      }
-      const parent = findNode(cloned, parentId);
-      if (!parent) return prev;
-      const [item] = parent.children.splice(fromIndex, 1);
-      parent.children.splice(toIndex, 0, item);
-      return cloned;
-    });
+  const handleMoveNode = useCallback((dragId: string, targetId: string | null, placement: MovePlacement) => {
+    setBom((current) => moveNodeAcrossHierarchy(current, dragId, targetId, placement));
+
+    if (targetId && placement === 'inside') {
+      setExpanded((current) => {
+        const next = new Set(current);
+        next.add(targetId);
+        return next;
+      });
+    }
   }, []);
 
-  if (!product || !initialTree) {
+  const handleReorderWithinParent = useCallback((parentId: string | null, fromIndex: number, toIndex: number) => {
+    setBom((current) => reorderWithinParent(current, parentId, fromIndex, toIndex));
+  }, []);
+
+  const canAcceptDrop = useCallback((dragId: string, targetId: string) => canMoveToTarget(bom, dragId, targetId), [bom]);
+
+  if (!product || !resolvedTree) {
     return (
       <div className="flex items-center justify-center h-64">
         <GlassCard className="p-12 text-center">
@@ -684,12 +888,14 @@ function BOMProductViewInner() {
     );
   }
 
+  const isDraftWorkspace = Boolean(draft);
+
   return (
     <div className="space-y-4 max-w-[1400px] mx-auto h-[calc(100vh-160px)] flex flex-col">
       <PageHeader
         title={`${product.name} — Bill of Materials`}
-        subtitle={product.subtitle}
-        breadcrumb={
+        subtitle={isDraftWorkspace ? 'Draft workspace. Structure changes are saved locally in the browser until the backend contract is finalized.' : product.subtitle}
+        breadcrumb={(
           <nav className="flex items-center gap-1.5 text-xs text-slate-500">
             <button onClick={() => navigate('/bom')} className="hover:text-teal-400 transition-colors flex items-center gap-1">
               <GitBranch className="w-3 h-3" /> BOM Explorer
@@ -697,8 +903,8 @@ function BOMProductViewInner() {
             <ChevronRight className="w-3 h-3" />
             <span className="text-slate-300">{product.name}</span>
           </nav>
-        }
-        actions={
+        )}
+        actions={(
           <div className="flex items-center gap-2">
             <Button variant="secondary" size="sm" onClick={() => navigate('/bom')}>
               <ArrowLeft className="w-3.5 h-3.5" /> All Products
@@ -710,10 +916,9 @@ function BOMProductViewInner() {
               <Plus className="w-3.5 h-3.5" /> Add Node
             </Button>
           </div>
-        }
+        )}
       />
 
-      {/* Stats bar */}
       <div className="flex gap-3 text-xs flex-wrap">
         {[
           { label: 'Root PL', value: product.rootPL, mono: true },
@@ -721,27 +926,33 @@ function BOMProductViewInner() {
           { label: 'Total Nodes', value: stats.total },
           { label: 'Assemblies', value: stats.assemblies },
           { label: 'Parts', value: stats.parts },
-        ].map(s => (
-          <GlassCard key={s.label} className="px-3 py-2 flex items-center gap-2">
-            <span className="text-slate-500">{s.label}</span>
-            <span className={`font-bold text-teal-400 ${s.mono ? 'font-mono' : ''}`}>{s.value}</span>
+        ].map((stat) => (
+          <GlassCard key={stat.label} className="px-3 py-2 flex items-center gap-2">
+            <span className="text-slate-500">{stat.label}</span>
+            <span className={`font-bold text-teal-400 ${stat.mono ? 'font-mono' : ''}`}>{stat.value}</span>
           </GlassCard>
         ))}
-        <Badge variant={
-          product.lifecycle === 'Production' ? 'success' :
-          product.lifecycle === 'In Development' ? 'info' : 'warning'
-        } className="self-center">{product.lifecycle}</Badge>
+        {isDraftWorkspace && <Badge variant="info" className="self-center">Draft</Badge>}
+        <Badge
+          variant={product.lifecycle === 'Production' ? 'success' : product.lifecycle === 'In Development' ? 'info' : 'warning'}
+          className="self-center"
+        >
+          {product.lifecycle}
+        </Badge>
       </div>
 
-      {/* Main layout: Tree + Detail */}
       <div className="flex-1 flex gap-4 min-h-0">
-        {/* Tree panel */}
         <GlassCard className="flex flex-col flex-1 min-w-0">
           <div className="p-4 border-b border-white/5">
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
-                <Input placeholder="Search by name, PL number, or tag..." className="pl-9 w-full py-2" value={search} onChange={e => setSearch(e.target.value)} />
+                <Input
+                  placeholder="Search by name, PL number, or tag..."
+                  className="pl-9 w-full py-2"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                />
               </div>
               <button onClick={expandAll} className="px-2.5 py-2 text-xs text-slate-400 hover:text-teal-300 border border-slate-700/60 rounded-lg transition-colors whitespace-nowrap">Expand All</button>
               <button onClick={collapseAll} className="px-2.5 py-2 text-xs text-slate-400 hover:text-teal-300 border border-slate-700/60 rounded-lg transition-colors">Collapse</button>
@@ -752,36 +963,49 @@ function BOMProductViewInner() {
               </p>
             )}
           </div>
-          <div className="p-1.5 text-[10px] text-slate-500 border-b border-white/5 px-4 flex items-center gap-2">
-            <GripVertical className="w-3 h-3" /> Drag nodes to reorder within their parent
+
+          <div className="border-b border-white/5 px-4 py-2.5 text-[11px] text-slate-500 flex flex-wrap items-center gap-2">
+            <Sparkles className="w-3.5 h-3.5 text-teal-400" />
+            <span>Drag a PL above, below, or into another node. Drop hints snap into place so you can promote to a higher level or nest deeper without guessing.</span>
           </div>
-          <div className="flex-1 overflow-y-auto p-3 space-y-0.5 custom-scrollbar">
+
+          <div className="flex-1 overflow-y-auto p-3 space-y-2 custom-scrollbar">
+            <RootDropZone
+              label="Top-level drop lane"
+              hint="Drop here to promote any dragged PL back to the root of the BOM."
+              onMoveNode={handleMoveNode}
+            />
+
             <BOMTreeLevel
               nodes={bom}
               parentId={null}
-              level={0}
               expanded={expanded}
               toggleExpand={toggleExpand}
-              selectedId={selectedNode?.id ?? null}
-              onSelect={node => setSelectedNode(prev => prev?.id === node.id ? null : node)}
+              selectedId={selectedNodeId}
+              onSelect={(nodeId) => setSelectedNodeId((current) => current === nodeId ? null : nodeId)}
               searchMatches={searchMatches}
-              onMove={onMove}
+              onMoveNode={handleMoveNode}
+              onReorderWithinParent={handleReorderWithinParent}
+              canAcceptDrop={canAcceptDrop}
+            />
+
+            <RootDropZone
+              label="Promote here"
+              hint="Useful when downgrading a child was a mistake and the PL belongs at the top level instead."
+              onMoveNode={handleMoveNode}
             />
           </div>
         </GlassCard>
 
-        {/* Detail panel */}
         <AnimatePresence>
-          {selectedNode && (
-            <DetailPanel node={selectedNode} onClose={() => setSelectedNode(null)} />
-          )}
+          {selectedNode && <DetailPanel node={selectedNode} onClose={() => setSelectedNodeId(null)} />}
         </AnimatePresence>
       </div>
 
       {showAddNode && (
         <AddNodeModal
           bom={bom}
-          products={PRODUCTS}
+          workspaceName={product.name}
           onClose={() => setShowAddNode(false)}
           onAdd={handleAddNode}
         />

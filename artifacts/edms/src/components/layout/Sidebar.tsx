@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { PreferencesService } from '../../services/PreferencesService';
 import {
   LayoutDashboard, FolderOpen, Component, Activity,
   Briefcase, CheckSquare, BarChart3, ShieldAlert,
@@ -77,31 +76,27 @@ const navGroups: NavGroup[] = [
 ];
 
 export function Sidebar() {
-  const [isExpanded, setIsExpanded] = useState(() => PreferencesService.get().sidebarExpanded);
+  const [isHovered, setIsHovered] = useState(false);
   const location = useLocation();
   const { hasPermission } = useAuth();
-
-  const toggleSidebar = () => {
-    const next = !isExpanded;
-    setIsExpanded(next);
-    PreferencesService.set({ sidebarExpanded: next });
-  };
+  const isExpanded = isHovered;
 
   return (
     <motion.aside
       initial={false}
       animate={{ width: isExpanded ? 260 : 72 }}
       transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className="relative h-[calc(100vh-2rem)] ml-4 my-4 flex flex-col bg-slate-900/60 backdrop-blur-2xl border border-teal-500/20 shadow-2xl shadow-teal-950/50 rounded-2xl overflow-hidden z-40 shrink-0 group"
     >
-      {/* Collapse indicator for collapsed state */}
       {!isExpanded && (
         <div className="absolute right-1.5 top-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1.5 rounded-lg text-teal-400 bg-teal-500/10">
           <ChevronRight className="w-4 h-4" />
         </div>
       )}
       
-      <div className="flex items-center p-4 gap-3 cursor-pointer border-b border-white/5 min-h-[52px] hover:bg-slate-800/30 transition-colors" onClick={toggleSidebar}>
+      <div className="flex items-center p-4 gap-3 border-b border-white/5 min-h-[52px] hover:bg-slate-800/30 transition-colors">
         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-400 to-emerald-600 flex items-center justify-center shrink-0 shadow-lg shadow-teal-500/20">
           <span className="text-white font-bold text-sm">L2</span>
         </div>
@@ -167,7 +162,7 @@ export function Sidebar() {
                           exit={{ opacity: 0 }}
                           className="text-sm font-medium whitespace-nowrap overflow-hidden flex-1"
                         >
-                          {item.label}
+                    {item.label}
                         </motion.span>
                       )}
                     </AnimatePresence>

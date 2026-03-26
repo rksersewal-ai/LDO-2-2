@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, type ReactNode } from 'react';
 import { toast } from 'sonner';
 import {
   Search, DatabaseBackup, Shield, Hash,
@@ -96,6 +96,24 @@ const DOC_STATUS_VARIANT: Record<string, 'success' | 'warning' | 'default' | 'da
   Draft: 'default',
   Obsolete: 'danger',
 };
+
+function PlModalField({ label, error, children }: { label: string; error?: string; children: ReactNode }) {
+  return (
+    <div>
+      <label className="block text-xs font-medium text-slate-400 mb-1.5">{label}</label>
+      {children}
+      {error && <p className="text-[10px] text-rose-400 mt-1">{error}</p>}
+    </div>
+  );
+}
+
+function PlModalSectionHeading({ title }: { title: string }) {
+  return (
+    <p className="text-[10px] uppercase tracking-widest font-semibold text-teal-500 mb-3 pt-1 border-t border-slate-700/40">
+      {title}
+    </p>
+  );
+}
 
 function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey | null; sortDir: 'asc' | 'desc' }) {
   if (sortKey !== col) return <ChevronsUpDown className="w-3 h-3 text-slate-600 ml-0.5 shrink-0" />;
@@ -265,18 +283,6 @@ function CreatePLModal({ onClose, onSave }: { onClose: () => void; onSave: (data
     finally { setSaving(false); }
   };
 
-  const Field = ({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) => (
-    <div>
-      <label className="block text-xs font-medium text-slate-400 mb-1.5">{label}</label>
-      {children}
-      {error && <p className="text-[10px] text-rose-400 mt-1">{error}</p>}
-    </div>
-  );
-
-  const SectionHeading = ({ title }: { title: string }) => (
-    <p className="text-[10px] uppercase tracking-widest font-semibold text-teal-500 mb-3 pt-1 border-t border-slate-700/40">{title}</p>
-  );
-
   const ta = `w-full bg-slate-950/60 border border-slate-700/50 text-slate-200 text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/30 transition-all placeholder:text-slate-600 resize-none`;
 
   return (
@@ -295,63 +301,64 @@ function CreatePLModal({ onClose, onSave }: { onClose: () => void; onSave: (data
 
         <div className="flex-1 overflow-y-auto custom-scrollbar px-6 py-5 space-y-4">
           {/* Identity */}
-          <SectionHeading title="Identity" />
+          <PlModalSectionHeading title="Identity" />
           <div className="grid grid-cols-2 gap-3">
-            <Field label="PL Number (8 digits) *" error={errors.plNumber}>
+            <PlModalField label="PL Number (8 digits) *" error={errors.plNumber}>
               <Input
                 value={form.plNumber}
                 onChange={e => setForm(f => ({ ...f, plNumber: e.target.value }))}
                 placeholder="e.g. 38110000"
                 className={`w-full font-mono ${errors.plNumber ? 'border-rose-500/50' : ''}`}
                 maxLength={8}
+                inputMode="numeric"
               />
-            </Field>
-            <Field label="Status">
+            </PlModalField>
+            <PlModalField label="Status">
               <Select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))} className="w-full">
                 <option value="ACTIVE">Active</option>
                 <option value="UNDER_REVIEW">Under Review</option>
                 <option value="OBSOLETE">Obsolete</option>
               </Select>
-            </Field>
+            </PlModalField>
           </div>
-          <Field label="Name / Component Description *" error={errors.name}>
+          <PlModalField label="Name / Component Description *" error={errors.name}>
             <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Bogie Frame Assembly" className={`w-full ${errors.name ? 'border-rose-500/50' : ''}`} />
-          </Field>
-          <Field label="Technical Description *" error={errors.description}>
+          </PlModalField>
+          <PlModalField label="Technical Description *" error={errors.description}>
             <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Detailed technical description..." rows={3} className={`${ta} ${errors.description ? 'border-rose-500/50' : ''}`} />
-          </Field>
+          </PlModalField>
 
           {/* Classification */}
-          <SectionHeading title="Classification" />
+          <PlModalSectionHeading title="Classification" />
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Inspection Category">
+            <PlModalField label="Inspection Category">
               <Select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value as InspectionCategory }))} className="w-full">
                 {(['CAT-A', 'CAT-B', 'CAT-C', 'CAT-D'] as InspectionCategory[]).map(c => (
                   <option key={c} value={c}>{INSPECTION_CATEGORY_LABELS[c]}</option>
                 ))}
               </Select>
-            </Field>
-            <Field label="Controlling Agency">
+            </PlModalField>
+            <PlModalField label="Controlling Agency">
               <Select value={form.controllingAgency} onChange={e => setForm(f => ({ ...f, controllingAgency: e.target.value }))} className="w-full">
                 {AGENCIES.map(a => <option key={a} value={a}>{a}</option>)}
               </Select>
-            </Field>
+            </PlModalField>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Vendor Type">
+            <PlModalField label="Vendor Type">
               <Select value={form.vendorType} onChange={e => setForm(f => ({ ...f, vendorType: e.target.value as CreatePLFormData['vendorType'] }))} className="w-full">
                 <option value="">— Select —</option>
                 <option value="VD">VD (Vendor-Designed)</option>
                 <option value="NVD">NVD (Non-Vendor)</option>
               </Select>
-            </Field>
-            <Field label="Mother Part No.">
+            </PlModalField>
+            <PlModalField label="Mother Part No.">
               <Input value={form.motherPart} onChange={e => setForm(f => ({ ...f, motherPart: e.target.value }))} placeholder="e.g. 38000000" className="w-full font-mono" />
-            </Field>
+            </PlModalField>
           </div>
 
           {/* Safety */}
-          <SectionHeading title="Safety" />
+          <PlModalSectionHeading title="Safety" />
           <div className="flex items-center justify-between p-3 rounded-xl bg-slate-800/40 border border-slate-700/30">
             <div>
               <p className="text-sm font-medium text-slate-200">Safety Vital Component</p>
@@ -367,7 +374,7 @@ function CreatePLModal({ onClose, onSave }: { onClose: () => void; onSave: (data
               <p className="text-xs text-rose-300">Flagged as <strong>Safety Vital</strong> — requires additional supervisor review on all linked records.</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Safety Classification">
+              <PlModalField label="Safety Classification">
                 <Select value={form.safetyClassification} onChange={e => setForm(f => ({ ...f, safetyClassification: e.target.value as SafetyClassification | '' }))} className="w-full">
                   <option value="">— Select —</option>
                   <option value="LOW">LOW</option>
@@ -375,8 +382,8 @@ function CreatePLModal({ onClose, onSave }: { onClose: () => void; onSave: (data
                   <option value="HIGH">HIGH</option>
                   <option value="CRITICAL">CRITICAL</option>
                 </Select>
-              </Field>
-              <Field label="Severity of Failure">
+              </PlModalField>
+              <PlModalField label="Severity of Failure">
                 <Select value={form.severityOfFailure} onChange={e => setForm(f => ({ ...f, severityOfFailure: e.target.value }))} className="w-full">
                   <option value="">— Select —</option>
                   <option value="Catastrophic">Catastrophic</option>
@@ -384,61 +391,61 @@ function CreatePLModal({ onClose, onSave }: { onClose: () => void; onSave: (data
                   <option value="Marginal">Marginal</option>
                   <option value="Negligible">Negligible</option>
                 </Select>
-              </Field>
+              </PlModalField>
             </div>
-            <Field label="Consequences of Failure">
+            <PlModalField label="Consequences of Failure">
               <textarea value={form.consequences} onChange={e => setForm(f => ({ ...f, consequences: e.target.value }))} rows={2} placeholder="Describe failure consequences..." className={ta} />
-            </Field>
-            <Field label="Functionality">
+            </PlModalField>
+            <PlModalField label="Functionality">
               <textarea value={form.functionality} onChange={e => setForm(f => ({ ...f, functionality: e.target.value }))} rows={2} placeholder="Describe component functionality..." className={ta} />
-            </Field>
+            </PlModalField>
           </>}
 
           {/* Engineering References */}
-          <SectionHeading title="Engineering References" />
-          <Field label="Drawing Numbers (comma-separated)">
+          <PlModalSectionHeading title="Engineering References" />
+          <PlModalField label="Drawing Numbers (comma-separated)">
             <Input value={form.drawingNumbers} onChange={e => setForm(f => ({ ...f, drawingNumbers: e.target.value }))} placeholder="e.g. DWG-BOG-001, DWG-BOG-002" className="w-full font-mono text-xs" />
-          </Field>
-          <Field label="Spec Numbers (comma-separated)">
+          </PlModalField>
+          <PlModalField label="Spec Numbers (comma-separated)">
             <Input value={form.specNumbers} onChange={e => setForm(f => ({ ...f, specNumbers: e.target.value }))} placeholder="e.g. SPC-ELE-001, SPC-MEC-005" className="w-full font-mono text-xs" />
-          </Field>
+          </PlModalField>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="UVAM ID" error={errors.uvamId}>
+            <PlModalField label="UVAM ID" error={errors.uvamId}>
               <Input value={form.uvamId} onChange={e => setForm(f => ({ ...f, uvamId: e.target.value }))} placeholder="e.g. UVAM-2026-001" className="w-full font-mono text-xs" />
-            </Field>
-            <Field label="STR Number">
+            </PlModalField>
+            <PlModalField label="STR Number">
               <Input value={form.strNumber} onChange={e => setForm(f => ({ ...f, strNumber: e.target.value }))} placeholder="e.g. STR-2026-0045" className="w-full font-mono text-xs" />
-            </Field>
+            </PlModalField>
           </div>
 
           {/* Application */}
-          <SectionHeading title="Application" />
-          <Field label="Application Area (platforms)">
+          <PlModalSectionHeading title="Application" />
+          <PlModalField label="Application Area (platforms)">
             <Input value={form.applicationArea} onChange={e => setForm(f => ({ ...f, applicationArea: e.target.value }))} placeholder="e.g. WAP7, WAG9HC, LHB Coach" className="w-full" />
-          </Field>
-          <Field label="Used In (products, comma-separated)">
+          </PlModalField>
+          <PlModalField label="Used In (products, comma-separated)">
             <Input value={form.usedIn} onChange={e => setForm(f => ({ ...f, usedIn: e.target.value }))} placeholder="e.g. WAP7 Brake System, LHB Coach Control Panel" className="w-full" />
-          </Field>
-          <Field label="Eligibility Criteria">
+          </PlModalField>
+          <PlModalField label="Eligibility Criteria">
             <textarea value={form.eligibilityCriteria} onChange={e => setForm(f => ({ ...f, eligibilityCriteria: e.target.value }))} rows={2} placeholder="Conditions under which this component is eligible for use..." className={ta} />
-          </Field>
-          <Field label="Procurement Conditions">
+          </PlModalField>
+          <PlModalField label="Procurement Conditions">
             <textarea value={form.procurementConditions} onChange={e => setForm(f => ({ ...f, procurementConditions: e.target.value }))} rows={2} placeholder="Optional procurement conditions, restrictions, or sourcing notes..." className={ta} />
-          </Field>
+          </PlModalField>
 
           {/* Personnel & Admin */}
-          <SectionHeading title="Personnel & Admin" />
+          <PlModalSectionHeading title="Personnel & Admin" />
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Design Supervisor">
+            <PlModalField label="Design Supervisor">
               <Input value={form.designSupervisor} onChange={e => setForm(f => ({ ...f, designSupervisor: e.target.value }))} placeholder="e.g. SSE/Design" className="w-full" />
-            </Field>
-            <Field label="Concerned Supervisor">
+            </PlModalField>
+            <PlModalField label="Concerned Supervisor">
               <Input value={form.concernedSupervisor} onChange={e => setForm(f => ({ ...f, concernedSupervisor: e.target.value }))} placeholder="e.g. SSE/Mech" className="w-full" />
-            </Field>
+            </PlModalField>
           </div>
-          <Field label="e-Office File No.">
+          <PlModalField label="e-Office File No.">
             <Input value={form.eOfficeFile} onChange={e => setForm(f => ({ ...f, eOfficeFile: e.target.value }))} placeholder="e.g. CLW-DWG-2026-001" className="w-full font-mono text-xs" />
-          </Field>
+          </PlModalField>
         </div>
 
         <div className="flex gap-3 px-6 py-4 border-t border-white/8 shrink-0">

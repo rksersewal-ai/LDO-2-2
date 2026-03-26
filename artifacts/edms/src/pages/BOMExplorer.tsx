@@ -8,6 +8,7 @@ import {
 import { PRODUCTS } from '../lib/bomData';
 import type { Product } from '../lib/bomData';
 import { GlassCard, Badge, Button, Input, FilterPills, PageHeader } from '../components/ui/Shared';
+import { BomDraftService } from '../services/BomDraftService';
 
 const PRODUCT_ICONS: Record<string, React.ElementType> = {
   Train, Container: Package, Layers, Zap,
@@ -39,7 +40,7 @@ function categoryIconColor(cat: string): string {
 const CATEGORIES = ['All', 'Passenger Locomotive', 'Freight Locomotive', 'EMU Rolling Stock', 'Electrical Component'];
 const LIFECYCLES = ['All', 'Production', 'In Development', 'Prototyping'];
 
-function ProductCard({ product, index }: { product: Product; index: number }) {
+function ProductCard({ product, index, isDraft = false }: { product: Product; index: number; isDraft?: boolean }) {
   const navigate = useNavigate();
   const Icon = PRODUCT_ICONS[product.icon] || Package;
   const gradClass = categoryColor(product.category);
@@ -65,7 +66,10 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
           <div className={`w-11 h-11 rounded-xl bg-slate-900/60 border border-white/5 flex items-center justify-center ${iconColor}`}>
             <Icon className="w-5 h-5" />
           </div>
-          <Badge variant={lifecycleBadgeVariant(product.lifecycle)}>{product.lifecycle}</Badge>
+          <div className="flex items-center gap-2">
+            {isDraft && <Badge variant="info">Draft</Badge>}
+            <Badge variant={lifecycleBadgeVariant(product.lifecycle)}>{product.lifecycle}</Badge>
+          </div>
         </div>
 
         {/* Name + subtitle */}
@@ -107,6 +111,8 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
 }
 
 function CreateNewCard() {
+  const navigate = useNavigate();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -114,6 +120,10 @@ function CreateNewCard() {
       transition={{ duration: 0.25, delay: 4 * 0.06, ease: 'easeOut' }}
       whileHover={{ y: -3, transition: { duration: 0.15 } }}
       className="relative glass-card rounded-2xl border-2 border-dashed border-teal-500/25 hover:border-teal-400/50 cursor-pointer group transition-all duration-200 overflow-hidden"
+      onClick={() => navigate('/bom/new')}
+      role="button"
+      tabIndex={0}
+      onKeyDown={event => event.key === 'Enter' && navigate('/bom/new')}
     >
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-teal-500/5 pointer-events-none" />
       <div className="p-6 h-full flex flex-col items-center justify-center text-center min-h-[240px]">
@@ -128,11 +138,14 @@ function CreateNewCard() {
 }
 
 export default function BOMExplorer() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [lifecycleFilter, setLifecycleFilter] = useState('All');
+  const draftProducts = BomDraftService.getAll().map((draft) => draft.product);
+  const allProducts = [...draftProducts, ...PRODUCTS];
 
-  const filtered = PRODUCTS.filter(p => {
+  const filtered = allProducts.filter(p => {
     const matchSearch = !search ||
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       p.subtitle.toLowerCase().includes(search.toLowerCase()) ||
@@ -143,8 +156,8 @@ export default function BOMExplorer() {
     return matchSearch && matchCat && matchLife;
   });
 
-  const totalNodes = PRODUCTS.reduce((s, p) => s + p.total, 0);
-  const totalParts = PRODUCTS.reduce((s, p) => s + p.parts, 0);
+  const totalNodes = allProducts.reduce((s, p) => s + p.total, 0);
+  const totalParts = allProducts.reduce((s, p) => s + p.parts, 0);
 
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto">
@@ -156,7 +169,7 @@ export default function BOMExplorer() {
             <Button variant="secondary" size="sm">
               <Filter className="w-3.5 h-3.5" /> Export
             </Button>
-            <Button size="sm">
+            <Button size="sm" onClick={() => navigate('/bom/new')}>
               <Plus className="w-3.5 h-3.5" /> New BOM
             </Button>
           </div>
@@ -166,9 +179,9 @@ export default function BOMExplorer() {
       {/* Summary stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Products', value: PRODUCTS.length, accent: true },
+          { label: 'Products', value: allProducts.length, accent: true },
           { label: 'Total Nodes', value: totalNodes, accent: false },
-          { label: 'In Production', value: PRODUCTS.filter(p => p.lifecycle === 'Production').length, accent: false },
+          { label: 'In Production', value: allProducts.filter(p => p.lifecycle === 'Production').length, accent: false },
           { label: 'Total Parts', value: totalParts, accent: false },
         ].map(s => (
           <GlassCard key={s.label} className="px-4 py-3">
@@ -205,7 +218,7 @@ export default function BOMExplorer() {
         </div>
         {(categoryFilter !== 'All' || lifecycleFilter !== 'All' || search) && (
           <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/5">
-            <span className="text-xs text-slate-400">Showing <span className="text-teal-400 font-semibold">{filtered.length}</span> of {PRODUCTS.length} products</span>
+            <span className="text-xs text-slate-400">Showing <span className="text-teal-400 font-semibold">{filtered.length}</span> of {allProducts.length} products</span>
             <button
               onClick={() => { setSearch(''); setCategoryFilter('All'); setLifecycleFilter('All'); }}
               className="text-xs text-slate-500 hover:text-slate-300 underline transition-colors"
@@ -220,7 +233,7 @@ export default function BOMExplorer() {
       {filtered.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filtered.map((product, i) => (
-            <ProductCard key={product.id} product={product} index={i} />
+            <ProductCard key={product.id} product={product} index={i} isDraft={product.id.startsWith('draft-')} />
           ))}
           <CreateNewCard />
         </div>
@@ -244,7 +257,7 @@ export default function BOMExplorer() {
           <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-500">Recently Modified</h3>
         </div>
         <div className="space-y-2">
-          {[...PRODUCTS].sort((a, b) => b.lastModified.localeCompare(a.lastModified)).slice(0, 3).map(p => (
+          {[...allProducts].sort((a, b) => b.lastModified.localeCompare(a.lastModified)).slice(0, 3).map(p => (
             <div key={p.id} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-slate-800/40 transition-colors cursor-pointer group">
               <div className="flex items-center gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-teal-500" />

@@ -15,6 +15,7 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const DocumentHub = lazy(() => import('./pages/DocumentHub'));
 const DocumentDetail = lazy(() => import('./pages/DocumentDetail'));
 const BOMExplorer = lazy(() => import('./pages/BOMExplorer'));
+const BOMCreate = lazy(() => import('./pages/BOMCreate'));
 const BOMProductView = lazy(() => import('./pages/BOMProductView'));
 const PLKnowledgeHub = lazy(() => import('./pages/PLKnowledgeHub'));
 const PLDetail = lazy(() => import('./pages/PLDetail'));
@@ -38,7 +39,7 @@ const SystemHealth = lazy(() => import('./pages/SystemHealth'));
 
 function RouteFallback() {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 flex items-center justify-center">
+    <div className="app-shell-bg min-h-screen text-slate-200 flex items-center justify-center">
       <div className="text-sm text-slate-400">Loading workspace...</div>
     </div>
   );
@@ -73,6 +74,7 @@ const router = createBrowserRouter([
       { path: 'documents/ingest', element: <ProtectedRoute allowedRoles={[...ALL_ROLES]}><LazyView Component={DocumentIngestion} /></ProtectedRoute> },
       { path: 'documents/:id', element: <ProtectedRoute allowedRoles={[...ALL_ROLES]}><LazyView Component={DocumentDetail} /></ProtectedRoute> },
       { path: 'bom', element: <ProtectedRoute allowedRoles={[...ENGINEER_UP]}><LazyView Component={BOMExplorer} /></ProtectedRoute> },
+      { path: 'bom/new', element: <ProtectedRoute allowedRoles={[...ENGINEER_UP]}><LazyView Component={BOMCreate} /></ProtectedRoute> },
       { path: 'bom/:productId', element: <ProtectedRoute allowedRoles={[...ENGINEER_UP]}><LazyView Component={BOMProductView} /></ProtectedRoute> },
       { path: 'pl', element: <ProtectedRoute allowedRoles={[...ENGINEER_UP]}><LazyView Component={PLKnowledgeHub} /></ProtectedRoute> },
       { path: 'pl/:id', element: <ProtectedRoute allowedRoles={[...ENGINEER_UP]}><LazyView Component={PLDetail} /></ProtectedRoute> },

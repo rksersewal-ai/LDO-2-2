@@ -116,7 +116,7 @@ export function calculateDaysTaken(startDate: string, endDate: string): number {
 export function getKPIStatus(record: WorkRecord): { label: string; color: string; isOnTime: boolean } {
   const targetDays = record.targetDays ?? getTargetDays(record.workType);
   const today = new Date().toISOString().split('T')[0];
-  const endDate = record.completionDate ?? today;
+  const endDate = record.completionDate ?? record.closingDate ?? today;
   const daysTaken = calculateDaysTaken(record.date, endDate);
   const daysLeft = targetDays - daysTaken;
 
@@ -202,9 +202,9 @@ export const WorkLedgerService = {
         w.id.toLowerCase().includes(q) ||
         w.workType.toLowerCase().includes(q) ||
         w.description.toLowerCase().includes(q) ||
-        (w.referenceNumber?.toLowerCase().includes(q) ?? false) ||
         (w.plNumber?.toLowerCase().includes(q) ?? false) ||
         (w.eOfficeNumber?.toLowerCase().includes(q) ?? false) ||
+        (w.tenderNumber?.toLowerCase().includes(q) ?? false) ||
         (w.userName?.toLowerCase().includes(q) ?? false)
       )
     );

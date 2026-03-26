@@ -1,0 +1,176 @@
+INFO 2026-03-26 17:32:54,980 "GET /api/health/status/ HTTP/1.1" 200 182
+INFO 2026-03-26 17:33:40,542 "OPTIONS /api/auth/login/ HTTP/1.1" 200 0
+INFO 2026-03-26 17:33:43,454 "POST /api/auth/login/ HTTP/1.1" 200 611
+INFO 2026-03-26 17:36:58,518 "OPTIONS /api/pl-items/38110000/ HTTP/1.1" 200 0
+WARNING 2026-03-26 17:36:58,552 "GET /api/pl-items/38110000/ HTTP/1.1" 404 47
+WARNING 2026-03-26 17:36:58,666 "GET /api/pl-items/38110000/ HTTP/1.1" 404 47
+INFO 2026-03-26 17:37:10,250 "OPTIONS /api/pl-items/38100000/ HTTP/1.1" 200 0
+WARNING 2026-03-26 17:37:10,273 "GET /api/pl-items/38100000/ HTTP/1.1" 404 47
+WARNING 2026-03-26 17:37:10,398 "GET /api/pl-items/38100000/ HTTP/1.1" 404 47
+INFO 2026-03-26 17:49:48,840 "GET /api/health/status/ HTTP/1.1" 200 182
+INFO 2026-03-26 17:50:57,699 "POST /api/auth/login/ HTTP/1.1" 200 611
+INFO 2026-03-26 18:03:08,281 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 18342
+INFO 2026-03-26 18:03:08,283 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 18:03:08,359 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 18:03:08,383 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 18342
+INFO 2026-03-26 18:22:41,424 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 18:22:41,568 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 18342
+INFO 2026-03-26 18:22:41,640 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 18:22:41,708 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 18342
+INFO 2026-03-26 18:28:17,224 "GET /api/health/status/ HTTP/1.1" 200 182
+INFO 2026-03-26 18:29:05,669 "POST /api/auth/login/ HTTP/1.1" 200 611
+INFO 2026-03-26 18:30:50,256 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 18:30:50,373 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 18342
+INFO 2026-03-26 18:30:50,422 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 18:30:50,483 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 18342
+INFO 2026-03-26 18:30:57,337 "GET /api/pl-items/00000001/ HTTP/1.1" 200 894
+INFO 2026-03-26 18:30:57,438 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 18:30:57,493 "GET /api/pl-items/00000001/ HTTP/1.1" 200 894
+INFO 2026-03-26 18:30:57,650 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 18:31:08,775 "PATCH /api/pl-items/00000001/ HTTP/1.1" 200 894
+INFO 2026-03-26 18:31:08,925 "POST /api/pl-items/00000001/documents/set/ HTTP/1.1" 200 1254
+INFO 2026-03-26 18:31:08,982 "GET /api/pl-items/00000001/ HTTP/1.1" 200 1254
+INFO 2026-03-26 18:31:09,062 "GET /api/pl-items/00000001/ HTTP/1.1" 200 1254
+INFO 2026-03-26 18:31:09,146 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 18:31:16,903 "PATCH /api/pl-items/00000001/ HTTP/1.1" 200 1254
+INFO 2026-03-26 18:31:17,083 "POST /api/pl-items/00000001/documents/set/ HTTP/1.1" 200 1616
+INFO 2026-03-26 18:31:17,130 "GET /api/pl-items/00000001/ HTTP/1.1" 200 1616
+INFO 2026-03-26 18:31:17,235 "GET /api/pl-items/00000001/ HTTP/1.1" 200 1616
+INFO 2026-03-26 18:31:17,432 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 18:31:39,298 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 18:31:39,354 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 19064
+INFO 2026-03-26 18:31:39,436 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 18:31:39,493 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 19064
+INFO 2026-03-26 18:31:48,412 "GET /api/pl-items/00000001/ HTTP/1.1" 200 1616
+INFO 2026-03-26 18:31:48,663 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 18:31:48,683 "GET /api/pl-items/00000001/ HTTP/1.1" 200 1616
+INFO 2026-03-26 18:31:48,778 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 18:33:55,500 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 18:33:55,552 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 19064
+INFO 2026-03-26 18:33:55,633 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 18:33:55,694 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 19064
+ERROR 2026-03-26 18:36:10,508 Internal Server Error: /api/pl-items/
+Traceback (most recent call last):
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\rest_framework\mixins.py", line 19, in create
+    self.perform_create(serializer)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\rest_framework\mixins.py", line 24, in perform_create
+    serializer.save()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\rest_framework\serializers.py", line 210, in save
+    self.instance = self.create(validated_data)
+                    ~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\rest_framework\serializers.py", line 991, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\django\db\models\query.py", line 663, in create
+    obj.save(force_insert=True, using=self.db)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ravi\Downloads\EDMS-Figma-Plan\EDMS-Figma-Plan\backend\edms_api\models.py", line 247, in save
+    self.full_clean()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\django\db\models\base.py", line 1679, in full_clean
+    raise ValidationError(errors)
+django.core.exceptions.ValidationError: {'id': ['This field cannot be blank.']}
+ERROR 2026-03-26 18:36:10,508 Internal Server Error: /api/pl-items/
+Traceback (most recent call last):
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\rest_framework\mixins.py", line 19, in create
+    self.perform_create(serializer)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\rest_framework\mixins.py", line 24, in perform_create
+    serializer.save()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\rest_framework\serializers.py", line 210, in save
+    self.instance = self.create(validated_data)
+                    ~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\rest_framework\serializers.py", line 991, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\django\db\models\query.py", line 663, in create
+    obj.save(force_insert=True, using=self.db)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ravi\Downloads\EDMS-Figma-Plan\EDMS-Figma-Plan\backend\edms_api\models.py", line 247, in save
+    self.full_clean()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ravi\AppData\Roaming\Python\Python314\site-packages\django\db\models\base.py", line 1679, in full_clean
+    raise ValidationError(errors)
+django.core.exceptions.ValidationError: {'id': ['This field cannot be blank.']}
+ERROR 2026-03-26 18:36:11,077 "POST /api/pl-items/ HTTP/1.1" 500 164208
+INFO 2026-03-26 18:36:22,441 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 18:36:22,475 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 19064
+INFO 2026-03-26 18:37:04,024 "PATCH /api/pl-items/00000004/ HTTP/1.1" 200 921
+INFO 2026-03-26 18:37:04,418 "POST /api/pl-items/00000004/documents/set/ HTTP/1.1" 200 1644
+INFO 2026-03-26 18:37:04,480 "GET /api/pl-items/00000004/ HTTP/1.1" 200 1644
+INFO 2026-03-26 18:37:04,691 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 19787
+INFO 2026-03-26 18:37:08,424 "GET /api/pl-items/00000001/ HTTP/1.1" 200 1616
+INFO 2026-03-26 18:37:08,636 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 18:37:08,715 "GET /api/pl-items/00000001/ HTTP/1.1" 200 1616
+INFO 2026-03-26 18:37:09,001 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 18:37:40,053 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 19787
+INFO 2026-03-26 18:37:40,092 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 18:37:40,171 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 19787
+INFO 2026-03-26 18:37:40,193 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 18:39:56,670 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 19787
+INFO 2026-03-26 18:39:56,739 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 18:39:56,874 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 18:39:56,880 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 19787
+INFO 2026-03-26 19:28:25,687 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 19787
+INFO 2026-03-26 19:28:26,520 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 19787
+INFO 2026-03-26 19:28:27,142 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 19787
+INFO 2026-03-26 19:28:27,671 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 19787
+INFO 2026-03-26 19:29:04,874 "GET /api/pl-items/00000001/ HTTP/1.1" 200 1616
+INFO 2026-03-26 19:29:04,958 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 19:29:04,990 "GET /api/pl-items/00000001/ HTTP/1.1" 200 1616
+INFO 2026-03-26 19:29:05,147 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 19:29:27,747 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 19:29:27,762 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 19787
+INFO 2026-03-26 19:29:27,881 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 19:29:27,896 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 19787
+INFO 2026-03-26 19:29:31,976 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 19787
+INFO 2026-03-26 19:29:33,081 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 19787
+INFO 2026-03-26 19:33:02,162 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 19:33:02,197 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 19787
+INFO 2026-03-26 19:33:02,219 "GET /api/documents/?page=1&page_size=500 HTTP/1.1" 200 8926
+INFO 2026-03-26 19:33:02,254 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 19787
+INFO 2026-03-26 19:33:16,365 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 19787
+INFO 2026-03-26 19:33:16,636 "GET /api/pl-items/?page=1&page_size=500 HTTP/1.1" 200 19787

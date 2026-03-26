@@ -10,6 +10,7 @@ import { useRightPanel } from '../../contexts/RightPanelContext';
 import { PreferencesService } from '../../services/PreferencesService';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
+import { RightClickPalette } from '../ui/RightClickPalette';
 
 export default function AppLayout() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -52,7 +53,7 @@ export default function AppLayout() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="app-shell-bg min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-teal-500" />
       </div>
     );
@@ -82,7 +83,8 @@ export default function AppLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-teal-900/10 via-slate-950 to-green-900/10 text-slate-200 font-sans overflow-hidden flex flex-col">
+    <div className="app-shell-bg min-h-screen text-slate-200 font-sans overflow-hidden flex flex-col">
+      <RightClickPalette />
       <div className="flex flex-1 overflow-hidden relative">
         <Sidebar />
         <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
