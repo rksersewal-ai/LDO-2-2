@@ -9,6 +9,13 @@ import { PRODUCTS } from '../lib/bomData';
 import type { Product } from '../lib/bomData';
 import { GlassCard, Badge, Button, Input, FilterPills, PageHeader } from '../components/ui/Shared';
 import { BomDraftService } from '../services/BomDraftService';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../components/ui/dropdown-menu';
+import { ExportImportService } from '../services/ExportImportService';
 
 const PRODUCT_ICONS: Record<string, React.ElementType> = {
   Train, Container: Package, Layers, Zap,
@@ -159,6 +166,54 @@ export default function BOMExplorer() {
   const totalNodes = allProducts.reduce((s, p) => s + p.total, 0);
   const totalParts = allProducts.reduce((s, p) => s + p.parts, 0);
 
+  const exportSubtitle = [
+    categoryFilter !== 'All' ? `Category: ${categoryFilter}` : null,
+    lifecycleFilter !== 'All' ? `Lifecycle: ${lifecycleFilter}` : null,
+    search ? `Search: ${search}` : null,
+  ].filter(Boolean).join(' • ');
+
+  const exportRows = filtered.map((product) => ([
+    product.name,
+    product.subtitle,
+    product.category,
+    product.rootPL,
+    product.revision,
+    product.lifecycle,
+    product.total,
+    product.assemblies,
+    product.parts,
+    product.lastModified,
+    product.description,
+  ]));
+
+  const exportHeaders = [
+    'Product',
+    'Subtitle',
+    'Category',
+    'Root PL',
+    'Revision',
+    'Lifecycle',
+    'Total Nodes',
+    'Assemblies',
+    'Parts',
+    'Last Modified',
+    'Description',
+  ];
+
+  const exportProducts = (format: 'excel' | 'word' | 'pdf') => {
+    if (format === 'excel') {
+      ExportImportService.exportGenericTableExcel('BOM Explorer', exportHeaders, exportRows, 'bom-explorer');
+      return;
+    }
+
+    if (format === 'word') {
+      ExportImportService.exportGenericTableWord('BOM Explorer Snapshot', exportHeaders, exportRows, 'bom-explorer', exportSubtitle || undefined);
+      return;
+    }
+
+    ExportImportService.exportGenericTablePdf('BOM Explorer Snapshot', exportHeaders, exportRows, exportSubtitle || undefined);
+  };
+
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto">
       <PageHeader
@@ -166,9 +221,24 @@ export default function BOMExplorer() {
         subtitle="Select a product to explore its full Bill of Materials hierarchy"
         actions={
           <div className="flex items-center gap-2">
-            <Button variant="secondary" size="sm">
-              <Filter className="w-3.5 h-3.5" /> Export
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="secondary" size="sm">
+                  <Filter className="w-3.5 h-3.5" /> Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52 border border-slate-700/60 bg-slate-950 text-slate-200">
+                <DropdownMenuItem className="focus:bg-slate-800" onSelect={() => exportProducts('excel')}>
+                  Export filtered list to Excel
+                </DropdownMenuItem>
+                <DropdownMenuItem className="focus:bg-slate-800" onSelect={() => exportProducts('word')}>
+                  Export filtered list to Word
+                </DropdownMenuItem>
+                <DropdownMenuItem className="focus:bg-slate-800" onSelect={() => exportProducts('pdf')}>
+                  Export filtered list to PDF
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button size="sm" onClick={() => navigate('/bom/new')}>
               <Plus className="w-3.5 h-3.5" /> New BOM
             </Button>
@@ -258,7 +328,12 @@ export default function BOMExplorer() {
         </div>
         <div className="space-y-2">
           {[...allProducts].sort((a, b) => b.lastModified.localeCompare(a.lastModified)).slice(0, 3).map(p => (
-            <div key={p.id} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-slate-800/40 transition-colors cursor-pointer group">
+            <button
+              type="button"
+              key={p.id}
+              onClick={() => navigate(`/bom/${p.id}`)}
+              className="w-full flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-slate-800/40 transition-colors cursor-pointer group text-left"
+            >
               <div className="flex items-center gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-teal-500" />
                 <span className="text-sm text-slate-300 group-hover:text-white transition-colors">{p.name}</span>
@@ -268,7 +343,7 @@ export default function BOMExplorer() {
                 <span className="text-xs text-slate-500">{p.lastModified}</span>
                 <ChevronRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-teal-400 transition-colors" />
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </GlassCard>

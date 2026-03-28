@@ -6,7 +6,7 @@ import {
   Briefcase, CheckSquare, BarChart3, ShieldAlert,
   Settings, ServerCog, DatabaseBackup,
   Megaphone, ClipboardList, FileBarChart, BookOpen, Telescope,
-  Bell, FileCheck2, MonitorCheck, ChevronRight, CopyCheck,
+  Bell, FileCheck2, MonitorCheck, ChevronRight, CopyCheck, Users,
 } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import type { UserRole } from '../../lib/auth';
@@ -66,6 +66,7 @@ const navGroups: NavGroup[] = [
     label: "System",
     items: [
       { icon: ServerCog, label: "Admin", path: "/admin", roles: ['admin'], exact: true },
+      { icon: Users, label: "Users", path: "/admin/users", roles: ['admin'] },
       { icon: CopyCheck, label: "Deduplication", path: "/admin/deduplication", roles: ['admin'] },
       { icon: Activity, label: "OCR Monitor", path: "/ocr", roles: ['admin'] },
       { icon: MonitorCheck, label: "System Health", path: "/health", roles: ['admin'] },

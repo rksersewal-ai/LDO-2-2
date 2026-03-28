@@ -207,13 +207,15 @@
 
 .app-shell-bg::after {
   background:
-    linear-gradient(116deg, transparent 0 22%, rgba(34, 211, 238, 0.05) 22% 22.6%, transparent 22.6% 100%),
-    linear-gradient(180deg, transparent 0 52%, rgba(148, 163, 184, 0.055) 52% 52.6%, transparent 52.6% 100%),
-    linear-gradient(90deg, transparent 0 74%, rgba(20, 184, 166, 0.045) 74% 74.6%, transparent 74.6% 100%),
-    radial-gradient(circle at 22% 72%, rgba(45, 212, 191, 0.16) 0 2px, transparent 3px),
-    radial-gradient(circle at 74% 34%, rgba(56, 189, 248, 0.16) 0 2px, transparent 3px),
-    radial-gradient(circle at 58% 22%, rgba(148, 163, 184, 0.16) 0 1.5px, transparent 3px);
-  opacity: 0.48;
+    radial-gradient(circle at 22% 72%, rgba(45, 212, 191, 0.14) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 74% 34%, rgba(56, 189, 248, 0.14) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 58% 22%, rgba(148, 163, 184, 0.14) 0 1.25px, transparent 2.5px),
+    radial-gradient(circle at 40% 54%, rgba(20, 184, 166, 0.09) 0 1px, transparent 2.2px),
+    linear-gradient(rgba(34, 211, 238, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 211, 238, 0.018) 1px, transparent 1px);
+  background-size: auto, auto, auto, auto, 224px 224px, 224px 224px;
+  background-position: center, center, center, center, 48px 48px, 48px 48px;
+  opacity: 0.26;
 }
 
 @layer base {
@@ -227,7 +229,7 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-size: 14px;
+    font-size: var(--app-font-size, 14px);
     line-height: 1.5;
   }
   :focus-visible {
@@ -242,6 +244,15 @@
   ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
   ::-webkit-scrollbar-thumb { background: rgba(20, 184, 166, 0.2); border-radius: 4px; }
   ::-webkit-scrollbar-thumb:hover { background: rgba(20, 184, 166, 0.4); }
+}
+
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
 }
 
 @layer utilities {

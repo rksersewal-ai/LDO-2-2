@@ -3,6 +3,47 @@ import type { WorkRecord } from '../lib/types';
 import { MOCK_DOCUMENTS } from '../lib/mock';
 
 export class ExportImportService {
+  private static buildTableHtml(title: string, headers: string[], rows: Array<Array<string | number>>, subtitle?: string) {
+    const head = headers.map((header) => `<th>${this.escapeHtml(header)}</th>`).join('');
+    const body = rows
+      .map((row) => `<tr>${row.map((cell) => `<td>${this.escapeHtml(String(cell ?? ''))}</td>`).join('')}</tr>`)
+      .join('');
+
+    return `<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>${this.escapeHtml(title)}</title>
+    <style>
+      body { font-family: Segoe UI, Arial, sans-serif; padding: 28px; color: #0f172a; }
+      h1 { margin: 0 0 6px; font-size: 22px; }
+      p { margin: 0 0 18px; color: #475569; font-size: 12px; }
+      table { width: 100%; border-collapse: collapse; font-size: 12px; }
+      th, td { border: 1px solid #cbd5e1; padding: 8px 10px; text-align: left; vertical-align: top; }
+      th { background: #e2e8f0; font-weight: 700; }
+      tr:nth-child(even) td { background: #f8fafc; }
+    </style>
+  </head>
+  <body>
+    <h1>${this.escapeHtml(title)}</h1>
+    ${subtitle ? `<p>${this.escapeHtml(subtitle)}</p>` : ''}
+    <table>
+      <thead><tr>${head}</tr></thead>
+      <tbody>${body}</tbody>
+    </table>
+  </body>
+</html>`;
+  }
+
+  private static escapeHtml(value: string) {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   private static getDaysTaken(record: WorkRecord): number | '' {
     if (record.daysTaken != null) {
       return record.daysTaken;
@@ -124,6 +165,35 @@ export class ExportImportService {
   static downloadDocumentsCSV() {
     const date = new Date().toISOString().split('T')[0];
     this.downloadBlob(this.exportDocumentsCSV(), `documents-${date}.csv`);
+  }
+
+  static exportGenericTableExcel(sheetName: string, headers: string[], rows: Array<Array<string | number>>, filenamePrefix: string) {
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    ws['!cols'] = headers.map((header) => ({ wch: Math.max(16, Math.min(42, header.length + 8)) }));
+    XLSX.utils.book_append_sheet(wb, ws, sheetName.slice(0, 31) || 'Report');
+    const date = new Date().toISOString().split('T')[0];
+    XLSX.writeFile(wb, `${filenamePrefix}-${date}.xlsx`);
+  }
+
+  static exportGenericTableWord(title: string, headers: string[], rows: Array<Array<string | number>>, filenamePrefix: string, subtitle?: string) {
+    const html = this.buildTableHtml(title, headers, rows, subtitle);
+    const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+    const date = new Date().toISOString().split('T')[0];
+    this.downloadBlob(blob, `${filenamePrefix}-${date}.doc`);
+  }
+
+  static exportGenericTablePdf(title: string, headers: string[], rows: Array<Array<string | number>>, subtitle?: string) {
+    const html = this.buildTableHtml(title, headers, rows, subtitle);
+    const printWindow = window.open('', '_blank', 'width=1200,height=900');
+    if (!printWindow) return;
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.focus();
+    window.setTimeout(() => {
+      printWindow.print();
+    }, 250);
   }
 
   static getImportTemplate(): Blob {

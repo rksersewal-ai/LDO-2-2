@@ -1,9 +1,11 @@
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
 from django.db.models import Q
+from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
-from edms_api.models import Document, PlBomLine, PlDocumentLink, PlItem
+from edms_api.models import Document, PlBomLine, PlDocumentLink, PlItem, SupervisorDocumentReview
 from shared.services import AuditService, EventService
 
 
@@ -56,6 +58,11 @@ class PlItemService:
             )
             document.linked_pl = pl_item.id
             document.save(update_fields=['linked_pl'])
+            SupervisorDocumentReviewService.create_or_refresh_for_link(
+                pl_item,
+                document,
+                requested_by=request.user,
+            )
 
         AuditService.log('UPDATE', 'Document', user=request.user, entity=pl_item.id, ip_address=request.META.get('REMOTE_ADDR'))
         EventService.publish(
@@ -82,6 +89,11 @@ class PlItemService:
             link.save(update_fields=['link_role', 'notes', 'updated_at'])
         document.linked_pl = pl_item.id
         document.save(update_fields=['linked_pl'])
+        SupervisorDocumentReviewService.create_or_refresh_for_link(
+            pl_item,
+            document,
+            requested_by=request.user,
+        )
         AuditService.log('UPDATE', 'Document', user=request.user, entity=pl_item.id, ip_address=request.META.get('REMOTE_ADDR'))
         EventService.publish(
             'PlLinkedToDocument',
@@ -226,3 +238,238 @@ class BomService:
             idempotency_key=f'bom-move:{line.id}:{line.updated_at.isoformat()}',
         )
         return line
+
+
+class SupervisorDocumentReviewService:
+    @staticmethod
+    def normalize_family_key(document):
+        return f"{(document.name or '').strip().lower()}::{(document.category or '').strip().lower()}"
+
+    @staticmethod
+    def _matches_design_supervisor(user, supervisor_name):
+        normalized_supervisor = (supervisor_name or '').strip().lower()
+        if not normalized_supervisor:
+            return False
+
+        candidates = [
+            getattr(user, 'username', ''),
+            user.get_full_name() if hasattr(user, 'get_full_name') else '',
+            getattr(user, 'first_name', ''),
+            getattr(user, 'last_name', ''),
+            getattr(user, 'designation', ''),
+            getattr(user, 'email', ''),
+        ]
+        normalized_candidates = [candidate.strip().lower() for candidate in candidates if candidate]
+        return any(
+            normalized_supervisor in candidate or candidate in normalized_supervisor
+            for candidate in normalized_candidates
+        )
+
+    @staticmethod
+    def visible_reviews_for_user(user):
+        queryset = SupervisorDocumentReview.objects.select_related(
+            'pl_item',
+            'latest_document',
+            'previous_document',
+            'requested_by',
+            'resolved_by',
+        )
+        status_filter = getattr(user, 'is_authenticated', False)
+        if not status_filter:
+            return queryset.none()
+
+        queryset = queryset.filter(status='PENDING')
+        if user.is_superuser or user.is_staff:
+            return queryset
+
+        ids = [
+            review.id
+            for review in queryset
+            if SupervisorDocumentReviewService._matches_design_supervisor(user, review.design_supervisor)
+        ]
+        return queryset.filter(id__in=ids)
+
+    @staticmethod
+    @transaction.atomic
+    def create_or_refresh_for_link(pl_item, latest_document, *, requested_by=None, previous_revision=None):
+        if not pl_item.design_supervisor:
+            return None
+
+        family_key = SupervisorDocumentReviewService.normalize_family_key(latest_document)
+        if not family_key or family_key == '::':
+            return None
+
+        candidate_documents = [
+            link.document
+            for link in pl_item.document_links.select_related('document').all()
+            if link.document_id != latest_document.id
+            and SupervisorDocumentReviewService.normalize_family_key(link.document) == family_key
+        ]
+        previous_document = None
+        previous_document_revision = previous_revision
+        if candidate_documents:
+            previous_document = max(
+                candidate_documents,
+                key=lambda item: (item.revision, item.updated_at or item.created_at, item.id),
+            )
+            previous_document_revision = previous_document.revision
+
+        if previous_document is None and previous_document_revision is None:
+            return None
+
+        if previous_document_revision is not None and latest_document.revision <= previous_document_revision:
+            return None
+
+        summary = (
+            f"Review document {latest_document.name} rev {latest_document.revision} for PL {pl_item.id}. "
+            f"Current linked revision is {previous_document_revision} on {(previous_document.id if previous_document else latest_document.id)}."
+        )
+
+        review, created = SupervisorDocumentReview.objects.update_or_create(
+            pl_item=pl_item,
+            latest_document=latest_document,
+            latest_revision=latest_document.revision,
+            status='PENDING',
+            defaults={
+                'previous_document': previous_document,
+                'previous_revision': previous_document_revision,
+                'document_family_key': family_key,
+                'design_supervisor': pl_item.design_supervisor,
+                'change_summary': summary,
+                'requested_by': requested_by,
+                'resolved_by': None,
+                'resolution_notes': '',
+                'bypass_reason': '',
+                'resolved_at': None,
+            },
+        )
+
+        AuditService.log(
+            'REVIEW',
+            'Approval',
+            user=requested_by,
+            entity=str(review.id),
+            details={
+                'pl_item': pl_item.id,
+                'latest_document': latest_document.id,
+                'latest_revision': latest_document.revision,
+                'previous_document': previous_document.id if previous_document else latest_document.id,
+                'previous_revision': previous_document_revision,
+                'design_supervisor': pl_item.design_supervisor,
+                'created': created,
+            },
+        )
+        EventService.publish(
+            'DocumentChangeReviewPending',
+            'SupervisorDocumentReview',
+            review.id,
+            {
+                'pl_item': pl_item.id,
+                'latest_document': latest_document.id,
+                'previous_document': previous_document.id if previous_document else latest_document.id,
+                'design_supervisor': pl_item.design_supervisor,
+            },
+            idempotency_key=f'document-review-pending:{pl_item.id}:{latest_document.id}:{latest_document.revision}',
+        )
+        return review
+
+    @staticmethod
+    @transaction.atomic
+    def approve(review, *, user, notes='', request=None):
+        if review.status != 'PENDING':
+            raise ValidationError({'status': 'Only pending reviews can be approved.'})
+        review.status = 'APPROVED'
+        review.resolved_by = user
+        review.resolution_notes = notes or ''
+        review.resolved_at = timezone.now()
+        review.save(update_fields=['status', 'resolved_by', 'resolution_notes', 'resolved_at', 'updated_at'])
+
+        latest_document = review.latest_document
+        previous_document = review.previous_document
+
+        latest_document.linked_pl = review.pl_item_id
+        latest_document.save(update_fields=['linked_pl', 'updated_at'])
+        PlDocumentLink.objects.get_or_create(
+            pl_item=review.pl_item,
+            document=latest_document,
+            defaults={'link_role': 'GENERAL'},
+        )
+
+        if previous_document and previous_document.id != latest_document.id:
+            previous_document.status = 'Obsolete'
+            previous_document.save(update_fields=['status', 'updated_at'])
+
+        AuditService.log(
+            'APPROVE',
+            'Approval',
+            user=user,
+            entity=str(review.id),
+            details={
+                'pl_item': review.pl_item_id,
+                'latest_document': latest_document.id,
+                'previous_document': previous_document.id if previous_document else None,
+                'notes': notes or '',
+            },
+            ip_address=request.META.get('REMOTE_ADDR') if request else None,
+        )
+        EventService.publish(
+            'DesignSupervisorApprovedDocumentChange',
+            'SupervisorDocumentReview',
+            review.id,
+            {
+                'pl_item': review.pl_item_id,
+                'latest_document': latest_document.id,
+                'previous_document': previous_document.id if previous_document else None,
+            },
+            idempotency_key=f'document-review-approved:{review.id}',
+        )
+        return review
+
+    @staticmethod
+    @transaction.atomic
+    def bypass(review, *, user, notes='', bypass_reason='', request=None):
+        if review.status != 'PENDING':
+            raise ValidationError({'status': 'Only pending reviews can be bypassed.'})
+        review.status = 'BYPASSED'
+        review.resolved_by = user
+        review.resolution_notes = notes or ''
+        review.bypass_reason = bypass_reason or notes or ''
+        review.resolved_at = timezone.now()
+        review.save(
+            update_fields=[
+                'status',
+                'resolved_by',
+                'resolution_notes',
+                'bypass_reason',
+                'resolved_at',
+                'updated_at',
+            ]
+        )
+
+        AuditService.log(
+            'BYPASS',
+            'Approval',
+            user=user,
+            entity=str(review.id),
+            details={
+                'pl_item': review.pl_item_id,
+                'latest_document': review.latest_document_id,
+                'previous_document': review.previous_document_id,
+                'bypass_reason': review.bypass_reason,
+                'notes': notes or '',
+            },
+            ip_address=request.META.get('REMOTE_ADDR') if request else None,
+        )
+        EventService.publish(
+            'DesignSupervisorBypassedDocumentChange',
+            'SupervisorDocumentReview',
+            review.id,
+            {
+                'pl_item': review.pl_item_id,
+                'latest_document': review.latest_document_id,
+                'previous_document': review.previous_document_id,
+                'bypass_reason': review.bypass_reason,
+            },
+            idempotency_key=f'document-review-bypassed:{review.id}',
+        )
+        return review

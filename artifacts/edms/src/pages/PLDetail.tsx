@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router';
+import { useState, useMemo, useEffect } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router';
 import { GlassCard, Badge, Button, Input, Select } from '../components/ui/Shared';
 import { DatePicker } from '../components/ui/DatePicker';
 import { PLNumberSelect } from '../components/ui/PLNumberSelect';
@@ -9,7 +9,9 @@ import { MOCK_PL_RECORDS } from '../lib/mock';
 import { getPLRecord } from '../lib/bomData';
 import { usePLItem, usePLItems } from '../hooks/usePLItems';
 import { usePlLinkableDocuments, type PlLinkableDocument } from '../hooks/usePlLinkableDocuments';
+import { useDocumentChangeAlerts } from '../hooks/useDocumentChangeAlerts';
 import { PLService } from '../services/PLService';
+import type { DocumentChangeAlert } from '../services/DocumentChangeAlertService';
 import type { PLNumber, EngineeringChange, SafetyClassification, InspectionCategory } from '../lib/types';
 import { INSPECTION_CATEGORY_LABELS, AGENCIES } from '../lib/constants';
 import { LoadingState } from '../components/ui/LoadingState';
@@ -91,10 +93,23 @@ interface DocumentLinkingSectionProps {
   pl: PLNumber;
   documents: PlLinkableDocument[];
   documentsLoading: boolean;
+  documentAlerts?: Record<string, DocumentChangeAlert>;
   onLinkChange: (nextLinkedIds: string[]) => Promise<void> | void;
+  onApproveAlert?: (alertId: string, notes?: string) => Promise<void> | void;
+  onBypassAlert?: (alertId: string, payload?: { notes?: string; bypassReason?: string }) => Promise<void> | void;
+  focusedDocumentId?: string | null;
 }
 
-function DocumentLinkingSection({ pl, documents, documentsLoading, onLinkChange }: DocumentLinkingSectionProps) {
+function DocumentLinkingSection({
+  pl,
+  documents,
+  documentsLoading,
+  documentAlerts = {},
+  onLinkChange,
+  onApproveAlert,
+  onBypassAlert,
+  focusedDocumentId,
+}: DocumentLinkingSectionProps) {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const linkedDocs = useMemo(() =>
@@ -193,10 +208,42 @@ function DocumentLinkingSection({ pl, documents, documentsLoading, onLinkChange 
         <div className="flex-1 overflow-y-auto space-y-2 custom-scrollbar">
           {linkedDocs.length > 0 ? (
             linkedDocs.map(doc => (
+              (() => {
+                const alert = documentAlerts[doc.id];
+                const isFocused = focusedDocumentId === doc.id;
+                return (
               <div
                 key={doc.id}
-                className="p-3 rounded-lg bg-slate-800/40 border border-teal-500/20 hover:border-teal-500/40 transition-all"
+                className={`p-3 rounded-lg bg-slate-800/40 border transition-all ${alert ? 'border-amber-500/30 hover:border-amber-400/50' : 'border-teal-500/20 hover:border-teal-500/40'} ${isFocused ? 'ring-2 ring-amber-400/60 shadow-[0_0_0_1px_rgba(251,191,36,0.18)]' : ''}`}
               >
+                {alert && (
+                  <div className="mb-2 flex items-center justify-between gap-2 rounded-lg border border-amber-500/25 bg-amber-500/10 px-2.5 py-1.5">
+                    <div className="flex min-w-0 items-center gap-1.5 text-[10px] text-amber-200">
+                      <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                      <span className="truncate">Latest linked change pending supervisor review</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        void onApproveAlert?.(alert.id, 'Approved from PL linked documents');
+                      }}
+                      className="shrink-0 rounded-md border border-amber-400/30 px-2 py-0.5 text-[9px] font-semibold text-amber-100 hover:bg-amber-500/12 transition-colors"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        void onBypassAlert?.(alert.id, { bypassReason: 'Bypassed from PL linked documents' });
+                      }}
+                      className="shrink-0 rounded-md border border-rose-400/30 px-2 py-0.5 text-[9px] font-semibold text-rose-200 hover:bg-rose-500/12 transition-colors"
+                    >
+                      Bypass
+                    </button>
+                  </div>
+                )}
                 <div className="flex items-start gap-2 mb-2">
                   <FileText className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0">
@@ -223,6 +270,8 @@ function DocumentLinkingSection({ pl, documents, documentsLoading, onLinkChange 
                   </Button>
                 </div>
               </div>
+                );
+              })()
             ))
           ) : (
             <div className="text-center py-8 text-slate-500">
@@ -658,6 +707,10 @@ function AddECForm({ onAdd, onCancel }: AddECFormProps) {
 
 type PLNumberTab = 'overview' | 'documents' | 'changes' | 'crossrefs';
 
+function isPLNumberTab(value: string | null): value is PLNumberTab {
+  return value === 'overview' || value === 'documents' || value === 'changes' || value === 'crossrefs';
+}
+
 function PLNumberDetailView({
   pl,
   onUpdate,
@@ -666,17 +719,33 @@ function PLNumberDetailView({
   onUpdate: (patch: Partial<PLNumber>) => Promise<void>;
 }) {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<PLNumberTab>('overview');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<PLNumberTab>(() => (
+    isPLNumberTab(searchParams.get('tab')) ? searchParams.get('tab') as PLNumberTab : 'overview'
+  ));
   const [editOpen, setEditOpen] = useState(false);
   const [showAddEC, setShowAddEC] = useState(false);
   const { documents, loading: documentsLoading } = usePlLinkableDocuments();
+  const { alerts: documentAlerts, approveAlert, bypassAlert } = useDocumentChangeAlerts({ plItem: pl.id });
+  const focusedDocumentId = searchParams.get('doc');
 
   const linkedDocs = useMemo(() =>
     documents.filter(d => (pl.linkedDocumentIds ?? []).includes(d.id)),
     [documents, pl.linkedDocumentIds]
   );
+  const documentAlertMap = useMemo(
+    () => Object.fromEntries(documentAlerts.map((alert) => [alert.documentId, alert])),
+    [documentAlerts],
+  );
 
   const engineeringChanges = pl.engineeringChanges ?? [];
+
+  useEffect(() => {
+    const nextTab = searchParams.get('tab');
+    if (isPLNumberTab(nextTab)) {
+      setActiveTab(nextTab);
+    }
+  }, [searchParams]);
 
   const handleAddEC = async (ec: Omit<EngineeringChange, 'id'>) => {
     const newEC: EngineeringChange = {
@@ -685,6 +754,18 @@ function PLNumberDetailView({
     };
     await onUpdate({ engineeringChanges: [...engineeringChanges, newEC] });
     setShowAddEC(false);
+  };
+
+  const handleTabChange = (tab: PLNumberTab) => {
+    setActiveTab(tab);
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      next.set('tab', tab);
+      if (tab !== 'documents' && tab !== 'crossrefs') {
+        next.delete('doc');
+      }
+      return next;
+    }, { replace: true });
   };
 
   const tabs: { id: PLNumberTab; label: string; count?: number }[] = [
@@ -742,7 +823,7 @@ function PLNumberDetailView({
         {tabs.map(tab => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => handleTabChange(tab.id)}
             className={`flex-shrink-0 px-4 py-2.5 text-xs font-medium border-b-2 transition-all -mb-px flex items-center gap-1.5 ${
               activeTab === tab.id ? 'border-teal-500 text-teal-300' : 'border-transparent text-slate-500 hover:text-slate-300'
             }`}
@@ -927,7 +1008,11 @@ function PLNumberDetailView({
           pl={pl}
           documents={documents}
           documentsLoading={documentsLoading}
+          documentAlerts={documentAlertMap}
           onLinkChange={(nextLinkedIds) => onUpdate({ linkedDocumentIds: nextLinkedIds })}
+          onApproveAlert={approveAlert}
+          onBypassAlert={bypassAlert}
+          focusedDocumentId={focusedDocumentId}
         />
       )}
 
@@ -999,30 +1084,70 @@ function PLNumberDetailView({
               <FileText className="w-4 h-4 text-teal-400" />
               <h2 className="text-sm font-bold text-white">Documents</h2>
               <span className="px-1.5 py-0.5 bg-teal-500/10 text-teal-300 border border-teal-500/20 rounded-full text-[10px] font-semibold">{linkedDocs.length}</span>
+              {documentAlerts.length > 0 && (
+                <span className="px-1.5 py-0.5 bg-amber-500/10 text-amber-200 border border-amber-500/25 rounded-full text-[10px] font-semibold">
+                  {documentAlerts.length} alert{documentAlerts.length === 1 ? '' : 's'}
+                </span>
+              )}
             </div>
             {linkedDocs.length > 0 ? (
               <div className="space-y-1.5">
-                {linkedDocs.map(doc => (
-                  <div
-                    key={doc.id}
-                    className="flex items-center gap-3 p-2.5 rounded-lg bg-slate-800/30 border border-slate-700/40 hover:border-teal-500/30 cursor-pointer transition-all"
-                    onClick={() => navigate(`/documents/${doc.id}`)}
-                  >
-                    <FileText className="w-4 h-4 text-teal-400 shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <span className="text-sm text-slate-200 truncate">{doc.name}</span>
-                      <span className="font-mono text-[10px] text-slate-500 ml-2">{doc.id}</span>
+                {linkedDocs.map(doc => {
+                  const alert = documentAlertMap[doc.id];
+                  const isFocused = focusedDocumentId === doc.id;
+
+                  return (
+                    <div
+                      key={doc.id}
+                      className={`flex items-center gap-3 p-2.5 rounded-lg bg-slate-800/30 border cursor-pointer transition-all ${alert ? 'border-amber-500/25 hover:border-amber-400/45' : 'border-slate-700/40 hover:border-teal-500/30'} ${isFocused ? 'ring-2 ring-amber-400/50' : ''}`}
+                      onClick={() => navigate(`/documents/${doc.id}`)}
+                    >
+                      <FileText className="w-4 h-4 text-teal-400 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm text-slate-200 truncate">{doc.name}</span>
+                        <span className="font-mono text-[10px] text-slate-500 ml-2">{doc.id}</span>
+                        {alert && (
+                          <span className="ml-2 inline-flex items-center gap-1 rounded-full border border-amber-500/25 bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-amber-200">
+                            <AlertTriangle className="w-2.5 h-2.5" />
+                            Change alert
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {(doc.ocrStatus === 'Completed' || doc.ocrStatus === 'COMPLETED') && (
+                          <span className="flex items-center gap-1 px-1.5 py-0.5 bg-indigo-500/10 border border-indigo-500/30 rounded-full text-[9px] text-indigo-300">
+                            <FileSearch className="w-2.5 h-2.5" /> OCR
+                          </span>
+                        )}
+                        {alert && (
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              void approveAlert(alert.id, 'Approved from PL cross-reference list');
+                            }}
+                            className="rounded-full border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 text-[9px] font-semibold text-amber-100 hover:bg-amber-500/14 transition-colors"
+                          >
+                            Approve
+                          </button>
+                        )}
+                        {alert && (
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              void bypassAlert(alert.id, { bypassReason: 'Bypassed from PL cross-reference list' });
+                            }}
+                            className="rounded-full border border-rose-500/25 bg-rose-500/10 px-2 py-0.5 text-[9px] font-semibold text-rose-100 hover:bg-rose-500/14 transition-colors"
+                          >
+                            Bypass
+                          </button>
+                        )}
+                        <Badge variant={statusBadgeVariant(doc.status)} className="text-[9px]">{doc.status}</Badge>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      {(doc.ocrStatus === 'Completed' || doc.ocrStatus === 'COMPLETED') && (
-                        <span className="flex items-center gap-1 px-1.5 py-0.5 bg-indigo-500/10 border border-indigo-500/30 rounded-full text-[9px] text-indigo-300">
-                          <FileSearch className="w-2.5 h-2.5" /> OCR
-                        </span>
-                      )}
-                      <Badge variant={statusBadgeVariant(doc.status)} className="text-[9px]">{doc.status}</Badge>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <p className="text-slate-500 text-sm">No documents linked.</p>

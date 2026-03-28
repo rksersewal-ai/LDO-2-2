@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from edms_api.models import PlBomLine, PlDocumentLink, PlItem
+from edms_api.models import PlBomLine, PlDocumentLink, PlItem, SupervisorDocumentReview
 
 
 class PlDocumentLinkSerializer(serializers.ModelSerializer):
@@ -144,3 +144,53 @@ class BomMoveSerializer(serializers.Serializer):
     line_order = serializers.IntegerField(required=False, min_value=0)
     find_number = serializers.CharField(required=False)
 
+
+class SupervisorDocumentReviewSerializer(serializers.ModelSerializer):
+    pl_number = serializers.CharField(source='pl_item.id', read_only=True)
+    pl_name = serializers.CharField(source='pl_item.name', read_only=True)
+    latest_document_id = serializers.CharField(source='latest_document.id', read_only=True)
+    latest_document_name = serializers.CharField(source='latest_document.name', read_only=True)
+    latest_document_status = serializers.CharField(source='latest_document.status', read_only=True)
+    latest_document_type = serializers.CharField(source='latest_document.type', read_only=True)
+    previous_document_id = serializers.CharField(source='previous_document.id', read_only=True, allow_null=True)
+    previous_document_name = serializers.CharField(source='previous_document.name', read_only=True, allow_null=True)
+    previous_document_status = serializers.CharField(source='previous_document.status', read_only=True, allow_null=True)
+    previous_document_type = serializers.CharField(source='previous_document.type', read_only=True, allow_null=True)
+
+    class Meta:
+        model = SupervisorDocumentReview
+        fields = [
+            'id',
+            'status',
+            'pl_item',
+            'pl_number',
+            'pl_name',
+            'design_supervisor',
+            'latest_document',
+            'latest_document_id',
+            'latest_document_name',
+            'latest_document_status',
+            'latest_document_type',
+            'latest_revision',
+            'previous_document',
+            'previous_document_id',
+            'previous_document_name',
+            'previous_document_status',
+            'previous_document_type',
+            'previous_revision',
+            'document_family_key',
+            'change_summary',
+            'requested_by',
+            'resolved_by',
+            'resolution_notes',
+            'bypass_reason',
+            'created_at',
+            'updated_at',
+            'resolved_at',
+        ]
+        read_only_fields = fields
+
+
+class SupervisorDocumentReviewDecisionSerializer(serializers.Serializer):
+    notes = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    bypass_reason = serializers.CharField(required=False, allow_blank=True, allow_null=True)

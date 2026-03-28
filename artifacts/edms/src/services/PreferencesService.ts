@@ -1,4 +1,5 @@
 const PREFS_KEY = 'ldo2_preferences';
+const PREFS_EVENT = 'ldo2_preferences_updated';
 
 export interface UserPreferences {
   theme: 'dark' | 'light' | 'system';
@@ -9,6 +10,12 @@ export interface UserPreferences {
   workLedgerPageSize: number;
   documentHubPageSize: number;
   lastVisitedPath: string;
+  fontSize: number;
+  dateFormat: 'dd-mmm-yyyy' | 'yyyy-mm-dd';
+  timeFormat: '12h' | '24h';
+  compactTables: boolean;
+  reduceMotion: boolean;
+  showLiveClock: boolean;
 }
 
 const DEFAULTS: UserPreferences = {
@@ -20,6 +27,12 @@ const DEFAULTS: UserPreferences = {
   workLedgerPageSize: 20,
   documentHubPageSize: 20,
   lastVisitedPath: '/',
+  fontSize: 14,
+  dateFormat: 'dd-mmm-yyyy',
+  timeFormat: '24h',
+  compactTables: false,
+  reduceMotion: false,
+  showLiveClock: true,
 };
 
 export class PreferencesService {
@@ -36,11 +49,34 @@ export class PreferencesService {
     const current = this.get();
     const updated = { ...current, ...prefs };
     localStorage.setItem(PREFS_KEY, JSON.stringify(updated));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent(PREFS_EVENT, { detail: updated }));
+    }
     return updated;
   }
 
   static reset() {
     localStorage.removeItem(PREFS_KEY);
-    return { ...DEFAULTS };
+    const updated = { ...DEFAULTS };
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent(PREFS_EVENT, { detail: updated }));
+    }
+    return updated;
+  }
+
+  static subscribe(listener: (prefs: UserPreferences) => void) {
+    if (typeof window === 'undefined') {
+      return () => {};
+    }
+
+    const handler = (event: Event) => {
+      const customEvent = event as CustomEvent<UserPreferences>;
+      if (customEvent.detail) {
+        listener(customEvent.detail);
+      }
+    };
+
+    window.addEventListener(PREFS_EVENT, handler);
+    return () => window.removeEventListener(PREFS_EVENT, handler);
   }
 }

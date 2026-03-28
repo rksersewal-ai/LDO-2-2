@@ -582,6 +582,30 @@ export class ApiClient {
     return response.data;
   }
 
+  async getSupervisorDocumentReviews(
+    params?: {
+      pl_item?: string;
+      document?: string;
+    },
+    options: RequestOptions = {}
+  ): Promise<NormalizedListResult<any>> {
+    const response = await this.executeWithRetry(
+      () => this.client.get('/supervisor-document-reviews/', { params, signal: options.signal }),
+      'GET'
+    );
+    return this.normalizeListResponse(response.data, 50);
+  }
+
+  async approveSupervisorDocumentReview(id: string, payload?: { notes?: string }) {
+    const response = await this.client.post(`/supervisor-document-reviews/${id}/approve/`, payload ?? {});
+    return response.data;
+  }
+
+  async bypassSupervisorDocumentReview(id: string, payload?: { notes?: string; bypass_reason?: string }) {
+    const response = await this.client.post(`/supervisor-document-reviews/${id}/bypass/`, payload ?? {});
+    return response.data;
+  }
+
   // ─────────────────────────────────────────────────────────────────────────
   // Case/Discrepancy Endpoints
   // ─────────────────────────────────────────────────────────────────────────

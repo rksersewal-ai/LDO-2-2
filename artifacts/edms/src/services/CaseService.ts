@@ -1,6 +1,8 @@
 import type { CaseRecord, CaseStatus, CaseSeverity } from '../lib/types';
 import { MOCK_CASES } from '../lib/mockExtended';
 
+const STORAGE_KEY = 'ldo2_cases';
+
 function mapMockCase(c: typeof MOCK_CASES[0]): CaseRecord {
   const statusMap: Record<string, CaseStatus> = {
     Open: 'OPEN',
@@ -32,11 +34,54 @@ function mapMockCase(c: typeof MOCK_CASES[0]): CaseRecord {
   };
 }
 
-let _store: CaseRecord[] = MOCK_CASES.map(mapMockCase);
+function buildDefaultStore() {
+  return MOCK_CASES.map(mapMockCase);
+}
+
+function loadStore(): CaseRecord[] {
+  if (typeof window === 'undefined') {
+    return buildDefaultStore();
+  }
+
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      const seeded = buildDefaultStore();
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded));
+      return seeded;
+    }
+
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      throw new Error('Case store is invalid');
+    }
+
+    return parsed.map((record) => ({
+      ...record,
+      linkedDocumentIds: Array.isArray(record.linkedDocumentIds) ? record.linkedDocumentIds : [],
+      linkedWorkIds: Array.isArray(record.linkedWorkIds) ? record.linkedWorkIds : [],
+    }));
+  } catch {
+    const fallback = buildDefaultStore();
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(fallback));
+    return fallback;
+  }
+}
+
+function persist() {
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(_store));
+  }
+}
+
+let _store: CaseRecord[] = loadStore();
 
 function generateId(): string {
-  const seq = Math.floor(Math.random() * 9000) + 1000;
-  return `CAS-${seq}`;
+  const max = _store.reduce((highest, record) => {
+    const numeric = Number(record.caseNumber.replace(/\D/g, ''));
+    return Number.isFinite(numeric) ? Math.max(highest, numeric) : highest;
+  }, 0);
+  return `CAS-${String(max + 1).padStart(3, '0')}`;
 }
 
 export const CaseService = {
@@ -48,7 +93,7 @@ export const CaseService = {
     return Promise.resolve(_store.find(c => c.id === id || c.caseNumber === id) ?? null);
   },
 
-  add(data: Omit<CaseRecord, 'id' | 'createdAt' | 'updatedAt'>): Promise<CaseRecord> {
+  add(data: Omit<CaseRecord, 'id' | 'caseNumber' | 'createdAt' | 'updatedAt'>): Promise<CaseRecord> {
     const now = new Date().toISOString().split('T')[0];
     const newId = generateId();
     const c: CaseRecord = {
@@ -59,6 +104,7 @@ export const CaseService = {
       updatedAt: now,
     };
     _store = [c, ..._store];
+    persist();
     return Promise.resolve(c);
   },
 
@@ -66,12 +112,14 @@ export const CaseService = {
     const idx = _store.findIndex(c => c.id === id || c.caseNumber === id);
     if (idx < 0) return Promise.resolve(null);
     _store[idx] = { ..._store[idx], ...patch, updatedAt: new Date().toISOString().split('T')[0] };
+    persist();
     return Promise.resolve(_store[idx]);
   },
 
   delete(id: string): Promise<boolean> {
     const before = _store.length;
     _store = _store.filter(c => c.id !== id && c.caseNumber !== id);
+    persist();
     return Promise.resolve(_store.length < before);
   },
 

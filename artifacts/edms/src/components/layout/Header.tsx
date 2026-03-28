@@ -6,23 +6,27 @@ import { NotificationPanel } from './NotificationPanel';
 import { MOCK_NOTIFICATIONS } from '../../lib/mockExtended';
 import { CommandPalette } from '../ui/CommandPalette';
 import { useTheme } from '../../contexts/ThemeContext';
+import { PreferencesService, type UserPreferences } from '../../services/PreferencesService';
+import { useDocumentChangeAlerts } from '../../hooks/useDocumentChangeAlerts';
 
 export function Header() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, hasPermission } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { alerts: documentChangeAlerts, approveAlert, bypassAlert } = useDocumentChangeAlerts();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showTextControls, setShowTextControls] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
-  const [fontSize, setFontSize] = useState(14);
+  const [preferences, setPreferences] = useState<UserPreferences>(() => PreferencesService.get());
   const [commandOpen, setCommandOpen] = useState(false);
   const [showBanner, setShowBanner] = useState(true);
+  const [now, setNow] = useState(() => new Date());
   const headerRef = useRef<HTMLDivElement>(null);
 
   const paths = location.pathname.split('/').filter(Boolean);
   const breadcrumbs = ['Home', ...paths.map(p => p.charAt(0).toUpperCase() + p.slice(1))];
-  const unreadCount = MOCK_NOTIFICATIONS.filter(n => !n.read).length;
+  const unreadCount = MOCK_NOTIFICATIONS.filter(n => !n.read).length + documentChangeAlerts.length;
 
   // Breadcrumb navigation helper
   const getBreadcrumbPath = (index: number): string => {
@@ -31,10 +35,21 @@ export function Header() {
     return '/' + pathSegments.join('/');
   };
 
+  const fontSize = preferences.fontSize;
+
+  const applyPreferences = (prefs: UserPreferences) => {
+    setPreferences(prefs);
+    document.documentElement.style.setProperty('--app-font-size', `${prefs.fontSize}px`);
+    document.documentElement.classList.toggle('reduce-motion', prefs.reduceMotion);
+  };
+
   const adjustFontSize = (delta: number) => {
     const next = Math.max(12, Math.min(18, fontSize + delta));
-    setFontSize(next);
-    document.documentElement.style.setProperty('--font-size', `${next}px`);
+    applyPreferences(PreferencesService.set({ fontSize: next }));
+  };
+
+  const resetFontSize = () => {
+    applyPreferences(PreferencesService.set({ fontSize: 14 }));
   };
 
   const closeFloatingPanels = () => {
@@ -83,6 +98,30 @@ export function Header() {
     return () => document.removeEventListener('mousedown', handlePointerDown);
   }, [showNotifications, showProfile, showTextControls]);
 
+  useEffect(() => {
+    applyPreferences(PreferencesService.get());
+    return PreferencesService.subscribe((prefs) => applyPreferences(prefs));
+  }, []);
+
+  useEffect(() => {
+    if (!preferences.showLiveClock) {
+      return;
+    }
+    const timer = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(timer);
+  }, [preferences.showLiveClock]);
+
+  const clockLabel = now.toLocaleString('en-GB', {
+    weekday: 'short',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: preferences.timeFormat === '24h' ? '2-digit' : undefined,
+    hour12: preferences.timeFormat === '12h',
+  });
+
   return (
     <>
       <CommandPalette open={commandOpen} onClose={() => setCommandOpen(false)} />
@@ -124,10 +163,16 @@ export function Header() {
           </div>
 
           <div className="flex items-center gap-3">
+            {preferences.showLiveClock && (
+              <div className="hidden md:flex items-center rounded-lg border border-teal-500/18 bg-slate-950/55 px-3 py-1.5 text-xs font-medium text-slate-300 shadow-[0_10px_26px_rgba(15,23,42,0.22)]">
+                {clockLabel}
+              </div>
+            )}
+
             {/* Search → Command Palette trigger */}
             <button
               onClick={() => setCommandOpen(true)}
-              className="flex items-center gap-2 w-64 md:w-72 px-3 py-1.5 border border-teal-500/20 rounded-lg bg-slate-900/50 text-slate-500 hover:border-teal-400/40 hover:text-slate-400 text-sm transition-all text-left"
+              className="flex items-center gap-2 w-56 md:w-64 xl:w-72 px-3 py-1.5 border border-teal-500/20 rounded-lg bg-slate-900/50 text-slate-500 hover:border-teal-400/40 hover:text-slate-400 text-sm transition-all text-left"
             >
               <Search className="h-3.5 w-3.5 shrink-0" />
               <span className="flex-1">Search, navigate, act...</span>
@@ -162,7 +207,7 @@ export function Header() {
                   <button onClick={() => adjustFontSize(-1)} className="w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors"><Minus className="w-3 h-3" /></button>
                   <span className="text-slate-300 text-sm font-mono w-8 text-center">{fontSize}</span>
                   <button onClick={() => adjustFontSize(1)} className="w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors"><Plus className="w-3 h-3" /></button>
-                  <button onClick={() => { setFontSize(14); document.documentElement.style.setProperty('--font-size', '14px'); }} className="w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors"><RotateCcw className="w-3 h-3" /></button>
+                  <button onClick={resetFontSize} className="w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors"><RotateCcw className="w-3 h-3" /></button>
                 </div>
               )}
             </div>
@@ -181,7 +226,12 @@ export function Header() {
               </button>
               {showNotifications && (
                 <div>
-                  <NotificationPanel onClose={() => setShowNotifications(false)} />
+                  <NotificationPanel
+                    onClose={() => setShowNotifications(false)}
+                    documentChangeAlerts={documentChangeAlerts}
+                    onApproveAlert={approveAlert}
+                    onBypassAlert={bypassAlert}
+                  />
                 </div>
               )}
             </div>
@@ -216,9 +266,28 @@ export function Header() {
                     </div>
                   </div>
                   <div className="p-2">
-                    <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-300 hover:text-slate-100 hover:bg-slate-800/50 rounded-lg transition-colors">
+                    <button
+                      onClick={() => { navigate('/profile'); closeFloatingPanels(); }}
+                      className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-300 hover:text-slate-100 hover:bg-slate-800/50 rounded-lg transition-colors"
+                    >
                       <User className="w-4 h-4" /> Profile Settings
                     </button>
+                    {hasPermission(['admin']) && (
+                      <>
+                        <button
+                          onClick={() => { navigate('/admin/users'); closeFloatingPanels(); }}
+                          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-300 hover:text-slate-100 hover:bg-slate-800/50 rounded-lg transition-colors"
+                        >
+                          <User className="w-4 h-4" /> User Administration
+                        </button>
+                        <button
+                          onClick={() => { navigate('/settings'); closeFloatingPanels(); }}
+                          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-300 hover:text-slate-100 hover:bg-slate-800/50 rounded-lg transition-colors"
+                        >
+                          <Moon className="w-4 h-4" /> System Settings
+                        </button>
+                      </>
+                    )}
                     <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-rose-400 hover:text-rose-300 hover:bg-rose-500/5 rounded-lg transition-colors">
                       <LogOut className="w-4 h-4" /> Sign Out
                     </button>

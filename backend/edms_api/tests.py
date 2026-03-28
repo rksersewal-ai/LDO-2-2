@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APITestCase
 
-from edms_api.models import Approval, Document, PlItem, WorkRecord
+from edms_api.models import Approval, Document, PlDocumentLink, PlItem, SupervisorDocumentReview, WorkRecord
 from shared.models import DomainEvent
 from work.models import WorkRecordExportJob
 
@@ -31,6 +31,8 @@ class ModularApiSmokeTests(APITestCase):
             entity_id=self.document.id,
             requested_by=self.user,
         )
+        self.pl_item.design_supervisor = 'tester'
+        self.pl_item.save(update_fields=['design_supervisor'])
 
     def test_login_endpoint_returns_expected_payload(self):
         self.client.force_authenticate(user=None)
@@ -123,5 +125,119 @@ class ModularApiSmokeTests(APITestCase):
                 event_type='ApprovalGranted',
                 aggregate_type='Approval',
                 aggregate_id='APPROVAL-001',
+            ).exists()
+        )
+
+    def test_supervisor_document_review_created_and_approved(self):
+        previous = Document.objects.create(
+            id='DOC-T-OLD',
+            name='Brake Drawing Pack',
+            description='Older revision',
+            type='PDF',
+            status='Approved',
+            revision=1,
+            category='Drawing',
+            linked_pl=self.pl_item.id,
+            file=SimpleUploadedFile('old.txt', b'old'),
+        )
+        PlDocumentLink.objects.create(pl_item=self.pl_item, document=previous, link_role='GENERAL')
+
+        latest = Document.objects.create(
+            id='DOC-T-NEW',
+            name='Brake Drawing Pack',
+            description='Latest revision',
+            type='PDF',
+            status='In Review',
+            revision=2,
+            category='Drawing',
+            linked_pl=self.pl_item.id,
+            file=SimpleUploadedFile('new.txt', b'new'),
+        )
+
+        response = self.client.post(
+            '/api/v1/pl-items/12345678/documents/link/',
+            {'document_id': latest.id, 'link_role': 'GENERAL'},
+            format='json',
+        )
+        self.assertEqual(response.status_code, 201)
+
+        review = SupervisorDocumentReview.objects.get(pl_item=self.pl_item, latest_document=latest, status='PENDING')
+
+        list_response = self.client.get('/api/v1/supervisor-document-reviews/')
+        self.assertEqual(list_response.status_code, 200)
+        payload = list_response.data
+        if isinstance(payload, list):
+            self.assertEqual(len(payload), 1)
+        else:
+            results = payload.get('results', [])
+            self.assertEqual(payload.get('count', len(results)), 1)
+            self.assertEqual(len(results), 1)
+
+        approve_response = self.client.post(
+            f'/api/v1/supervisor-document-reviews/{review.id}/approve/',
+            {'notes': 'Revision accepted'},
+            format='json',
+        )
+        self.assertEqual(approve_response.status_code, 200)
+
+        review.refresh_from_db()
+        previous.refresh_from_db()
+        self.assertEqual(review.status, 'APPROVED')
+        self.assertEqual(previous.status, 'Obsolete')
+        self.assertTrue(
+            DomainEvent.objects.filter(
+                event_type='DesignSupervisorApprovedDocumentChange',
+                aggregate_type='SupervisorDocumentReview',
+                aggregate_id=str(review.id),
+            ).exists()
+        )
+
+    def test_supervisor_document_review_can_be_bypassed(self):
+        previous = Document.objects.create(
+            id='DOC-T-OL2',
+            name='Cooling Layout Sheet',
+            description='Older revision',
+            type='PDF',
+            status='Approved',
+            revision=1,
+            category='Drawing',
+            linked_pl=self.pl_item.id,
+            file=SimpleUploadedFile('old2.txt', b'old2'),
+        )
+        PlDocumentLink.objects.create(pl_item=self.pl_item, document=previous, link_role='GENERAL')
+
+        latest = Document.objects.create(
+            id='DOC-T-NE2',
+            name='Cooling Layout Sheet',
+            description='Latest revision',
+            type='PDF',
+            status='In Review',
+            revision=2,
+            category='Drawing',
+            linked_pl=self.pl_item.id,
+            file=SimpleUploadedFile('new2.txt', b'new2'),
+        )
+        self.client.post(
+            '/api/v1/pl-items/12345678/documents/link/',
+            {'document_id': latest.id, 'link_role': 'GENERAL'},
+            format='json',
+        )
+        review = SupervisorDocumentReview.objects.get(pl_item=self.pl_item, latest_document=latest, status='PENDING')
+
+        bypass_response = self.client.post(
+            f'/api/v1/supervisor-document-reviews/{review.id}/bypass/',
+            {'bypass_reason': 'Temporary hold requested by design office'},
+            format='json',
+        )
+        self.assertEqual(bypass_response.status_code, 200)
+
+        review.refresh_from_db()
+        self.assertEqual(review.status, 'BYPASSED')
+        self.assertEqual(review.bypass_reason, 'Temporary hold requested by design office')
+        self.assertTrue(
+            DomainEvent.objects.filter(
+                event_type='DesignSupervisorBypassedDocumentChange',
+                aggregate_type='SupervisorDocumentReview',
+                aggregate_id=str(review.id),
             ).exists()
         )

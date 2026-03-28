@@ -3,7 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from edms_api.models import PlBomLine, PlDocumentLink, PlItem
+from edms_api.models import PlBomLine, PlDocumentLink, PlItem, SupervisorDocumentReview
 
 from .serializers import (
     BomMoveSerializer,
@@ -11,8 +11,10 @@ from .serializers import (
     PlDocumentLinkCreateSerializer,
     PlDocumentLinkSerializer,
     PlItemSerializer,
+    SupervisorDocumentReviewDecisionSerializer,
+    SupervisorDocumentReviewSerializer,
 )
-from .services import BomService, PlItemService
+from .services import BomService, PlItemService, SupervisorDocumentReviewService
 
 
 class PlItemViewSet(viewsets.ModelViewSet):
@@ -103,3 +105,49 @@ class PlBomLineViewSet(viewsets.ModelViewSet):
         line = BomService.move(self.get_object(), request=request, **serializer.validated_data)
         return Response(self.get_serializer(line).data)
 
+
+class SupervisorDocumentReviewViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = SupervisorDocumentReview.objects.select_related(
+        'pl_item',
+        'latest_document',
+        'previous_document',
+        'requested_by',
+        'resolved_by',
+    ).all()
+    serializer_class = SupervisorDocumentReviewSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = SupervisorDocumentReviewService.visible_reviews_for_user(self.request.user)
+        pl_item = self.request.query_params.get('pl_item')
+        if pl_item:
+            queryset = queryset.filter(pl_item_id=pl_item)
+        document = self.request.query_params.get('document')
+        if document:
+            queryset = queryset.filter(latest_document_id=document)
+        return queryset
+
+    @action(detail=True, methods=['post'])
+    def approve(self, request, pk=None):
+        serializer = SupervisorDocumentReviewDecisionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        review = SupervisorDocumentReviewService.approve(
+            self.get_object(),
+            user=request.user,
+            notes=serializer.validated_data.get('notes') or '',
+            request=request,
+        )
+        return Response(self.get_serializer(review).data)
+
+    @action(detail=True, methods=['post'])
+    def bypass(self, request, pk=None):
+        serializer = SupervisorDocumentReviewDecisionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        review = SupervisorDocumentReviewService.bypass(
+            self.get_object(),
+            user=request.user,
+            notes=serializer.validated_data.get('notes') or '',
+            bypass_reason=serializer.validated_data.get('bypass_reason') or '',
+            request=request,
+        )
+        return Response(self.get_serializer(review).data)

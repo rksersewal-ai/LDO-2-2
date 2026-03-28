@@ -1,44 +1,90 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { GlassCard, Badge, Button, Input } from '../components/ui/Shared';
 import { DatePicker } from '../components/ui/DatePicker';
-import { MOCK_BANNERS } from '../lib/mockExtended';
+import { BannerService, type BannerRecord } from '../services/BannerService';
 import { Megaphone, Plus, Edit3, Trash2, Eye, X, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function BannerManagement() {
-  const [banners, setBanners] = useState(MOCK_BANNERS);
+  const navigate = useNavigate();
+  const [banners, setBanners] = useState<BannerRecord[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [editBanner, setEditBanner] = useState<typeof MOCK_BANNERS[0] | null>(null);
+  const [editBanner, setEditBanner] = useState<BannerRecord | null>(null);
   const [newTitle, setNewTitle] = useState('');
   const [newMessage, setNewMessage] = useState('');
+  const [newLink, setNewLink] = useState('');
   const [newValidFrom, setNewValidFrom] = useState('');
   const [newValidTo, setNewValidTo] = useState('');
 
-  const toggleActive = (id: string) => {
-    setBanners(b => b.map(x => x.id === id ? { ...x, active: !x.active } : x));
-  };
+  const activeBanners = useMemo(
+    () => banners.filter((banner) => banner.active).sort((left, right) => left.order - right.order),
+    [banners]
+  );
 
-  const deleteBanner = (id: string) => {
-    setBanners(b => b.filter(x => x.id !== id));
-  };
+  useEffect(() => {
+    BannerService.getAll().then(setBanners);
+  }, []);
 
-  const handleCreate = () => {
-    if (!newTitle || !newMessage) return;
-    const nb = {
-      id: `BNR-${Date.now()}`,
-      title: newTitle,
-      message: newMessage,
-      link: null,
-      active: true,
-      validFrom: newValidFrom || new Date().toISOString().split('T')[0],
-      validTo: newValidTo,
-      order: banners.length + 1,
-    };
-    setBanners(b => [...b, nb]);
+  const resetForm = () => {
+    setEditBanner(null);
     setNewTitle('');
     setNewMessage('');
+    setNewLink('');
     setNewValidFrom('');
     setNewValidTo('');
     setShowForm(false);
+  };
+
+  const toggleActive = async (id: string) => {
+    const updated = await BannerService.toggleActive(id);
+    if (!updated) {
+      toast.error('Banner could not be updated');
+      return;
+    }
+    setBanners(await BannerService.getAll());
+    toast.success(`${updated.title} ${updated.active ? 'activated' : 'deactivated'}`);
+  };
+
+  const deleteBanner = async (id: string) => {
+    const deleted = await BannerService.delete(id);
+    if (!deleted) {
+      toast.error('Banner could not be deleted');
+      return;
+    }
+    setBanners(await BannerService.getAll());
+    if (editBanner?.id === id) {
+      resetForm();
+    }
+    toast.success('Announcement removed');
+  };
+
+  const handleCreate = async () => {
+    if (!newTitle || !newMessage) return;
+
+    const payload = {
+      title: newTitle,
+      message: newMessage,
+      link: newLink.trim() || null,
+      active: true,
+      validFrom: newValidFrom || new Date().toISOString().split('T')[0],
+      validTo: newValidTo,
+    };
+
+    if (editBanner) {
+      const updated = await BannerService.update(editBanner.id, payload);
+      if (!updated) {
+        toast.error('Announcement could not be saved');
+        return;
+      }
+      toast.success('Announcement updated');
+    } else {
+      await BannerService.create(payload);
+      toast.success('Announcement created');
+    }
+
+    setBanners(await BannerService.getAll());
+    resetForm();
   };
 
   return (
@@ -48,7 +94,7 @@ export default function BannerManagement() {
           <h1 className="text-3xl font-bold text-white mb-2">Announcement Management</h1>
           <p className="text-slate-400 text-sm">Create and manage running banner announcements visible to all users.</p>
         </div>
-        <Button onClick={() => { setEditBanner(null); setShowForm(true); }}>
+        <Button onClick={() => { setEditBanner(null); setNewTitle(''); setNewMessage(''); setNewLink(''); setNewValidFrom(''); setNewValidTo(''); setShowForm(true); }}>
           <Plus className="w-4 h-4" /> New Announcement
         </Button>
       </div>
@@ -58,9 +104,9 @@ export default function BannerManagement() {
         <div className="bg-gradient-to-r from-teal-900 to-emerald-900 border border-teal-500/30 text-teal-100 text-xs px-4 py-2 rounded-xl flex items-center gap-2">
           <AlertCircle className="w-3.5 h-3.5 shrink-0 text-teal-400" />
           <div className="flex-1 overflow-hidden">
-            {banners.filter(b => b.active).length > 0 ? (
+            {activeBanners.length > 0 ? (
               <div className="flex gap-8 animate-pulse">
-                {banners.filter(b => b.active).map(b => (
+                {activeBanners.map(b => (
                   <span key={b.id}><span className="font-semibold">{b.title}:</span> {b.message}</span>
                 ))}
               </div>
@@ -90,6 +136,15 @@ export default function BannerManagement() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                {banner.link ? (
+                  <button
+                    onClick={() => navigate(banner.link!)}
+                    className="p-1.5 rounded-lg bg-slate-800/50 text-slate-400 hover:text-teal-300 transition-colors"
+                    title="Open banner link"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </button>
+                ) : null}
                 <button
                   onClick={() => toggleActive(banner.id)}
                   className={`px-3 py-1 rounded-lg text-xs font-medium border transition-colors ${
@@ -101,7 +156,15 @@ export default function BannerManagement() {
                   {banner.active ? 'Deactivate' : 'Activate'}
                 </button>
                 <button
-                  onClick={() => { setEditBanner(banner); setNewTitle(banner.title); setNewMessage(banner.message); setShowForm(true); }}
+                  onClick={() => {
+                    setEditBanner(banner);
+                    setNewTitle(banner.title);
+                    setNewMessage(banner.message);
+                    setNewLink(banner.link ?? '');
+                    setNewValidFrom(banner.validFrom);
+                    setNewValidTo(banner.validTo);
+                    setShowForm(true);
+                  }}
                   className="p-1.5 rounded-lg bg-slate-800/50 text-slate-400 hover:text-slate-200 transition-colors"
                 >
                   <Edit3 className="w-4 h-4" />
@@ -123,7 +186,7 @@ export default function BannerManagement() {
           <GlassCard className="p-6 w-full max-w-md">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-white">{editBanner ? 'Edit Announcement' : 'New Announcement'}</h2>
-              <button onClick={() => { setShowForm(false); setEditBanner(null); setNewTitle(''); setNewMessage(''); setNewValidFrom(''); setNewValidTo(''); }} className="text-slate-500 hover:text-white">
+              <button onClick={resetForm} className="text-slate-500 hover:text-white">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -142,6 +205,10 @@ export default function BannerManagement() {
                   onChange={e => setNewMessage(e.target.value)}
                 />
               </div>
+              <div>
+                <label className="text-xs text-slate-400 mb-1 block">Optional Link</label>
+                <Input className="w-full" placeholder="e.g. /documents or /bom" value={newLink} onChange={e => setNewLink(e.target.value)} />
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs text-slate-400 mb-1 block">Valid From</label>
@@ -157,7 +224,7 @@ export default function BannerManagement() {
               <Button className="flex-1" onClick={handleCreate}>
                 {editBanner ? 'Save Changes' : 'Create Announcement'}
               </Button>
-              <Button variant="secondary" onClick={() => { setShowForm(false); setEditBanner(null); setNewTitle(''); setNewMessage(''); setNewValidFrom(''); setNewValidTo(''); }}>Cancel</Button>
+              <Button variant="secondary" onClick={resetForm}>Cancel</Button>
             </div>
           </GlassCard>
         </div>

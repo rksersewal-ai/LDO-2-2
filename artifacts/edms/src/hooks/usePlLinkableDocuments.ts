@@ -9,6 +9,7 @@ export interface PlLinkableDocument {
   status: string;
   size: string;
   ocrStatus?: string;
+  date?: string;
 }
 
 function formatSize(size: number | null | undefined): string {
@@ -32,6 +33,7 @@ function mapApiDocument(doc: any): PlLinkableDocument {
     status: doc.status ?? 'Draft',
     size: formatSize(typeof doc.size === 'number' ? doc.size : Number(doc.size ?? 0)),
     ocrStatus: doc.ocr_status,
+    date: doc.updated_at ?? doc.date ?? doc.created_at ?? '',
   };
 }
 

@@ -4,7 +4,7 @@ import { useAuth } from '../../lib/auth';
 import {
   Search, FileText, Briefcase, Component, ShieldAlert, CheckSquare,
   ServerCog, BarChart3, Settings, Users, Bell, FileSearch,
-  ArrowRight, Hash, BookOpen, AlertTriangle, X,
+  ArrowRight, Hash, BookOpen, AlertTriangle, X, UserRound,
 } from 'lucide-react';
 import { SearchHistoryService } from '../../services/SearchHistoryService';
 
@@ -46,11 +46,13 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
     { id: 'ledger-reports', label: 'Ledger Reports', description: 'Work analytics', icon: BarChart3, action: () => go('/ledger-reports'), category: 'Navigation', roles: ['admin', 'supervisor'] },
     { id: 'cases', label: 'Cases', description: 'Discrepancy cases', icon: ShieldAlert, action: () => go('/cases'), category: 'Navigation' },
     { id: 'approvals', label: 'Approvals', description: 'Pending decisions', icon: CheckSquare, action: () => go('/approvals'), category: 'Navigation' },
+    { id: 'profile', label: 'Profile & Preferences', description: 'Account details and personal settings', icon: UserRound, action: () => go('/profile'), category: 'Navigation' },
     { id: 'reports', label: 'Reports', description: 'System reports', icon: BarChart3, action: () => go('/reports'), category: 'Navigation', roles: ['admin', 'supervisor'] },
     { id: 'alerts', label: 'Alert Rules', description: 'Manage alert rules', icon: Bell, action: () => go('/alerts'), category: 'Navigation' },
     { id: 'templates', label: 'Document Templates', description: 'Pre-filled templates', icon: BookOpen, action: () => go('/templates'), category: 'Navigation' },
     { id: 'audit', label: 'Audit Log', description: 'Action history', icon: AlertTriangle, action: () => go('/audit'), category: 'Admin', roles: ['admin'] },
     { id: 'admin', label: 'Admin Workspace', description: 'System admin', icon: Users, action: () => go('/admin'), category: 'Admin', roles: ['admin'] },
+    { id: 'users', label: 'User Administration', description: 'Manage workspace accounts', icon: Users, action: () => go('/admin/users'), category: 'Admin', roles: ['admin'] },
     { id: 'ocr', label: 'OCR Monitor', description: 'Extraction jobs', icon: ServerCog, action: () => go('/ocr'), category: 'Admin', roles: ['admin'] },
     { id: 'health', label: 'System Health', description: 'Service metrics', icon: ServerCog, action: () => go('/health'), category: 'Admin', roles: ['admin'] },
     { id: 'settings', label: 'Settings', description: 'System config', icon: Settings, action: () => go('/settings'), category: 'Admin', roles: ['admin'] },

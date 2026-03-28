@@ -282,6 +282,61 @@ class PlDocumentLink(models.Model):
         return f"{self.pl_item_id} -> {self.document_id} ({self.link_role})"
 
 
+class SupervisorDocumentReview(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('APPROVED', 'Approved'),
+        ('BYPASSED', 'Bypassed'),
+    ]
+
+    id = models.CharField(max_length=50, primary_key=True, default=uuid.uuid4)
+    pl_item = models.ForeignKey(PlItem, on_delete=models.CASCADE, related_name='document_reviews')
+    latest_document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='latest_document_reviews')
+    previous_document = models.ForeignKey(
+        Document,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='previous_document_reviews',
+    )
+    latest_revision = models.IntegerField(default=1)
+    previous_revision = models.IntegerField(null=True, blank=True)
+    document_family_key = models.CharField(max_length=255, db_index=True)
+    design_supervisor = models.CharField(max_length=255, blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    change_summary = models.TextField(blank=True, null=True)
+    requested_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='requested_document_reviews',
+    )
+    resolved_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='resolved_document_reviews',
+    )
+    resolution_notes = models.TextField(blank=True, null=True)
+    bypass_reason = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['status', 'created_at']),
+            models.Index(fields=['pl_item', 'status']),
+            models.Index(fields=['latest_document', 'status']),
+        ]
+
+    def __str__(self):
+        return f"{self.pl_item_id} review for {self.latest_document_id} ({self.status})"
+
+
 class PlBomLine(models.Model):
     parent = models.ForeignKey(PlItem, on_delete=models.CASCADE, related_name='bom_children')
     child = models.ForeignKey(PlItem, on_delete=models.CASCADE, related_name='bom_parents')
@@ -458,7 +513,9 @@ class AuditLog(models.Model):
         ('LOGIN', 'Login'),
         ('LOGOUT', 'Logout'),
         ('APPROVE', 'Approve'),
+        ('BYPASS', 'Bypass'),
         ('REJECT', 'Reject'),
+        ('REVIEW', 'Review'),
         ('OCR', 'OCR'),
     ]
     

@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import apiClient from '../services/ApiClient';
+import { UserService } from '../services/UserService';
 
 export type UserRole = 'admin' | 'supervisor' | 'engineer' | 'reviewer' | 'viewer';
 
@@ -27,6 +28,7 @@ interface AuthContextType extends AuthState {
   logout: (expired?: boolean) => void;
   clearError: () => void;
   hasPermission: (requiredRole: UserRole[]) => boolean;
+  updateCurrentUser: (patch: Partial<User>) => void;
 }
 
 const SESSION_KEY = 'ldo2_session';
@@ -66,6 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setState(s => ({ ...s, isLoading: true, error: null }));
     try {
       const { token, user } = await apiClient.login(username, password);
+      await UserService.ensureSessionUser(user);
       sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
       sessionStorage.setItem(`${SESSION_KEY}_ts`, String(Date.now()));
       setState({ user, isAuthenticated: true, isLoading: false, sessionExpired: false, error: null, loginAttempts: 0 });
@@ -95,8 +98,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return requiredRoles.includes(state.user.role);
   };
 
+  const updateCurrentUser = (patch: Partial<User>) => {
+    setState((current) => {
+      if (!current.user) {
+        return current;
+      }
+
+      const user = { ...current.user, ...patch };
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+      sessionStorage.setItem(`${SESSION_KEY}_ts`, String(Date.now()));
+      void UserService.update(current.user.id, user);
+      return { ...current, user };
+    });
+  };
+
   return (
-    <AuthContext.Provider value={{ ...state, login, logout, clearError, hasPermission }}>
+    <AuthContext.Provider value={{ ...state, login, logout, clearError, hasPermission, updateCurrentUser }}>
       {children}
     </AuthContext.Provider>
   );
