@@ -9,7 +9,7 @@ from pathlib import Path
 from django.db import transaction
 from django.db.models import Count, Q
 from django.utils import timezone
-from django_celery_beat.models import IntervalSchedule, PeriodicTask
+from django_celery_beat.models import IntervalSchedule, PeriodicTask, PeriodicTasks
 from rest_framework.exceptions import ValidationError
 
 from edms_api.models import Document, OcrJob
@@ -475,8 +475,66 @@ class IndexedSourceService:
 
     @classmethod
     def sync_runtime_schedules(cls):
-        for source in IndexedSource.objects.all().only('id', 'is_active', 'scan_interval_minutes'):
-            cls.sync_source_schedule(source)
+        sources = list(IndexedSource.objects.all().only('id', 'is_active', 'scan_interval_minutes'))
+
+        inactive_names = [cls._source_schedule_name(s.id) for s in sources if not s.is_active]
+        if inactive_names:
+            PeriodicTask.objects.filter(name__in=inactive_names).update(enabled=False)
+
+        active_sources = [s for s in sources if s.is_active]
+        if active_sources:
+            intervals = {max(int(s.scan_interval_minutes or 60), 1) for s in active_sources}
+            schedule_map = {}
+            for interval in intervals:
+                schedule, _ = IntervalSchedule.objects.get_or_create(every=interval, period=IntervalSchedule.MINUTES)
+                schedule_map[interval] = schedule
+
+            active_names = [cls._source_schedule_name(s.id) for s in active_sources]
+            existing_tasks = {t.name: t for t in PeriodicTask.objects.filter(name__in=active_names)}
+
+            tasks_to_create = []
+            tasks_to_update = []
+
+            for source in active_sources:
+                name = cls._source_schedule_name(source.id)
+                interval = max(int(source.scan_interval_minutes or 60), 1)
+                schedule = schedule_map[interval]
+                task_path = 'documents.tasks.queue_indexed_source_crawl'
+                args_json = json.dumps([str(source.id)])
+
+                if name in existing_tasks:
+                    task = existing_tasks[name]
+                    needs_update = False
+                    if task.task != task_path:
+                        task.task = task_path
+                        needs_update = True
+                    if task.interval_id != schedule.id:
+                        task.interval_id = schedule.id
+                        needs_update = True
+                    if task.args != args_json:
+                        task.args = args_json
+                        needs_update = True
+                    if not task.enabled:
+                        task.enabled = True
+                        needs_update = True
+
+                    if needs_update:
+                        tasks_to_update.append(task)
+                else:
+                    tasks_to_create.append(PeriodicTask(
+                        name=name,
+                        task=task_path,
+                        interval=schedule,
+                        args=args_json,
+                        enabled=True
+                    ))
+
+            if tasks_to_create:
+                PeriodicTask.objects.bulk_create(tasks_to_create)
+            if tasks_to_update:
+                PeriodicTask.objects.bulk_update(tasks_to_update, ['task', 'interval_id', 'args', 'enabled'])
+
+        PeriodicTasks.update_changed()
         cls.ensure_hash_backfill_schedule()
 
 
@@ -507,13 +565,17 @@ class _DocumentIndexingBatchService:
                     return False
         return True
 
+    @staticmethod
+    def _generate_document_id(path: Path) -> str:
+        stable_hash = hashlib.sha1(str(path).lower().encode('utf-8')).hexdigest()[:12].upper()
+        return f"NET-{stable_hash}"
+
     @classmethod
     def index_path(cls, path: Path, source: IndexedSource, *, force_full_hash: bool = False):
         if not path.is_file() or not cls._allowed_extension(path, source):
             return None
 
-        stable_hash = hashlib.sha1(str(path).lower().encode('utf-8')).hexdigest()[:12].upper()
-        document_id = f"NET-{stable_hash}"
+        document_id = cls._generate_document_id(path)
         stat = path.stat()
         defaults = {
             'name': path.stem,
@@ -536,6 +598,53 @@ class _DocumentIndexingBatchService:
             force_full_hash=force_full_hash,
         )
         return indexed
+
+    @classmethod
+    def index_paths_bulk(cls, paths: list[Path], source: IndexedSource, *, force_full_hash: bool = False) -> list[Document]:
+        documents_to_create_or_update = []
+        document_ids = []
+        path_by_id = {}
+
+        for path in paths:
+            if not path.is_file() or not cls._allowed_extension(path, source):
+                continue
+
+            document_id = cls._generate_document_id(path)
+            stat = path.stat()
+            defaults = {
+                'id': document_id,
+                'name': path.stem,
+                'description': f'Indexed from source {source.name}',
+                'type': cls.EXTENSION_TYPE_MAP.get(path.suffix.lower(), 'Other'),
+                'status': 'Approved',
+                'source_system': source.source_system,
+                'external_file_path': str(path),
+                'size': stat.st_size,
+                'category': path.parent.name[:100],
+                'file': '',
+            }
+            documents_to_create_or_update.append(Document(**defaults))
+            document_ids.append(document_id)
+            path_by_id[document_id] = path
+
+        if not documents_to_create_or_update:
+            return []
+
+        Document.objects.bulk_create(
+            documents_to_create_or_update,
+            update_conflicts=True,
+            unique_fields=['id'],
+            update_fields=['name', 'description', 'type', 'status', 'source_system', 'external_file_path', 'size', 'category']
+        )
+
+        documents = list(Document.objects.filter(id__in=document_ids))
+
+        indexed_documents = DocumentIndexOrchestrator.index_documents_bulk(
+            documents,
+            force_hashes=True,
+            force_full_hash=force_full_hash,
+        )
+        return indexed_documents
 
 
 class IndexedSourceFileStateService:
@@ -601,6 +710,45 @@ class IndexedSourceFileStateService:
         )
         cls._update_document_source_metadata(document, source, relative_path, source_state='ACTIVE', last_indexed_at=now)
         return state
+
+    @classmethod
+    def mark_success_bulk(cls, source: IndexedSource, paths: list[Path], documents: list[Document]):
+        now = timezone.now()
+        states_to_create_or_update = []
+        doc_by_path = {doc.external_file_path: doc for doc in documents}
+
+        for path in paths:
+            doc = doc_by_path.get(str(path))
+            if not doc:
+                continue
+
+            stat = path.stat()
+            relative_path = cls._relative_path(source, path)
+
+            states_to_create_or_update.append(IndexedSourceFileState(
+                source=source,
+                relative_path=relative_path,
+                absolute_path=str(path),
+                document=doc,
+                status='ACTIVE',
+                size_bytes=stat.st_size,
+                source_modified_at=cls._aware_timestamp(stat.st_mtime),
+                last_seen_at=now,
+                last_indexed_at=now,
+                missing_since=None,
+                failure_count=0,
+                last_error='',
+            ))
+
+            cls._update_document_source_metadata(doc, source, relative_path, source_state='ACTIVE', last_indexed_at=now)
+
+        if states_to_create_or_update:
+            IndexedSourceFileState.objects.bulk_create(
+                states_to_create_or_update,
+                update_conflicts=True,
+                unique_fields=['source', 'relative_path'],
+                update_fields=['absolute_path', 'document', 'status', 'size_bytes', 'source_modified_at', 'last_seen_at', 'last_indexed_at', 'missing_since', 'failure_count', 'last_error', 'updated_at']
+            )
 
     @classmethod
     def mark_failure(cls, source: IndexedSource, path: Path, error_message: str):
@@ -783,6 +931,7 @@ class CrawlJobService:
             else:
                 candidate_paths = list(root.rglob('*'))
 
+            valid_paths = []
             for path in candidate_paths:
                 if not path.is_file():
                     continue
@@ -792,20 +941,43 @@ class CrawlJobService:
                 if moved_relinked and new_path and Path(new_path) == path:
                     continue
 
-                discovered += 1
-                relative_path = IndexedSourceFileStateService._relative_path(source, path)
-                seen_relative_paths.add(relative_path)
+                valid_paths.append(path)
+
+            batch_size = 500
+            for i in range(0, len(valid_paths), batch_size):
+                batch_paths = valid_paths[i:i + batch_size]
+
                 try:
-                    document = _DocumentIndexingBatchService.index_path(path, source, force_full_hash=force_full_hash)
-                    if document:
-                        indexed += 1
-                        IndexedSourceFileStateService.mark_success(source, path, document)
-                        if document.duplicate_status == 'DUPLICATE':
-                            duplicates += 1
-                except Exception as exc:  # pragma: no cover
-                    failed += 1
-                    job.error_message = str(exc)
-                    IndexedSourceFileStateService.mark_failure(source, path, str(exc))
+                    indexed_documents = _DocumentIndexingBatchService.index_paths_bulk(batch_paths, source, force_full_hash=force_full_hash)
+
+                    IndexedSourceFileStateService.mark_success_bulk(source, batch_paths, indexed_documents)
+
+                    for path in batch_paths:
+                        discovered += 1
+                        seen_relative_paths.add(IndexedSourceFileStateService._relative_path(source, path))
+
+                    for document in indexed_documents:
+                        if document:
+                            indexed += 1
+                            if document.duplicate_status == 'DUPLICATE':
+                                duplicates += 1
+                except Exception as exc_bulk:  # pragma: no cover
+                    # Fallback to sequential on batch failure
+                    for path in batch_paths:
+                        discovered += 1
+                        seen_relative_paths.add(IndexedSourceFileStateService._relative_path(source, path))
+                        try:
+                            document = _DocumentIndexingBatchService.index_path(path, source, force_full_hash=force_full_hash)
+                            if document:
+                                indexed += 1
+                                IndexedSourceFileStateService.mark_success(source, path, document)
+                                if document.duplicate_status == 'DUPLICATE':
+                                    duplicates += 1
+                        except Exception as exc:
+                            failed += 1
+                            job.error_message = str(exc)
+                            IndexedSourceFileStateService.mark_failure(source, path, str(exc))
+
             if scan_paths:
                 missing_targets = []
                 if old_path and not moved_relinked:
@@ -833,6 +1005,7 @@ class CrawlJobService:
                 job.complete()
             job.save(update_fields=['status', 'completed_at', 'discovered_count', 'indexed_count', 'duplicate_count', 'failed_count', 'error_message', 'updated_at'])
         except Exception as exc:
+            job.error_message = str(exc)
             job.fail(str(exc))
             job.save(update_fields=['status', 'completed_at', 'error_message', 'updated_at'])
             raise
@@ -891,6 +1064,7 @@ class HashBackfillJobService:
             job.complete()
             job.save(update_fields=['status', 'completed_at', 'documents_scanned', 'documents_indexed', 'full_hashes_computed', 'error_message', 'updated_at'])
         except Exception as exc:
+            job.error_message = str(exc)
             job.fail(str(exc))
             job.save(update_fields=['status', 'completed_at', 'error_message', 'updated_at'])
             raise
