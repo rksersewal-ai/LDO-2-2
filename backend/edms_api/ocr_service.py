@@ -83,25 +83,32 @@ class PlainTextEngine(OcrEngine):
     def name(self) -> str:
         return "plaintext"
 
+    def _try_decode(self, path: Path) -> Optional[str]:
+        """Try reading the file with common encodings."""
+        for encoding in ('utf-8', 'utf-8-sig', 'latin-1'):
+            try:
+                return path.read_text(encoding=encoding)
+            except UnicodeDecodeError:
+                continue
+        return None
+
     def extract(self, file_path: str) -> OcrResult:
         path = Path(file_path)
         if path.suffix.lower() not in self.SUPPORTED_EXTENSIONS:
             return OcrResult("", confidence=0.0, engine=self.name(), error="unsupported file type")
 
-        for encoding in ('utf-8', 'utf-8-sig', 'latin-1'):
-            try:
-                text = path.read_text(encoding=encoding)
+        try:
+            text = self._try_decode(path)
+            if text is not None:
                 return OcrResult(
                     text=text,
                     confidence=1.0,
                     engine=self.name(),
                     is_scanned=False,
                 )
-            except UnicodeDecodeError:
-                continue
-            except Exception as exc:
-                logger.error(f"Plain text extraction error: {exc}")
-                return OcrResult("", confidence=0.0, engine=self.name(), error=str(exc))
+        except Exception as exc:
+            logger.error(f"Plain text extraction error: {exc}")
+            return OcrResult("", confidence=0.0, engine=self.name(), error=str(exc))
 
         return OcrResult("", confidence=0.0, engine=self.name(), error="could not decode text file")
 
