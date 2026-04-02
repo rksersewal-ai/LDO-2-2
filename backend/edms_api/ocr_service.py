@@ -187,8 +187,6 @@ class EasyOcrEngine(OcrEngine):
         
         try:
             import numpy as np
-            images = self._get_images(file_path)
-            import io
             
             images, error_result = self._get_images_from_file(file_path)
             if error_result:
@@ -203,11 +201,8 @@ class EasyOcrEngine(OcrEngine):
                 img_array = np.array(image)
                 results = reader.readtext(img_array)
 
-                page_lines = []
-                for (bbox, text, conf) in results:
-                    page_lines.append(text)
-                    all_confidences.append(conf)
-                page_texts.append("\n".join(page_lines))
+                page_texts.append("\n".join(text for (_, text, conf) in results))
+                all_confidences.extend(conf for (_, _, conf) in results)
 
             full_text = "\n\f\n".join(text for text in page_texts if text)
             avg_confidence = sum(all_confidences) / len(all_confidences) if all_confidences else 0.0
@@ -279,9 +274,6 @@ class TesseractEngine(OcrEngine):
                            error="Tesseract not available")
         
         try:
-            images = self._get_images(file_path)
-            import io
-            
             images, error_result = self._get_images_from_file(file_path)
             if error_result:
                 return error_result
