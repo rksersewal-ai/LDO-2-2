@@ -11,6 +11,39 @@ from .ocr_service import get_ocr_service
 logger = logging.getLogger(__name__)
 
 
+def _start_job(job, document_id):
+    """Update job status when OCR starts"""
+    job.status = 'Processing'
+    job.started_at = timezone.now()
+    job.save()
+    logger.info(f"Starting OCR job {job.id} for document {document_id}")
+
+def _handle_ocr_failure(job, document_id, error_message):
+    """Handle OCR failure and update job status"""
+    job.status = 'Failed'
+    job.error_message = error_message
+    job.completed_at = timezone.now()
+    job.save()
+    logger.error(f"OCR failed for {document_id}: {job.error_message}")
+
+def _handle_ocr_success(job, document, result):
+    """Handle successful OCR and update job and document"""
+    # Update job with results
+    job.status = 'Completed'
+    job.extracted_text = result.text
+    job.confidence = result.confidence
+    job.completed_at = timezone.now()
+    job.save()
+
+    # Update document with OCR results
+    document.ocr_status = 'Completed'
+    document.ocr_confidence = result.confidence
+    document.extracted_text = result.text
+    document.save()
+
+    logger.info(f"OCR completed for {document.id} using {result.engine} "
+               f"(confidence: {result.confidence:.1%})")
+
 def process_ocr_job(job_id: str) -> bool:
     """
     Process an OCR job synchronously
@@ -24,12 +57,7 @@ def process_ocr_job(job_id: str) -> bool:
         job = OcrJob.objects.get(id=job_id)
         document = job.document
         
-        # Update job status
-        job.status = 'Processing'
-        job.started_at = timezone.now()
-        job.save()
-        
-        logger.info(f"Starting OCR job {job_id} for document {document.id}")
+        _start_job(job, document.id)
         
         # Get file path
         file_path = document.file.path if hasattr(document.file, 'path') else str(document.file)
@@ -39,31 +67,10 @@ def process_ocr_job(job_id: str) -> bool:
         result = ocr_service.extract_text(file_path)
         
         if not result.is_valid():
-            # OCR failed
-            job.status = 'Failed'
-            job.error_message = result.error or 'Text extraction failed'
-            job.completed_at = timezone.now()
-            job.save()
-            
-            logger.error(f"OCR failed for {document.id}: {job.error_message}")
+            _handle_ocr_failure(job, document.id, result.error or 'Text extraction failed')
             return False
-        
-        # Update job with results
-        job.status = 'Completed'
-        job.extracted_text = result.text
-        job.confidence = result.confidence
-        job.completed_at = timezone.now()
-        job.save()
-        
-        # Update document with OCR results
-        document.ocr_status = 'Completed'
-        document.ocr_confidence = result.confidence
-        document.extracted_text = result.text
-        document.save()
-        
-        logger.info(f"OCR completed for {document.id} using {result.engine} "
-                   f"(confidence: {result.confidence:.1%})")
-        
+
+        _handle_ocr_success(job, document, result)
         return True
     
     except OcrJob.DoesNotExist:
@@ -76,10 +83,7 @@ def process_ocr_job(job_id: str) -> bool:
         logger.error(f"Unexpected error in OCR job {job_id}: {e}", exc_info=True)
         try:
             job = OcrJob.objects.get(id=job_id)
-            job.status = 'Failed'
-            job.error_message = str(e)
-            job.completed_at = timezone.now()
-            job.save()
+            _handle_ocr_failure(job, "unknown", str(e))
         except:
             pass
         return False
