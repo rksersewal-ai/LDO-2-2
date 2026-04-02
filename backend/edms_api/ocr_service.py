@@ -39,6 +39,32 @@ class OcrEngine:
     def name(self) -> str:
         raise NotImplementedError
 
+    def _load_images(self, file_path: str) -> Tuple[Optional[list], Optional[OcrResult]]:
+        """
+        Shared method to load images from a file path.
+        Returns a tuple of (images_list, error_result).
+        """
+        try:
+            from PIL import Image
+
+            if file_path.lower().endswith('.pdf'):
+                try:
+                    import pdf2image
+                    images = pdf2image.convert_from_path(file_path)
+                    if not images:
+                        return None, OcrResult("", confidence=0.0, engine=self.name(),
+                                       error="Could not convert PDF to image")
+                    return images, None
+                except ImportError:
+                    logger.warning(f"pdf2image not installed. Cannot process PDFs with {self.name()}")
+                    return None, OcrResult("", confidence=0.0, engine=self.name(),
+                                   error="pdf2image required for PDF processing")
+            else:
+                return [Image.open(file_path)], None
+        except Exception as e:
+            logger.error(f"Image loading error in {self.name()}: {e}")
+            return None, OcrResult("", confidence=0.0, engine=self.name(), error=str(e))
+
 
 class PlainTextEngine(OcrEngine):
     """Direct text reader for text-like files."""
@@ -158,30 +184,16 @@ class EasyOcrEngine(OcrEngine):
             return OcrResult("", confidence=0.0, engine=self.name(),
                            error="easyocr not available")
         
-        try:
-            from PIL import Image
-            import io
+        images, error_result = self._load_images(file_path)
+        if error_result:
+            return error_result
             
-            # Convert PDF pages to images if needed
-            if file_path.lower().endswith('.pdf'):
-                try:
-                    import pdf2image
-                    images = pdf2image.convert_from_path(file_path)
-                    if not images:
-                        return OcrResult("", confidence=0.0, engine=self.name(),
-                                       error="Could not convert PDF to image")
-                except ImportError:
-                    logger.warning("pdf2image not installed. Cannot process PDFs with EasyOCR")
-                    return OcrResult("", confidence=0.0, engine=self.name(),
-                                   error="pdf2image required for PDF processing")
-            else:
-                # Open image file
-                images = [Image.open(file_path)]
-
+        try:
             reader = self._get_reader()
             page_texts = []
             all_confidences = []
             import tempfile
+            import os
 
             for image in images:
                 with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as tmp:
@@ -242,6 +254,25 @@ class TesseractEngine(OcrEngine):
     
     def name(self) -> str:
         return "tesseract"
+
+    def _extract_from_image(self, image) -> Tuple[str, list]:
+        """Extract text and confidences from a single image"""
+        page_text = self.pytesseract.image_to_string(image)
+        data = self.pytesseract.image_to_data(image)
+        lines = data.split('\n')[1:]  # Skip header
+
+        confidences = []
+        for line in lines:
+            parts = line.split('\t')
+            if len(parts) > 10:
+                try:
+                    conf = float(parts[10])
+                    if conf > 0:
+                        confidences.append(conf / 100.0)
+                except (ValueError, IndexError):
+                    pass
+
+        return page_text, confidences
     
     def extract(self, file_path: str) -> OcrResult:
         """Extract text using Tesseract"""
@@ -249,43 +280,20 @@ class TesseractEngine(OcrEngine):
             return OcrResult("", confidence=0.0, engine=self.name(),
                            error="Tesseract not available")
         
-        try:
-            from PIL import Image
-            import io
+        images, error_result = self._load_images(file_path)
+        if error_result:
+            return error_result
             
-            # Convert PDF pages to images if needed
-            if file_path.lower().endswith('.pdf'):
-                try:
-                    import pdf2image
-                    images = pdf2image.convert_from_path(file_path)
-                    if not images:
-                        return OcrResult("", confidence=0.0, engine=self.name(),
-                                       error="Could not convert PDF to image")
-                except ImportError:
-                    logger.warning("pdf2image not installed")
-                    return OcrResult("", confidence=0.0, engine=self.name(),
-                                   error="pdf2image required for PDF processing")
-            else:
-                images = [Image.open(file_path)]
-
+        try:
             page_texts = []
-            confidences = []
+            all_confidences = []
             for image in images:
-                page_texts.append(self.pytesseract.image_to_string(image))
-                data = self.pytesseract.image_to_data(image)
-                lines = data.split('\n')[1:]  # Skip header
-                for line in lines:
-                    parts = line.split('\t')
-                    if len(parts) > 10:
-                        try:
-                            conf = float(parts[10])
-                            if conf > 0:
-                                confidences.append(conf / 100.0)
-                        except (ValueError, IndexError):
-                            pass
+                page_text, confidences = self._extract_from_image(image)
+                page_texts.append(page_text)
+                all_confidences.extend(confidences)
 
             text = "\n\f\n".join(page_text for page_text in page_texts if page_text)
-            avg_confidence = sum(confidences) / len(confidences) if confidences else 0.5
+            avg_confidence = sum(all_confidences) / len(all_confidences) if all_confidences else 0.5
             
             return OcrResult(
                 text=text,
