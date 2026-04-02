@@ -135,20 +135,20 @@ class PdfTextEngine(OcrEngine):
             
             full_text = "\n".join(text_chunks)
             
-            if full_text.strip():
-                # Text was directly extractable
-                return OcrResult(
-                    text=full_text,
-                    confidence=0.95,  # High confidence for direct extraction
-                    engine=self.name(),
-                    is_scanned=False
-                )
-            else:
+            if not full_text.strip():
                 # PDF is likely scanned (no extractable text)
                 return OcrResult("", confidence=0.0, engine=self.name(),
                                is_scanned=True,
                                error="PDF appears to be scanned, needs OCR")
-        
+
+            # Text was directly extractable
+            return OcrResult(
+                text=full_text,
+                confidence=0.95,  # High confidence for direct extraction
+                engine=self.name(),
+                is_scanned=False
+            )
+
         except Exception as e:
             logger.error(f"pdfplumber error: {e}")
             return OcrResult("", confidence=0.0, engine=self.name(), error=str(e))
