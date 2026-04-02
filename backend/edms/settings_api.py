@@ -3,6 +3,8 @@ LDO-2 EDMS - Django REST Framework & JWT Configuration
 Add these settings to your main Django settings.py
 """
 
+import os
+
 # ─────────────────────────────────────────────────────────────────────────────
 # REST Framework Configuration
 # ─────────────────────────────────────────────────────────────────────────────
@@ -151,7 +153,7 @@ DATABASE_CONFIG = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'edms_db',
         'USER': 'edms_user',
-        'PASSWORD': 'secure_password_here',
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', ''),
         'HOST': 'localhost',
         'PORT': '5432',
         'CONN_MAX_AGE': 600,
