@@ -947,6 +947,7 @@ class CrawlJobService:
                 job.complete()
             job.save(update_fields=['status', 'completed_at', 'discovered_count', 'indexed_count', 'duplicate_count', 'failed_count', 'error_message', 'updated_at'])
         except Exception as exc:
+            job.error_message = str(exc)
             job.fail(str(exc))
             job.save(update_fields=['status', 'completed_at', 'error_message', 'updated_at'])
             raise
@@ -1005,6 +1006,7 @@ class HashBackfillJobService:
             job.complete()
             job.save(update_fields=['status', 'completed_at', 'documents_scanned', 'documents_indexed', 'full_hashes_computed', 'error_message', 'updated_at'])
         except Exception as exc:
+            job.error_message = str(exc)
             job.fail(str(exc))
             job.save(update_fields=['status', 'completed_at', 'error_message', 'updated_at'])
             raise

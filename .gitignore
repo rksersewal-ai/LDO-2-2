@@ -60,5 +60,7 @@ __pycache__/
 # Local Codex/runtime artifacts
 .codex-run/
 attached_assets/
+venv/
+__pycache__/
 backend/venv/
 venv/

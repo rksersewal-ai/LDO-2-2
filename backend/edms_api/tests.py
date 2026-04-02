@@ -14,6 +14,7 @@ from django_celery_beat.models import PeriodicTask
 from rest_framework.test import APITestCase
 
 from documents.indexing import DocumentIndexOrchestrator
+from unittest.mock import patch
 from documents.models import CrawlJob, DocumentMetadataAssertion, DocumentOcrEntity, DuplicateDecision, IndexedSource, IndexedSourceFileState
 from documents.services import CrawlJobService, IndexedSourceService
 from documents.tasks import run_indexed_source_crawl
@@ -1004,6 +1005,48 @@ class ModularApiSmokeTests(APITestCase):
         self.assertTrue(PermissionService.scope_queryset(Document.objects.all(), legacy_user, 'view_document').filter(pk=legacy_doc.pk).exists())
         self.assertTrue(PermissionService.scope_queryset(WorkRecord.objects.all(), legacy_user, 'view_workrecord').filter(pk=legacy_work.pk).exists())
         self.assertTrue(PermissionService.scope_queryset(PlItem.objects.all(), legacy_user, 'view_plitem').filter(pk=legacy_pl.pk).exists())
+
+    def test_crawl_job_handles_exception_during_run(self):
+        source = IndexedSource.objects.create(
+            name='Test Exception Source',
+            root_path='/tmp',
+            is_active=True,
+            watch_enabled=False,
+        )
+        job = CrawlJobService.create_job(source)
+
+        with patch('documents.services.Path.rglob') as mock_rglob:
+            mock_rglob.side_effect = Exception("Test crawl failure")
+
+            with self.assertRaises(Exception) as context:
+                CrawlJobService.run_job(job)
+
+            self.assertEqual(str(context.exception), "Test crawl failure")
+
+        self.assertEqual(job.status, 'FAILED')
+        self.assertEqual(job.error_message, "Test crawl failure")
+
+    def test_hash_backfill_job_handles_exception_during_run(self):
+        from documents.models import HashBackfillJob
+        from documents.services import HashBackfillJobService
+        source = IndexedSource.objects.create(
+            name='Test Backfill Source',
+            root_path='/tmp',
+            is_active=True,
+            watch_enabled=False,
+        )
+        job = HashBackfillJobService.create_job(source=source)
+
+        with patch('documents.services.Document.objects.filter') as mock_filter:
+            mock_filter.side_effect = Exception("Test backfill failure")
+
+            with self.assertRaises(Exception) as context:
+                HashBackfillJobService.run_job(job)
+
+            self.assertEqual(str(context.exception), "Test backfill failure")
+
+        self.assertEqual(job.status, 'FAILED')
+        self.assertEqual(job.error_message, "Test backfill failure")
 
     def test_document_admin_views_are_guardian_scoped_for_regular_users(self):
         regular_user = User.objects.create_user(username='doc-admin-user', password='pass12345')
