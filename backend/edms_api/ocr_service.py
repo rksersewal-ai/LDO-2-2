@@ -193,6 +193,10 @@ class EasyOcrEngine(OcrEngine):
         if not self.is_available():
             return OcrResult("", confidence=0.0, engine=self.name(),
                            error="easyocr not available")
+
+        images, error = self._get_images_for_file(file_path)
+        if error:
+            return OcrResult("", confidence=0.0, engine=self.name(), error=error)
         
         try:
             images, error_result = self._get_images_from_file(file_path)
@@ -281,6 +285,10 @@ class TesseractEngine(OcrEngine):
         if not self.is_available():
             return OcrResult("", confidence=0.0, engine=self.name(),
                            error="Tesseract not available")
+
+        images, error = self._get_images_for_file(file_path)
+        if error:
+            return OcrResult("", confidence=0.0, engine=self.name(), error=error)
         
         try:
             images, error_result = self._get_images_from_file(file_path)
