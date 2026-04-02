@@ -1,36 +1,63 @@
-import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import Mock
+
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.test import SimpleTestCase
 from rest_framework.exceptions import ValidationError
-from config_mgmt.services import ChangeNoticeService
 
-class ChangeNoticeServiceTest(unittest.TestCase):
-    def test_create_with_django_validation_error_message_dict(self):
-        """Test that ChangeNoticeService.create catches DjangoValidationError with message_dict and raises DRF ValidationError."""
-        serializer_mock = MagicMock()
+from config_mgmt.services import ChangeNoticeService, ChangeRequestService
 
-        error_msg = {'field_name': ['Error message']}
-        serializer_mock.save.side_effect = DjangoValidationError(error_msg)
 
-        request_mock = MagicMock()
+class ChangeRequestServiceTests(SimpleTestCase):
+    def test_create_raises_validation_error_with_message_dict(self):
+        mock_serializer = Mock()
+        err = DjangoValidationError({'field': ['error msg']})
+        mock_serializer.save.side_effect = err
 
-        with self.assertRaises(ValidationError) as context:
-            ChangeNoticeService.create(serializer_mock, request_mock)
+        mock_request = Mock()
+        mock_request.user = Mock()
 
-        self.assertEqual(context.exception.detail, error_msg)
+        with self.assertRaises(ValidationError) as cm:
+            ChangeRequestService.create.__wrapped__(mock_serializer, mock_request)
 
-    def test_create_with_django_validation_error_messages(self):
-        """Test that ChangeNoticeService.create catches DjangoValidationError with messages list and raises DRF ValidationError."""
-        serializer_mock = MagicMock()
+        self.assertIn('error msg', str(cm.exception.detail['field'][0]))
 
-        error_msg = "A single error message"
-        # When initialized with a string, DjangoValidationError sets it in .messages
-        serializer_mock.save.side_effect = DjangoValidationError(error_msg)
+    def test_create_raises_validation_error_with_messages(self):
+        mock_serializer = Mock()
+        err = DjangoValidationError(['error msg list'])
+        mock_serializer.save.side_effect = err
 
-        request_mock = MagicMock()
+        mock_request = Mock()
+        mock_request.user = Mock()
 
-        with self.assertRaises(ValidationError) as context:
-            ChangeNoticeService.create(serializer_mock, request_mock)
+        with self.assertRaises(ValidationError) as cm:
+            ChangeRequestService.create.__wrapped__(mock_serializer, mock_request)
 
-        # The DRF ValidationError detail will be a list containing the string
-        self.assertEqual(context.exception.detail, [error_msg])
+        self.assertIn('error msg list', str(cm.exception.detail[0]))
+
+
+class ChangeNoticeServiceTests(SimpleTestCase):
+    def test_create_raises_validation_error_with_message_dict(self):
+        mock_serializer = Mock()
+        err = DjangoValidationError({'field': ['error msg']})
+        mock_serializer.save.side_effect = err
+
+        mock_request = Mock()
+        mock_request.user = Mock()
+
+        with self.assertRaises(ValidationError) as cm:
+            ChangeNoticeService.create.__wrapped__(mock_serializer, mock_request)
+
+        self.assertIn('error msg', str(cm.exception.detail['field'][0]))
+
+    def test_create_raises_validation_error_with_messages(self):
+        mock_serializer = Mock()
+        err = DjangoValidationError(['error msg list'])
+        mock_serializer.save.side_effect = err
+
+        mock_request = Mock()
+        mock_request.user = Mock()
+
+        with self.assertRaises(ValidationError) as cm:
+            ChangeNoticeService.create.__wrapped__(mock_serializer, mock_request)
+
+        self.assertIn('error msg list', str(cm.exception.detail[0]))
