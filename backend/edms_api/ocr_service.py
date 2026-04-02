@@ -328,6 +328,24 @@ class TesseractEngine(OcrEngine):
             return OcrResult("", confidence=0.0, engine=self.name(), error=str(e))
 
 
+
+def _load_images(file_path: str, engine_name: str) -> list:
+    from PIL import Image
+
+    if file_path.lower().endswith('.pdf'):
+        try:
+            import pdf2image
+            images = pdf2image.convert_from_path(file_path)
+            if not images:
+                raise ValueError("Could not convert PDF to image")
+            return images
+        except ImportError:
+            logger.warning(f"pdf2image not installed. Cannot process PDFs with {engine_name}")
+            raise ValueError("pdf2image required for PDF processing")
+    else:
+        return [Image.open(file_path)]
+
+
 class OcrService:
     """Multi-engine OCR service with fallback strategy"""
     
