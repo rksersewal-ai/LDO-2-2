@@ -39,11 +39,6 @@ class OcrEngine:
     def name(self) -> str:
         raise NotImplementedError
 
-    def _get_images(self, file_path: str) -> list:
-        from PIL import Image
-        import logging
-        logger = logging.getLogger(__name__)
-
     def _get_images_from_file(self, file_path: str) -> Tuple[list, Optional[OcrResult]]:
         """Helper to get images from a file path, converting PDFs if necessary."""
         from PIL import Image
@@ -52,19 +47,12 @@ class OcrEngine:
                 import pdf2image
                 images = pdf2image.convert_from_path(file_path)
                 if not images:
-                    raise ValueError("Could not convert PDF to image")
-                return images
-            except ImportError:
-                logger.warning(f"pdf2image not installed. Cannot process PDFs with {self.name()}")
-                raise ImportError("pdf2image required for PDF processing")
-        else:
-            return [Image.open(file_path)]
                     return [], OcrResult("", confidence=0.0, engine=self.name(),
                                        error="Could not convert PDF to image")
                 return images, None
             except ImportError:
                 import logging
-                logging.getLogger(__name__).warning("pdf2image not installed")
+                logging.getLogger(__name__).warning(f"pdf2image not installed. Cannot process PDFs with {self.name()}")
                 return [], OcrResult("", confidence=0.0, engine=self.name(),
                                    error="pdf2image required for PDF processing")
         else:
@@ -83,25 +71,32 @@ class PlainTextEngine(OcrEngine):
     def name(self) -> str:
         return "plaintext"
 
+    def _try_decode(self, path: Path) -> Optional[str]:
+        """Try reading the file with common encodings."""
+        for encoding in ('utf-8', 'utf-8-sig', 'latin-1'):
+            try:
+                return path.read_text(encoding=encoding)
+            except UnicodeDecodeError:
+                continue
+        return None
+
     def extract(self, file_path: str) -> OcrResult:
         path = Path(file_path)
         if path.suffix.lower() not in self.SUPPORTED_EXTENSIONS:
             return OcrResult("", confidence=0.0, engine=self.name(), error="unsupported file type")
 
-        for encoding in ('utf-8', 'utf-8-sig', 'latin-1'):
-            try:
-                text = path.read_text(encoding=encoding)
+        try:
+            text = self._try_decode(path)
+            if text is not None:
                 return OcrResult(
                     text=text,
                     confidence=1.0,
                     engine=self.name(),
                     is_scanned=False,
                 )
-            except UnicodeDecodeError:
-                continue
-            except Exception as exc:
-                logger.error(f"Plain text extraction error: {exc}")
-                return OcrResult("", confidence=0.0, engine=self.name(), error=str(exc))
+        except Exception as exc:
+            logger.error(f"Plain text extraction error: {exc}")
+            return OcrResult("", confidence=0.0, engine=self.name(), error=str(exc))
 
         return OcrResult("", confidence=0.0, engine=self.name(), error="could not decode text file")
 
@@ -140,20 +135,20 @@ class PdfTextEngine(OcrEngine):
             
             full_text = "\n".join(text_chunks)
             
-            if full_text.strip():
-                # Text was directly extractable
-                return OcrResult(
-                    text=full_text,
-                    confidence=0.95,  # High confidence for direct extraction
-                    engine=self.name(),
-                    is_scanned=False
-                )
-            else:
+            if not full_text.strip():
                 # PDF is likely scanned (no extractable text)
                 return OcrResult("", confidence=0.0, engine=self.name(),
                                is_scanned=True,
                                error="PDF appears to be scanned, needs OCR")
-        
+
+            # Text was directly extractable
+            return OcrResult(
+                text=full_text,
+                confidence=0.95,  # High confidence for direct extraction
+                engine=self.name(),
+                is_scanned=False
+            )
+
         except Exception as e:
             logger.error(f"pdfplumber error: {e}")
             return OcrResult("", confidence=0.0, engine=self.name(), error=str(e))
@@ -192,8 +187,6 @@ class EasyOcrEngine(OcrEngine):
         
         try:
             import numpy as np
-            images = self._get_images(file_path)
-            import io
             
             images, error_result = self._get_images_from_file(file_path)
             if error_result:
@@ -208,11 +201,8 @@ class EasyOcrEngine(OcrEngine):
                 img_array = np.array(image)
                 results = reader.readtext(img_array)
 
-                page_lines = []
-                for (bbox, text, conf) in results:
-                    page_lines.append(text)
-                    all_confidences.append(conf)
-                page_texts.append("\n".join(page_lines))
+                page_texts.append("\n".join(text for (_, text, conf) in results))
+                all_confidences.extend(conf for (_, _, conf) in results)
 
             full_text = "\n\f\n".join(text for text in page_texts if text)
             avg_confidence = sum(all_confidences) / len(all_confidences) if all_confidences else 0.0
@@ -284,9 +274,6 @@ class TesseractEngine(OcrEngine):
                            error="Tesseract not available")
         
         try:
-            images = self._get_images(file_path)
-            import io
-            
             images, error_result = self._get_images_from_file(file_path)
             if error_result:
                 return error_result

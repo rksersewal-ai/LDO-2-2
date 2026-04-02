@@ -153,7 +153,7 @@ DATABASE_CONFIG = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'edms_db',
         'USER': 'edms_user',
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', ''),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
         'HOST': 'localhost',
         'PORT': '5432',
         'CONN_MAX_AGE': 600,
