@@ -221,6 +221,34 @@ class ModularApiSmokeTests(APITestCase):
             ).exists()
         )
 
+    @patch('documents.tasks.index_single_document.delay')
+    @patch('documents.indexing.DocumentIndexOrchestrator.index_document')
+    def test_uploading_new_document_version_indexing_fallback(self, mock_index_document, mock_delay):
+        document = Document.objects.create(
+            id='DOC-FALLBACK-001',
+            name='Version Fallback Document',
+            description='Test fallback on exception',
+            type='Other',
+            status='Draft',
+            category='Specification',
+            linked_pl=self.pl_item.id,
+            file=SimpleUploadedFile('version-1.txt', b'Initial version content'),
+        )
+
+        mock_delay.side_effect = Exception("Celery is down")
+
+        version_response = self.client.post(
+            f'/api/v1/documents/{document.id}/versions/',
+            {'file': SimpleUploadedFile('version-2.txt', b'New version content')},
+        )
+        self.assertEqual(version_response.status_code, 201)
+
+        document.refresh_from_db()
+        self.assertEqual(document.revision, 2)
+
+        mock_delay.assert_called_once_with(str(document.id))
+        mock_index_document.assert_any_call(document, force_hashes=True)
+
     def test_create_work_record_and_export_job(self):
         response = self.client.post(
             '/api/v1/work-records/',
