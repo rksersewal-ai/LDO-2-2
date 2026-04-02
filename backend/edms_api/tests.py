@@ -3,9 +3,11 @@ import tempfile
 import time
 import json
 from datetime import timedelta
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError as DjangoValidationError
+from rest_framework.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.test import override_settings
@@ -36,6 +38,7 @@ from shared.models import DomainEvent, ReportJob
 from shared.permissions import PermissionService
 from shared.services import ReportJobService
 from work.models import WorkRecordExportJob
+from config_mgmt.services import BomService
 
 
 class ModularApiSmokeTests(APITestCase):
@@ -494,47 +497,49 @@ class ModularApiSmokeTests(APITestCase):
         self.assertTrue(any(result['id'] == document.id for result in response.data['documents']))
 
     def test_shared_folder_indexing_marks_older_duplicate_and_search_filters_it(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            older_path = os.path.join(temp_dir, 'shared_duplicate_older.pdf')
-            newer_path = os.path.join(temp_dir, 'shared_duplicate_newer.pdf')
-            payload = b'duplicate payload for network share indexing'
+        temp_dir_obj = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir_obj.cleanup)
+        temp_dir = temp_dir_obj.name
+        older_path = os.path.join(temp_dir, 'shared_duplicate_older.pdf')
+        newer_path = os.path.join(temp_dir, 'shared_duplicate_newer.pdf')
+        payload = b'duplicate payload for network share indexing'
 
-            with open(older_path, 'wb') as handle:
-                handle.write(payload)
-            with open(newer_path, 'wb') as handle:
-                handle.write(payload)
+        with open(older_path, 'wb') as handle:
+            handle.write(payload)
+        with open(newer_path, 'wb') as handle:
+            handle.write(payload)
 
-            now = time.time()
-            os.utime(older_path, (now - 7200, now - 7200))
-            os.utime(newer_path, (now, now))
+        now = time.time()
+        os.utime(older_path, (now - 7200, now - 7200))
+        os.utime(newer_path, (now, now))
 
-            call_command('index_shared_documents', temp_dir)
+        call_command('index_shared_documents', temp_dir)
 
-            older_document = Document.objects.get(external_file_path=older_path)
-            newer_document = Document.objects.get(external_file_path=newer_path)
+        older_document = Document.objects.get(external_file_path=older_path)
+        newer_document = Document.objects.get(external_file_path=newer_path)
 
-            older_document.refresh_from_db()
-            newer_document.refresh_from_db()
+        older_document.refresh_from_db()
+        newer_document.refresh_from_db()
 
-            self.assertEqual(newer_document.source_system, 'NETWORK_SHARE')
-            self.assertTrue(newer_document.fingerprint_3x64k)
-            self.assertEqual(newer_document.duplicate_status, 'MASTER')
-            self.assertEqual(older_document.duplicate_status, 'DUPLICATE')
-            self.assertEqual(older_document.duplicate_of_id, newer_document.id)
+        self.assertEqual(newer_document.source_system, 'NETWORK_SHARE')
+        self.assertTrue(newer_document.fingerprint_3x64k)
+        self.assertEqual(newer_document.duplicate_status, 'MASTER')
+        self.assertEqual(older_document.duplicate_status, 'DUPLICATE')
+        self.assertEqual(older_document.duplicate_of_id, newer_document.id)
 
-            include_response = self.client.get('/api/v1/search/?q=shared_duplicate&scope=DOCUMENTS&duplicates=include')
-            self.assertEqual(include_response.status_code, 200)
-            self.assertEqual(len(include_response.data['documents']), 2)
+        include_response = self.client.get('/api/v1/search/?q=shared_duplicate&scope=DOCUMENTS&duplicates=include')
+        self.assertEqual(include_response.status_code, 200)
+        self.assertEqual(len(include_response.data['documents']), 2)
 
-            exclude_response = self.client.get('/api/v1/search/?q=shared_duplicate&scope=DOCUMENTS&duplicates=exclude')
-            self.assertEqual(exclude_response.status_code, 200)
-            self.assertEqual(len(exclude_response.data['documents']), 1)
-            self.assertEqual(exclude_response.data['documents'][0]['id'], newer_document.id)
+        exclude_response = self.client.get('/api/v1/search/?q=shared_duplicate&scope=DOCUMENTS&duplicates=exclude')
+        self.assertEqual(exclude_response.status_code, 200)
+        self.assertEqual(len(exclude_response.data['documents']), 1)
+        self.assertEqual(exclude_response.data['documents'][0]['id'], newer_document.id)
 
-            only_response = self.client.get('/api/v1/search/?q=shared_duplicate&scope=DOCUMENTS&duplicates=only')
-            self.assertEqual(only_response.status_code, 200)
-            self.assertEqual(len(only_response.data['documents']), 1)
-            self.assertEqual(only_response.data['documents'][0]['id'], older_document.id)
+        only_response = self.client.get('/api/v1/search/?q=shared_duplicate&scope=DOCUMENTS&duplicates=only')
+        self.assertEqual(only_response.status_code, 200)
+        self.assertEqual(len(only_response.data['documents']), 1)
+        self.assertEqual(only_response.data['documents'][0]['id'], older_document.id)
 
     def test_document_search_backend_applies_status_and_date_filters(self):
         old_document = Document.objects.create(
@@ -571,27 +576,29 @@ class ModularApiSmokeTests(APITestCase):
         self.assertEqual([item['id'] for item in recent_response.data['documents']], [recent_document.id])
 
     def test_document_search_ranks_master_ahead_of_duplicate_for_same_query(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            older_path = os.path.join(temp_dir, 'ranking_duplicate_older.pdf')
-            newer_path = os.path.join(temp_dir, 'ranking_duplicate_newer.pdf')
-            payload = b'ranking duplicate payload'
+        temp_dir_obj = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir_obj.cleanup)
+        temp_dir = temp_dir_obj.name
+        older_path = os.path.join(temp_dir, 'ranking_duplicate_older.pdf')
+        newer_path = os.path.join(temp_dir, 'ranking_duplicate_newer.pdf')
+        payload = b'ranking duplicate payload'
 
-            with open(older_path, 'wb') as handle:
-                handle.write(payload)
-            with open(newer_path, 'wb') as handle:
-                handle.write(payload)
+        with open(older_path, 'wb') as handle:
+            handle.write(payload)
+        with open(newer_path, 'wb') as handle:
+            handle.write(payload)
 
-            now = time.time()
-            os.utime(older_path, (now - 7200, now - 7200))
-            os.utime(newer_path, (now, now))
+        now = time.time()
+        os.utime(older_path, (now - 7200, now - 7200))
+        os.utime(newer_path, (now, now))
 
-            call_command('index_shared_documents', temp_dir)
+        call_command('index_shared_documents', temp_dir)
 
-            response = self.client.get('/api/v1/search/?q=ranking_duplicate&scope=DOCUMENTS&duplicates=include')
-            self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(response.data['documents']), 2)
-            self.assertEqual(response.data['documents'][0]['duplicate_status'], 'MASTER')
-            self.assertEqual(response.data['documents'][1]['duplicate_status'], 'DUPLICATE')
+        response = self.client.get('/api/v1/search/?q=ranking_duplicate&scope=DOCUMENTS&duplicates=include')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['documents']), 2)
+        self.assertEqual(response.data['documents'][0]['duplicate_status'], 'MASTER')
+        self.assertEqual(response.data['documents'][1]['duplicate_status'], 'DUPLICATE')
 
     def test_reindex_creates_governed_entities_and_assertions(self):
         document = Document.objects.create(
@@ -649,55 +656,59 @@ class ModularApiSmokeTests(APITestCase):
         self.assertEqual(response.data['documents'][0]['matched_assertions'][0]['field_key'], assertion.field_key)
 
     def test_family_key_keeps_same_hash_different_drawings_out_of_duplicate_state(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            first_path = os.path.join(temp_dir, 'DWG-AXLE-778.pdf')
-            second_path = os.path.join(temp_dir, 'DWG-BOGIE-991.pdf')
-            payload = b'same-content-different-families'
+        temp_dir_obj = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir_obj.cleanup)
+        temp_dir = temp_dir_obj.name
+        first_path = os.path.join(temp_dir, 'DWG-AXLE-778.pdf')
+        second_path = os.path.join(temp_dir, 'DWG-BOGIE-991.pdf')
+        payload = b'same-content-different-families'
 
-            with open(first_path, 'wb') as handle:
-                handle.write(payload)
-            with open(second_path, 'wb') as handle:
-                handle.write(payload)
+        with open(first_path, 'wb') as handle:
+            handle.write(payload)
+        with open(second_path, 'wb') as handle:
+            handle.write(payload)
 
-            call_command('index_shared_documents', temp_dir)
+        call_command('index_shared_documents', temp_dir)
 
-            first_document = Document.objects.get(external_file_path=first_path)
-            second_document = Document.objects.get(external_file_path=second_path)
+        first_document = Document.objects.get(external_file_path=first_path)
+        second_document = Document.objects.get(external_file_path=second_path)
 
-            self.assertEqual(first_document.duplicate_status, 'UNIQUE')
-            self.assertEqual(second_document.duplicate_status, 'UNIQUE')
-            self.assertNotEqual(first_document.document_family_key, second_document.document_family_key)
-            self.assertTrue(first_document.document_family_key.startswith('drawing_numbers:'))
-            self.assertTrue(second_document.document_family_key.startswith('drawing_numbers:'))
+        self.assertEqual(first_document.duplicate_status, 'UNIQUE')
+        self.assertEqual(second_document.duplicate_status, 'UNIQUE')
+        self.assertNotEqual(first_document.document_family_key, second_document.document_family_key)
+        self.assertTrue(first_document.document_family_key.startswith('drawing_numbers:'))
+        self.assertTrue(second_document.document_family_key.startswith('drawing_numbers:'))
 
-            dedup_response = self.client.get('/api/v1/deduplication/groups/')
-            self.assertEqual(dedup_response.status_code, 200)
-            self.assertEqual(len(dedup_response.data), 0)
+        dedup_response = self.client.get('/api/v1/deduplication/groups/')
+        self.assertEqual(dedup_response.status_code, 200)
+        self.assertEqual(len(dedup_response.data), 0)
 
     def test_family_key_stays_stable_across_drawing_revision_variants(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            older_path = os.path.join(temp_dir, 'DWG-AXLE-778_revA.pdf')
-            newer_path = os.path.join(temp_dir, 'DWG-AXLE-778_revB.pdf')
-            payload = b'same-content-same-family'
+        temp_dir_obj = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir_obj.cleanup)
+        temp_dir = temp_dir_obj.name
+        older_path = os.path.join(temp_dir, 'DWG-AXLE-778_revA.pdf')
+        newer_path = os.path.join(temp_dir, 'DWG-AXLE-778_revB.pdf')
+        payload = b'same-content-same-family'
 
-            with open(older_path, 'wb') as handle:
-                handle.write(payload)
-            with open(newer_path, 'wb') as handle:
-                handle.write(payload)
+        with open(older_path, 'wb') as handle:
+            handle.write(payload)
+        with open(newer_path, 'wb') as handle:
+            handle.write(payload)
 
-            now = time.time()
-            os.utime(older_path, (now - 7200, now - 7200))
-            os.utime(newer_path, (now, now))
+        now = time.time()
+        os.utime(older_path, (now - 7200, now - 7200))
+        os.utime(newer_path, (now, now))
 
-            call_command('index_shared_documents', temp_dir)
+        call_command('index_shared_documents', temp_dir)
 
-            older_document = Document.objects.get(external_file_path=older_path)
-            newer_document = Document.objects.get(external_file_path=newer_path)
+        older_document = Document.objects.get(external_file_path=older_path)
+        newer_document = Document.objects.get(external_file_path=newer_path)
 
-            self.assertEqual(older_document.document_family_key, newer_document.document_family_key)
-            self.assertEqual(newer_document.duplicate_status, 'MASTER')
-            self.assertEqual(older_document.duplicate_status, 'DUPLICATE')
-            self.assertEqual(older_document.duplicate_of_id, newer_document.id)
+        self.assertEqual(older_document.document_family_key, newer_document.document_family_key)
+        self.assertEqual(newer_document.duplicate_status, 'MASTER')
+        self.assertEqual(older_document.duplicate_status, 'DUPLICATE')
+        self.assertEqual(older_document.duplicate_of_id, newer_document.id)
 
     def test_change_request_release_creates_baseline_and_links_current_release(self):
         create_response = self.client.post(
@@ -735,150 +746,160 @@ class ModularApiSmokeTests(APITestCase):
         self.assertTrue(BaselineItem.objects.filter(baseline=baseline).exists())
 
     def test_indexed_source_schedule_uses_queue_task_and_disables_when_inactive(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            source = IndexedSource.objects.create(
-                name='Schedule Source',
-                root_path=temp_dir,
-                is_active=True,
-                watch_enabled=False,
-                scan_interval_minutes=15,
-            )
-            schedule_name = f'edms:crawl-source:{source.id}'
-            task = PeriodicTask.objects.get(name=schedule_name)
-            self.assertEqual(task.task, 'documents.tasks.queue_indexed_source_crawl')
-            self.assertTrue(task.enabled)
+        temp_dir_obj = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir_obj.cleanup)
+        temp_dir = temp_dir_obj.name
+        source = IndexedSource.objects.create(
+            name='Schedule Source',
+            root_path=temp_dir,
+            is_active=True,
+            watch_enabled=False,
+            scan_interval_minutes=15,
+        )
+        schedule_name = f'edms:crawl-source:{source.id}'
+        task = PeriodicTask.objects.get(name=schedule_name)
+        self.assertEqual(task.task, 'documents.tasks.queue_indexed_source_crawl')
+        self.assertTrue(task.enabled)
 
-            source.is_active = False
-            source.save(update_fields=['is_active'])
-            task.refresh_from_db()
-            self.assertFalse(task.enabled)
+        source.is_active = False
+        source.save(update_fields=['is_active'])
+        task.refresh_from_db()
+        self.assertFalse(task.enabled)
 
     def test_run_indexed_source_crawl_accepts_source_id(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            shared_file = os.path.join(temp_dir, 'index-me.pdf')
-            with open(shared_file, 'wb') as handle:
-                handle.write(b'network share payload')
+        temp_dir_obj = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir_obj.cleanup)
+        temp_dir = temp_dir_obj.name
+        shared_file = os.path.join(temp_dir, 'index-me.pdf')
+        with open(shared_file, 'wb') as handle:
+            handle.write(b'network share payload')
 
-            source = IndexedSource.objects.create(
-                name='Indexed Share',
-                root_path=temp_dir,
-                is_active=True,
-                watch_enabled=True,
-                scan_interval_minutes=10,
-            )
+        source = IndexedSource.objects.create(
+            name='Indexed Share',
+            root_path=temp_dir,
+            is_active=True,
+            watch_enabled=True,
+            scan_interval_minutes=10,
+        )
 
-            run_indexed_source_crawl(str(source.id))
+        run_indexed_source_crawl(str(source.id))
 
-            job = CrawlJob.objects.get(source=source)
-            self.assertEqual(job.status, 'COMPLETED')
-            self.assertEqual(job.indexed_count, 1)
+        job = CrawlJob.objects.get(source=source)
+        self.assertEqual(job.status, 'COMPLETED')
+        self.assertEqual(job.indexed_count, 1)
 
     def test_indexed_source_file_state_tracks_missing_files(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            shared_file = os.path.join(temp_dir, 'tracked.pdf')
-            with open(shared_file, 'wb') as handle:
-                handle.write(b'tracked payload')
+        temp_dir_obj = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir_obj.cleanup)
+        temp_dir = temp_dir_obj.name
+        shared_file = os.path.join(temp_dir, 'tracked.pdf')
+        with open(shared_file, 'wb') as handle:
+            handle.write(b'tracked payload')
 
-            source = IndexedSource.objects.create(
-                name='Tracked Share',
-                root_path=temp_dir,
-                is_active=True,
-                watch_enabled=False,
-            )
+        source = IndexedSource.objects.create(
+            name='Tracked Share',
+            root_path=temp_dir,
+            is_active=True,
+            watch_enabled=False,
+        )
 
-            initial_job = CrawlJobService.create_job(source)
-            CrawlJobService.run_job(initial_job)
+        initial_job = CrawlJobService.create_job(source)
+        CrawlJobService.run_job(initial_job)
 
-            state = IndexedSourceFileState.objects.get(source=source)
-            self.assertEqual(state.status, 'ACTIVE')
-            self.assertTrue(state.document_id)
+        state = IndexedSourceFileState.objects.get(source=source)
+        self.assertEqual(state.status, 'ACTIVE')
+        self.assertTrue(state.document_id)
 
-            os.remove(shared_file)
+        os.remove(shared_file)
 
-            followup_job = CrawlJobService.create_job(source)
-            CrawlJobService.run_job(followup_job)
+        followup_job = CrawlJobService.create_job(source)
+        CrawlJobService.run_job(followup_job)
 
-            state.refresh_from_db()
-            self.assertEqual(state.status, 'MISSING')
-            self.assertIsNotNone(state.missing_since)
+        state.refresh_from_db()
+        self.assertEqual(state.status, 'MISSING')
+        self.assertIsNotNone(state.missing_since)
 
-            document = Document.objects.get(pk=state.document_id)
-            source_index = document.search_metadata.get('source_index', {})
-            self.assertEqual(source_index.get('source_state'), 'MISSING')
-            self.assertEqual(source_index.get('relative_path'), 'tracked.pdf')
+        document = Document.objects.get(pk=state.document_id)
+        source_index = document.search_metadata.get('source_index', {})
+        self.assertEqual(source_index.get('source_state'), 'MISSING')
+        self.assertEqual(source_index.get('relative_path'), 'tracked.pdf')
 
     def test_indexed_source_file_state_tracks_failures_per_file(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            shared_file = os.path.join(temp_dir, 'broken.pdf')
-            with open(shared_file, 'wb') as handle:
-                handle.write(b'broken payload')
+        temp_dir_obj = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir_obj.cleanup)
+        temp_dir = temp_dir_obj.name
+        shared_file = os.path.join(temp_dir, 'broken.pdf')
+        with open(shared_file, 'wb') as handle:
+            handle.write(b'broken payload')
 
-            source = IndexedSource.objects.create(
-                name='Broken Share',
-                root_path=temp_dir,
-                is_active=True,
-                watch_enabled=False,
-            )
+        source = IndexedSource.objects.create(
+            name='Broken Share',
+            root_path=temp_dir,
+            is_active=True,
+            watch_enabled=False,
+        )
 
-            with patch('documents.services._DocumentIndexingBatchService.index_paths_bulk', side_effect=RuntimeError('boom_bulk')):
-                with patch('documents.services._DocumentIndexingBatchService.index_path', side_effect=RuntimeError('boom')):
-                    job = CrawlJobService.create_job(source)
-                    CrawlJobService.run_job(job)
+        with patch('documents.services._DocumentIndexingBatchService.index_paths_bulk', side_effect=RuntimeError('boom_bulk')):
+            with patch('documents.services._DocumentIndexingBatchService.index_path', side_effect=RuntimeError('boom')):
+                job = CrawlJobService.create_job(source)
+                CrawlJobService.run_job(job)
 
-            state = IndexedSourceFileState.objects.get(source=source, relative_path='broken.pdf')
-            self.assertEqual(state.status, 'FAILED')
-            self.assertEqual(state.failure_count, 1)
-            self.assertEqual(state.last_error, 'boom')
+        state = IndexedSourceFileState.objects.get(source=source, relative_path='broken.pdf')
+        self.assertEqual(state.status, 'FAILED')
+        self.assertEqual(state.failure_count, 1)
+        self.assertEqual(state.last_error, 'boom')
 
-            job = CrawlJob.objects.get(pk=job.pk)
-            self.assertEqual(job.status, 'FAILED')
-            self.assertEqual(job.failed_count, 1)
+        job = CrawlJob.objects.get(pk=job.pk)
+        self.assertEqual(job.status, 'FAILED')
+        self.assertEqual(job.failed_count, 1)
 
     def test_indexed_source_move_relinks_existing_document_state(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            original_path = os.path.join(temp_dir, 'original.pdf')
-            moved_path = os.path.join(temp_dir, 'renamed.pdf')
-            with open(original_path, 'wb') as handle:
-                handle.write(b'renamed payload')
+        temp_dir_obj = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir_obj.cleanup)
+        temp_dir = temp_dir_obj.name
+        original_path = os.path.join(temp_dir, 'original.pdf')
+        moved_path = os.path.join(temp_dir, 'renamed.pdf')
+        with open(original_path, 'wb') as handle:
+            handle.write(b'renamed payload')
 
-            source = IndexedSource.objects.create(
-                name='Move Share',
-                root_path=temp_dir,
-                is_active=True,
-                watch_enabled=True,
-            )
+        source = IndexedSource.objects.create(
+            name='Move Share',
+            root_path=temp_dir,
+            is_active=True,
+            watch_enabled=True,
+        )
 
-            initial_job = CrawlJobService.create_job(source)
-            CrawlJobService.run_job(initial_job)
+        initial_job = CrawlJobService.create_job(source)
+        CrawlJobService.run_job(initial_job)
 
-            state = IndexedSourceFileState.objects.get(source=source, relative_path='original.pdf')
-            document = Document.objects.get(pk=state.document_id)
-            original_document_id = document.id
+        state = IndexedSourceFileState.objects.get(source=source, relative_path='original.pdf')
+        document = Document.objects.get(pk=state.document_id)
+        original_document_id = document.id
 
-            os.rename(original_path, moved_path)
+        os.rename(original_path, moved_path)
 
-            move_job = CrawlJobService.create_job(
-                source,
-                parameters={
-                    'trigger': 'moved',
-                    'paths': [moved_path],
-                    'old_path': original_path,
-                    'new_path': moved_path,
-                },
-            )
-            CrawlJobService.run_job(move_job)
+        move_job = CrawlJobService.create_job(
+            source,
+            parameters={
+                'trigger': 'moved',
+                'paths': [moved_path],
+                'old_path': original_path,
+                'new_path': moved_path,
+            },
+        )
+        CrawlJobService.run_job(move_job)
 
-            state.refresh_from_db()
-            document.refresh_from_db()
+        state.refresh_from_db()
+        document.refresh_from_db()
 
-            self.assertEqual(state.relative_path, 'renamed.pdf')
-            self.assertEqual(state.status, 'ACTIVE')
-            self.assertEqual(str(document.id), str(original_document_id))
-            self.assertEqual(document.external_file_path, moved_path)
-            self.assertEqual(Document.objects.filter(indexed_source_states__source=source).distinct().count(), 1)
-            source_index = document.search_metadata.get('source_index', {})
-            self.assertEqual(source_index.get('relative_path'), 'renamed.pdf')
-            self.assertEqual(source_index.get('source_state'), 'ACTIVE')
+        self.assertEqual(state.relative_path, 'renamed.pdf')
+        self.assertEqual(state.status, 'ACTIVE')
+        self.assertEqual(str(document.id), str(original_document_id))
+        self.assertEqual(document.external_file_path, moved_path)
+        self.assertEqual(Document.objects.filter(indexed_source_states__source=source).distinct().count(), 1)
+        source_index = document.search_metadata.get('source_index', {})
+        self.assertEqual(source_index.get('relative_path'), 'renamed.pdf')
+        self.assertEqual(source_index.get('source_state'), 'ACTIVE')
 
     @override_settings(
         EDMS_HASH_BACKFILL_INTERVAL_MINUTES=30,
@@ -893,6 +914,18 @@ class ModularApiSmokeTests(APITestCase):
         payload = json.loads(task.kwargs)
         self.assertEqual(payload['batch_size'], 123)
         self.assertTrue(payload['force_full_hash'])
+
+    def test_bom_service_update_raises_validation_error_on_save(self):
+        serializer = MagicMock()
+        serializer.instance.parent = self.pl_item
+        serializer.save.side_effect = DjangoValidationError({'field': ['Invalid value']})
+
+        request = MagicMock()
+        request.user = self.user
+        request.META = {}
+
+        with self.assertRaises(ValidationError):
+            BomService.update(serializer, request)
 
     def test_bom_compare_reports_added_line_between_baselines(self):
         child = PlItem.objects.create(id='87654321', name='Child PL', description='Child item')

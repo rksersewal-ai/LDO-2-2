@@ -785,28 +785,35 @@ class SearchService:
 class DashboardService:
     @staticmethod
     def stats():
+        from django.db.models import Count, Q
+
+        doc_stats = Document.objects.aggregate(
+            total=Count('id'),
+            approved=Count('id', filter=Q(status__in=['Approved', 'APPROVED'])),
+            in_review=Count('id', filter=Q(status__in=['In Review', 'UNDER_REVIEW'])),
+            draft=Count('id', filter=Q(status__in=['Draft', 'DRAFT']))
+        )
+        work_stats = WorkRecord.objects.aggregate(
+            total=Count('id'),
+            open=Count('id', filter=Q(status__in=['Open', 'OPEN'])),
+            in_progress=Count('id', filter=Q(status__in=['In Progress', 'SUBMITTED'])),
+            completed=Count('id', filter=Q(status__in=['Completed', 'VERIFIED']))
+        )
+        approval_stats = Approval.objects.aggregate(
+            pending=Count('id', filter=Q(status='Pending')),
+            approved=Count('id', filter=Q(status='Approved')),
+            rejected=Count('id', filter=Q(status='Rejected'))
+        )
+        case_stats = Case.objects.aggregate(
+            open=Count('id', filter=Q(status__in=['Open', 'OPEN', 'In Progress', 'IN_PROGRESS'])),
+            closed=Count('id', filter=Q(status__in=['Closed', 'CLOSED', 'Resolved']))
+        )
+
         return {
-            'documents': {
-                'total': Document.objects.count(),
-                'approved': Document.objects.filter(status__in=['Approved', 'APPROVED']).count(),
-                'in_review': Document.objects.filter(status__in=['In Review', 'UNDER_REVIEW']).count(),
-                'draft': Document.objects.filter(status__in=['Draft', 'DRAFT']).count(),
-            },
-            'work_records': {
-                'total': WorkRecord.objects.count(),
-                'open': WorkRecord.objects.filter(status__in=['Open', 'OPEN']).count(),
-                'in_progress': WorkRecord.objects.filter(status__in=['In Progress', 'SUBMITTED']).count(),
-                'completed': WorkRecord.objects.filter(status__in=['Completed', 'VERIFIED']).count(),
-            },
-            'approvals': {
-                'pending': Approval.objects.filter(status='Pending').count(),
-                'approved': Approval.objects.filter(status='Approved').count(),
-                'rejected': Approval.objects.filter(status='Rejected').count(),
-            },
-            'cases': {
-                'open': Case.objects.filter(status__in=['Open', 'OPEN', 'In Progress', 'IN_PROGRESS']).count(),
-                'closed': Case.objects.filter(status__in=['Closed', 'CLOSED', 'Resolved']).count(),
-            },
+            'documents': doc_stats,
+            'work_records': work_stats,
+            'approvals': approval_stats,
+            'cases': case_stats,
             'timestamp': timezone.now(),
         }
 
