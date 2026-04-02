@@ -9,7 +9,7 @@ from pathlib import Path
 from django.db import transaction
 from django.db.models import Count, Q
 from django.utils import timezone
-from django_celery_beat.models import IntervalSchedule, PeriodicTask
+from django_celery_beat.models import IntervalSchedule, PeriodicTask, PeriodicTasks
 from rest_framework.exceptions import ValidationError
 
 from edms_api.models import Document, OcrJob
@@ -475,8 +475,66 @@ class IndexedSourceService:
 
     @classmethod
     def sync_runtime_schedules(cls):
-        for source in IndexedSource.objects.all().only('id', 'is_active', 'scan_interval_minutes'):
-            cls.sync_source_schedule(source)
+        sources = list(IndexedSource.objects.all().only('id', 'is_active', 'scan_interval_minutes'))
+
+        inactive_names = [cls._source_schedule_name(s.id) for s in sources if not s.is_active]
+        if inactive_names:
+            PeriodicTask.objects.filter(name__in=inactive_names).update(enabled=False)
+
+        active_sources = [s for s in sources if s.is_active]
+        if active_sources:
+            intervals = {max(int(s.scan_interval_minutes or 60), 1) for s in active_sources}
+            schedule_map = {}
+            for interval in intervals:
+                schedule, _ = IntervalSchedule.objects.get_or_create(every=interval, period=IntervalSchedule.MINUTES)
+                schedule_map[interval] = schedule
+
+            active_names = [cls._source_schedule_name(s.id) for s in active_sources]
+            existing_tasks = {t.name: t for t in PeriodicTask.objects.filter(name__in=active_names)}
+
+            tasks_to_create = []
+            tasks_to_update = []
+
+            for source in active_sources:
+                name = cls._source_schedule_name(source.id)
+                interval = max(int(source.scan_interval_minutes or 60), 1)
+                schedule = schedule_map[interval]
+                task_path = 'documents.tasks.queue_indexed_source_crawl'
+                args_json = json.dumps([str(source.id)])
+
+                if name in existing_tasks:
+                    task = existing_tasks[name]
+                    needs_update = False
+                    if task.task != task_path:
+                        task.task = task_path
+                        needs_update = True
+                    if task.interval_id != schedule.id:
+                        task.interval_id = schedule.id
+                        needs_update = True
+                    if task.args != args_json:
+                        task.args = args_json
+                        needs_update = True
+                    if not task.enabled:
+                        task.enabled = True
+                        needs_update = True
+
+                    if needs_update:
+                        tasks_to_update.append(task)
+                else:
+                    tasks_to_create.append(PeriodicTask(
+                        name=name,
+                        task=task_path,
+                        interval=schedule,
+                        args=args_json,
+                        enabled=True
+                    ))
+
+            if tasks_to_create:
+                PeriodicTask.objects.bulk_create(tasks_to_create)
+            if tasks_to_update:
+                PeriodicTask.objects.bulk_update(tasks_to_update, ['task', 'interval_id', 'args', 'enabled'])
+
+        PeriodicTasks.update_changed()
         cls.ensure_hash_backfill_schedule()
 
 
