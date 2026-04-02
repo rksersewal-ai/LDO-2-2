@@ -54,6 +54,7 @@ export function Header() {
             type="text"
             className="block w-64 md:w-96 pl-10 pr-3 py-2 border border-teal-500/20 rounded-xl leading-5 bg-slate-900/50 backdrop-blur-md text-slate-300 placeholder-slate-500 focus:outline-none focus:bg-slate-900 focus:border-teal-400/50 focus:ring-1 focus:ring-teal-400/50 sm:text-sm transition-all"
             placeholder="Search documents, PLs, OCR text..."
+            aria-label="Search"
             onFocus={() => navigate('/documents')}
           />
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -64,18 +65,20 @@ export function Header() {
         {/* Text Size Controls */}
         <div className="relative">
           <button
-            className="text-slate-400 hover:text-teal-300 transition-colors"
+            className="text-slate-400 hover:text-teal-300 transition-colors focus-visible:ring-2 focus-visible:ring-teal-500 rounded-lg outline-none"
             title="Adjust Text Size"
+            aria-label="Adjust Text Size"
+            aria-expanded={showTextControls}
             onClick={() => setShowTextControls(!showTextControls)}
           >
             <Type className="w-5 h-5" />
           </button>
           {showTextControls && (
             <div className="absolute top-full right-0 mt-2 bg-slate-900/95 backdrop-blur-xl border border-teal-500/20 rounded-xl shadow-xl p-3 z-50 flex items-center gap-2">
-              <button onClick={() => adjustFontSize(-1)} className="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center"><Minus className="w-3 h-3" /></button>
-              <span className="text-xs text-slate-400 w-8 text-center">{fontSize}</span>
-              <button onClick={() => adjustFontSize(1)} className="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center"><Plus className="w-3 h-3" /></button>
-              <button onClick={resetFontSize} className="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 flex items-center justify-center" title="Reset"><RotateCcw className="w-3 h-3" /></button>
+              <button onClick={() => adjustFontSize(-1)} className="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center focus-visible:ring-2 focus-visible:ring-teal-500 outline-none" aria-label="Decrease Text Size"><Minus className="w-3 h-3" /></button>
+              <span className="text-xs text-slate-400 w-8 text-center" aria-live="polite">{fontSize}</span>
+              <button onClick={() => adjustFontSize(1)} className="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center focus-visible:ring-2 focus-visible:ring-teal-500 outline-none" aria-label="Increase Text Size"><Plus className="w-3 h-3" /></button>
+              <button onClick={resetFontSize} className="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 flex items-center justify-center focus-visible:ring-2 focus-visible:ring-teal-500 outline-none" title="Reset Text Size" aria-label="Reset Text Size"><RotateCcw className="w-3 h-3" /></button>
             </div>
           )}
         </div>
@@ -83,7 +86,9 @@ export function Header() {
         {/* Notifications */}
         <div className="relative">
           <button
-            className="relative text-slate-400 hover:text-teal-300 transition-colors"
+            className="relative text-slate-400 hover:text-teal-300 transition-colors focus-visible:ring-2 focus-visible:ring-teal-500 rounded-lg outline-none"
+            aria-label="Toggle notifications"
+            aria-expanded={showNotifications}
             onClick={() => setShowNotifications(!showNotifications)}
           >
             <Bell className="w-5 h-5" />
@@ -97,8 +102,10 @@ export function Header() {
 
         {/* Profile */}
         <div className="relative">
-          <div
-            className="flex items-center gap-3 pl-6 border-l border-slate-700/50 cursor-pointer"
+          <button
+            className="flex items-center gap-3 pl-6 border-l border-slate-700/50 cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-500 rounded-lg outline-none"
+            aria-label="Toggle user menu"
+            aria-expanded={showProfile}
             onClick={() => setShowProfile(!showProfile)}
           >
             <div className="text-right hidden md:block">
@@ -108,7 +115,7 @@ export function Header() {
             <div className="w-9 h-9 rounded-full bg-slate-800 border border-teal-500/30 flex items-center justify-center text-teal-300 overflow-hidden">
               <User className="w-5 h-5" />
             </div>
-          </div>
+          </button>
           {showProfile && (
             <div className="absolute top-full right-0 mt-2 w-56 bg-slate-900/95 backdrop-blur-xl border border-teal-500/20 rounded-xl shadow-xl z-50 overflow-hidden">
               <div className="p-4 border-b border-slate-700/50">
