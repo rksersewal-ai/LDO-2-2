@@ -60,4 +60,11 @@ __pycache__/
 # Local Codex/runtime artifacts
 .codex-run/
 attached_assets/
+<<<<<<< fix-ocr-nested-code-11993806925022581285
+=======
+backend/venv/
+venv/
+__pycache__/
+backend/venv/
+>>>>>>> main
 venv/
