@@ -912,6 +912,18 @@ class ModularApiSmokeTests(APITestCase):
         with self.assertRaises(ValidationError):
             BomService.update(serializer, request)
 
+    def test_bom_tree_max_depth_validation(self):
+        invalid_response = self.client.get(
+            f'/api/v1/pl-items/{self.pl_item.id}/bom-tree/?max_depth=invalid'
+        )
+        self.assertEqual(invalid_response.status_code, 400)
+        self.assertEqual(invalid_response.data['detail'], 'max_depth must be an integer')
+
+        valid_response = self.client.get(
+            f'/api/v1/pl-items/{self.pl_item.id}/bom-tree/?max_depth=10'
+        )
+        self.assertEqual(valid_response.status_code, 200)
+
     def test_bom_compare_reports_added_line_between_baselines(self):
         child = PlItem.objects.create(id='87654321', name='Child PL', description='Child item')
         add_response = self.client.post(
