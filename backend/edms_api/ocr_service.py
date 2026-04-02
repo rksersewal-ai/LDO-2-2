@@ -39,11 +39,6 @@ class OcrEngine:
     def name(self) -> str:
         raise NotImplementedError
 
-    def _get_images(self, file_path: str) -> list:
-        from PIL import Image
-        import logging
-        logger = logging.getLogger(__name__)
-
     def _get_images_from_file(self, file_path: str) -> Tuple[list, Optional[OcrResult]]:
         """Helper to get images from a file path, converting PDFs if necessary."""
         from PIL import Image
@@ -52,19 +47,12 @@ class OcrEngine:
                 import pdf2image
                 images = pdf2image.convert_from_path(file_path)
                 if not images:
-                    raise ValueError("Could not convert PDF to image")
-                return images
-            except ImportError:
-                logger.warning(f"pdf2image not installed. Cannot process PDFs with {self.name()}")
-                raise ImportError("pdf2image required for PDF processing")
-        else:
-            return [Image.open(file_path)]
                     return [], OcrResult("", confidence=0.0, engine=self.name(),
                                        error="Could not convert PDF to image")
                 return images, None
             except ImportError:
                 import logging
-                logging.getLogger(__name__).warning("pdf2image not installed")
+                logging.getLogger(__name__).warning(f"pdf2image not installed. Cannot process PDFs with {self.name()}")
                 return [], OcrResult("", confidence=0.0, engine=self.name(),
                                    error="pdf2image required for PDF processing")
         else:
