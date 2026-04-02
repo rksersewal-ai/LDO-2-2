@@ -164,6 +164,24 @@ class DocumentFingerprintService:
         return category in HIGH_VALUE_CATEGORIES
 
     @classmethod
+    def ensure_hashes_bulk(cls, documents: list[Document], *, force: bool = False, force_full_hash: bool = False) -> dict[str, dict]:
+        updates_by_id = {}
+        for document in documents:
+            update_fields: dict[str, object] = {}
+            path = DocumentPathResolver.resolve(document)
+
+            if not path:
+                update_fields.setdefault('hash_algo', 'sha256')
+                update_fields.setdefault('hash_version', DEFAULT_HASH_VERSION)
+                updates_by_id[document.id] = update_fields
+                continue
+
+            payload = cls.ensure_hashes(document, force=force, force_full_hash=force_full_hash)
+            updates_by_id[document.id] = payload
+
+        return updates_by_id
+
+    @classmethod
     def ensure_hashes(cls, document: Document, *, force: bool = False, force_full_hash: bool = False) -> dict:
         path = DocumentPathResolver.resolve(document)
         now = timezone.now()
@@ -308,6 +326,13 @@ class DocumentDeduplicationService:
         )
 
     @classmethod
+    def apply_for_documents_bulk(cls, documents: list[Document]) -> dict[str, dict]:
+        results = {}
+        for document in documents:
+            results[document.id] = cls.apply_for_document(document)
+        return results
+
+    @classmethod
     def apply_for_document(cls, document: Document) -> dict:
         group_key = cls.duplicate_group_key(document)
         if not group_key:
@@ -409,6 +434,30 @@ class DocumentMetadataIndexService:
         return DocumentOcrEntity.objects.bulk_create(records)
 
     @classmethod
+    def _sync_regex_entities_bulk(cls, documents_data: list[tuple[Document, list[dict]]]) -> list[DocumentOcrEntity]:
+        doc_ids = [doc.id for doc, _ in documents_data]
+        if doc_ids:
+            DocumentOcrEntity.objects.filter(document_id__in=doc_ids, method='regex', source_engine='regex-indexer').delete()
+
+        records = []
+        for document, entities in documents_data:
+            for entity in entities:
+                records.append(
+                    DocumentOcrEntity(
+                        document=document,
+                        entity_type=entity['entity_type'],
+                        entity_value=entity['entity_value'],
+                        normalized_value=entity['normalized_value'],
+                        confidence=entity['confidence'],
+                        method=entity['method'],
+                        source_engine=entity['source_engine'],
+                        source_page=entity['source_page'],
+                        source_span=entity['source_span'],
+                    )
+                )
+        return DocumentOcrEntity.objects.bulk_create(records)
+
+    @classmethod
     def _sync_machine_assertions(cls, document: Document, entities: list[DocumentOcrEntity]) -> list[DocumentMetadataAssertion]:
         DocumentMetadataAssertion.objects.filter(document=document, source='machine').exclude(status='APPROVED').delete()
         created: list[DocumentMetadataAssertion] = []
@@ -439,6 +488,35 @@ class DocumentMetadataIndexService:
             )
             created.append(assertion)
         return created
+
+    @classmethod
+    def _sync_machine_assertions_bulk(cls, entities: list[DocumentOcrEntity]):
+        doc_ids = list(set([e.document_id for e in entities]))
+        if doc_ids:
+            DocumentMetadataAssertion.objects.filter(document_id__in=doc_ids, source='machine').exclude(status='APPROVED').delete()
+
+        created_records = []
+        seen_fields: set[tuple[str, str, str]] = set() # doc_id, field_key, normalized_value
+        for entity in entities:
+            field_key = next((mapped_field for candidate_pattern, mapped_field in ASSERTION_FIELD_MAP.items() if PATTERN_ENTITY_TYPES.get(candidate_pattern) == entity.entity_type), '')
+            if not field_key:
+                continue
+
+            field_signature = (entity.document_id, field_key, entity.normalized_value or entity.entity_value.upper())
+            if field_signature in seen_fields:
+                continue
+            seen_fields.add(field_signature)
+
+            created_records.append(DocumentMetadataAssertion(
+                document_id=entity.document_id,
+                field_key=field_key,
+                value=entity.entity_value,
+                normalized_value=entity.normalized_value,
+                source='machine',
+                derived_from_entity=entity,
+                status='PROPOSED',
+            ))
+        return DocumentMetadataAssertion.objects.bulk_create(created_records)
 
     @classmethod
     def _approved_assertions(cls, document: Document) -> list[DocumentMetadataAssertion]:
@@ -535,6 +613,97 @@ class DocumentMetadataIndexService:
         }
 
 
+    @classmethod
+    def build_index_payload_bulk(cls, documents: list[Document]) -> dict[str, dict]:
+        doc_ids = [d.id for d in documents]
+
+        approved_assertions_map = {doc_id: [] for doc_id in doc_ids}
+        for assertion in DocumentMetadataAssertion.objects.filter(document_id__in=doc_ids, status='APPROVED').order_by('field_key', '-updated_at'):
+            approved_assertions_map[assertion.document_id].append(assertion)
+
+        confirmed_entities_map = {doc_id: [] for doc_id in doc_ids}
+        for entity in DocumentOcrEntity.objects.filter(document_id__in=doc_ids).exclude(review_status='REJECTED').order_by('entity_type', 'entity_value'):
+            confirmed_entities_map[entity.document_id].append(entity)
+
+        regex_entities_data = []
+        raw_texts = {}
+        pattern_hits_map = {}
+
+        for document in documents:
+            raw_text = cls.source_text(document)
+            raw_texts[document.id] = raw_text
+            pattern_hits = cls.extract_patterns(raw_text)
+            pattern_hits_map[document.id] = pattern_hits
+            extracted_entities = cls.extract_entities(raw_text)
+            regex_entities_data.append((document, extracted_entities))
+
+        created_entities = cls._sync_regex_entities_bulk(regex_entities_data)
+        cls._sync_machine_assertions_bulk(created_entities)
+
+        results = {}
+        for document in documents:
+            pattern_hits = pattern_hits_map[document.id]
+            approved_assertions = approved_assertions_map[document.id]
+            confirmed_entities = confirmed_entities_map[document.id]
+            existing_metadata = document.search_metadata or {}
+
+            metadata = {
+                'size_bytes': int(document.size or 0),
+                'file_type': document.type,
+                'category': document.category or '',
+                'linked_pl': document.linked_pl or '',
+                'revision': int(document.revision or 0),
+                'tags': list(document.tags or []),
+                'source_system': document.source_system or '',
+                'external_file_path': document.external_file_path or '',
+                'fingerprint_3x64k': document.fingerprint_3x64k or '',
+                'full_hash_present': bool(document.file_hash),
+                'duplicate_status': document.duplicate_status or 'UNIQUE',
+                'duplicate_group_key': document.duplicate_group_key or '',
+                'duplicate_of': document.duplicate_of_id or '',
+                'patterns': pattern_hits,
+                'approved_assertions': [{'field_key': assertion.field_key, 'value': assertion.value, 'normalized_value': assertion.normalized_value} for assertion in approved_assertions],
+                'confirmed_entities': [{'entity_type': entity.entity_type, 'value': entity.entity_value, 'normalized_value': entity.normalized_value, 'review_status': entity.review_status} for entity in confirmed_entities],
+            }
+
+            document_family_key = _derive_document_family_key(document, pattern_hits)
+            for assertion in approved_assertions:
+                if assertion.field_key == 'drawing_number' and assertion.normalized_value:
+                    document_family_key = f'drawing_numbers:{_normalize_family_fragment(assertion.normalized_value)}'
+                    break
+                if assertion.field_key == 'document_number' and assertion.normalized_value:
+                    document_family_key = f'document_numbers:{_normalize_family_fragment(assertion.normalized_value)}'
+                    break
+            metadata['document_family_key'] = document_family_key
+            for key, value in existing_metadata.items():
+                if key not in metadata:
+                    metadata[key] = value
+
+            search_parts = [
+                document.id, document.name, document.description or '', document.category or '',
+                document.type or '', document.linked_pl or '', document.source_system or '',
+                document.external_file_path or '', document.extracted_text or '',
+                ' '.join(document.tags or []), document.duplicate_status or '', document_family_key,
+            ]
+            for assertion in approved_assertions:
+                search_parts.extend([assertion.field_key, assertion.value, assertion.normalized_value])
+            for entity in confirmed_entities:
+                search_parts.extend([entity.entity_type, entity.entity_value, entity.normalized_value])
+            for values in pattern_hits.values():
+                search_parts.extend(values)
+
+            search_text = ' '.join(str(part).strip() for part in search_parts if part).strip()
+
+            results[document.id] = {
+                'search_text': search_text,
+                'search_metadata': metadata,
+                'document_family_key': document_family_key or None,
+                'search_indexed_at': timezone.now(),
+            }
+
+        return results
+
+
 class DocumentIndexOrchestrator:
     @classmethod
     def index_document(cls, document: Document, *, force_hashes: bool = False, force_full_hash: bool = False):
@@ -562,3 +731,51 @@ class DocumentIndexOrchestrator:
             DocumentDeduplicationService.refresh_group(previous_group_key)
         DocumentDeduplicationService.refresh_group(refreshed.duplicate_group_key)
         return refreshed
+
+    @classmethod
+    def index_documents_bulk(cls, documents: list[Document], *, force_hashes: bool = False, force_full_hash: bool = False):
+        if not documents:
+            return []
+
+        previous_group_keys = {doc.id: doc.duplicate_group_key for doc in documents}
+
+        hashes_payloads = DocumentFingerprintService.ensure_hashes_bulk(documents, force=force_hashes, force_full_hash=force_full_hash)
+        for doc in documents:
+            for key, value in hashes_payloads.get(doc.id, {}).items():
+                setattr(doc, key, value)
+
+        index_payloads = DocumentMetadataIndexService.build_index_payload_bulk(documents)
+        for doc in documents:
+            for key, value in index_payloads.get(doc.id, {}).items():
+                setattr(doc, key, value)
+
+        dedup_payloads = DocumentDeduplicationService.apply_for_documents_bulk(documents)
+        for doc in documents:
+            for key, value in dedup_payloads.get(doc.id, {}).items():
+                setattr(doc, key, value)
+
+        fields_to_update = set()
+        for payload_dict in [hashes_payloads, index_payloads, dedup_payloads]:
+            for payload in payload_dict.values():
+                fields_to_update.update(payload.keys())
+
+        fields_to_update = list(fields_to_update)
+
+        if fields_to_update:
+            Document.objects.bulk_update(documents, fields_to_update, batch_size=1000)
+
+        refreshed_docs = list(Document.objects.filter(id__in=[d.id for d in documents]))
+
+        groups_to_refresh = set()
+        for doc in refreshed_docs:
+            prev_key = previous_group_keys.get(doc.id)
+            curr_key = doc.duplicate_group_key
+            if prev_key and prev_key != curr_key:
+                groups_to_refresh.add(prev_key)
+            if curr_key:
+                groups_to_refresh.add(curr_key)
+
+        for group_key in groups_to_refresh:
+            DocumentDeduplicationService.refresh_group(group_key)
+
+        return refreshed_docs

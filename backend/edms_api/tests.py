@@ -844,9 +844,10 @@ class ModularApiSmokeTests(APITestCase):
                 watch_enabled=False,
             )
 
-            with patch('documents.services._DocumentIndexingBatchService.index_path', side_effect=RuntimeError('boom')):
-                job = CrawlJobService.create_job(source)
-                CrawlJobService.run_job(job)
+            with patch('documents.services._DocumentIndexingBatchService.index_paths_bulk', side_effect=RuntimeError('boom_bulk')):
+                with patch('documents.services._DocumentIndexingBatchService.index_path', side_effect=RuntimeError('boom')):
+                    job = CrawlJobService.create_job(source)
+                    CrawlJobService.run_job(job)
 
             state = IndexedSourceFileState.objects.get(source=source, relative_path='broken.pdf')
             self.assertEqual(state.status, 'FAILED')
