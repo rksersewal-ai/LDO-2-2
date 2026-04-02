@@ -136,6 +136,16 @@ class PdfTextEngine(OcrEngine):
                 if (page_text := page.extract_text())
             )
     
+    def _extract_pdf_text(self, file_path: str) -> str:
+        """Helper to extract raw text chunks from a PDF file."""
+        text_chunks = []
+        with self.pdfplumber.open(file_path) as pdf:
+            for page in pdf.pages:
+                page_text = page.extract_text()
+                if page_text:
+                    text_chunks.append(page_text)
+        return "\n".join(text_chunks)
+
     def extract(self, file_path: str) -> OcrResult:
         """Extract text directly from PDF (no OCR)"""
         if not self.is_available():
