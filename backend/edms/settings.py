@@ -19,10 +19,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 LOG_DIR = BASE_DIR / 'logs'
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
-SECRET_KEY = os.getenv(
-    'DJANGO_SECRET_KEY',
-    'django-insecure-edms-local-development-key-change-me',
-)
+SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 DEBUG = os.getenv('DJANGO_DEBUG', 'true').lower() == 'true'
 
 allowed_hosts = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0,testserver')
@@ -83,7 +80,7 @@ if db_engine == 'postgresql':
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': os.getenv('POSTGRES_DB', 'edms_db'),
             'USER': os.getenv('POSTGRES_USER', 'edms_user'),
-            'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'secure_password_here'),
+            'PASSWORD': os.environ['POSTGRES_PASSWORD'],
             'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
             'PORT': os.getenv('POSTGRES_PORT', '5432'),
             'CONN_MAX_AGE': int(os.getenv('POSTGRES_CONN_MAX_AGE', '600')),
