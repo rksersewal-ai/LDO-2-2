@@ -18,7 +18,7 @@ from .services import ApprovalService, CaseService, WorkRecordService
 
 
 class WorkRecordViewSet(viewsets.ModelViewSet):
-    queryset = WorkRecord.objects.all()
+    queryset = WorkRecord.objects.select_related('user_name', 'verified_by').all()
     serializer_class = WorkRecordSerializer
     permission_classes = [IsAuthenticated]
 
@@ -56,7 +56,7 @@ class WorkRecordExportJobCreateView(APIView):
 
 
 class ApprovalViewSet(viewsets.ModelViewSet):
-    queryset = Approval.objects.all()
+    queryset = Approval.objects.select_related('requested_by', 'reviewed_by').all()
     serializer_class = ApprovalSerializer
     permission_classes = [IsAuthenticated]
 
@@ -84,7 +84,7 @@ class ApprovalViewSet(viewsets.ModelViewSet):
 
 
 class CaseViewSet(viewsets.ModelViewSet):
-    queryset = Case.objects.all()
+    queryset = Case.objects.select_related('assigned_to', 'raised_by').all()
     serializer_class = CaseSerializer
     permission_classes = [IsAuthenticated]
 

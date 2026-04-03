@@ -29,11 +29,13 @@ def edms_exception_handler(exc, context):
         logger.exception('Unhandled API exception', exc_info=exc)
         return Response(
             {
-                'success': False,
-                'code': 'internal_error',
-                'message': 'An unexpected error occurred.',
-                'errors': None,
-                'correlationId': correlation_id,
+                'error': {
+                    'code': 'internal_error',
+                    'message': 'An unexpected error occurred.',
+                    'details': None,
+                    'correlation_id': correlation_id,
+                },
+                'status': 'error',
             },
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
@@ -50,10 +52,12 @@ def edms_exception_handler(exc, context):
         errors = {'non_field_errors': payload}
 
     response.data = {
-        'success': False,
-        'code': getattr(exc, 'default_code', 'api_error'),
-        'message': message,
-        'errors': errors,
-        'correlationId': correlation_id,
+        'error': {
+            'code': getattr(exc, 'default_code', 'api_error'),
+            'message': message,
+            'details': errors,
+            'correlation_id': correlation_id,
+        },
+        'status': 'error',
     }
     return response
