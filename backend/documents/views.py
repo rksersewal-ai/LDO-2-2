@@ -1,3 +1,5 @@
+import logging
+
 from django.db.models import Q
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -32,6 +34,8 @@ from .services import (
     IndexedSourceService,
     OcrApplicationService,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class DocumentViewSet(viewsets.ModelViewSet):
@@ -70,6 +74,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
         file = request.FILES.get('file')
         if not file:
             return Response({'detail': 'No file provided'}, status=status.HTTP_400_BAD_REQUEST)
+        DocumentIngestSerializer.validate_file_security(file)
         version = DocumentService.create_version(document, file, request.user, request)
         return Response(
             {'id': str(version.id), 'revision': version.revision, 'created_at': version.created_at},
@@ -259,7 +264,8 @@ class CrawlJobViewSet(viewsets.ModelViewSet):
             from .tasks import run_indexed_source_crawl
 
             run_indexed_source_crawl.delay(str(job.id))
-        except Exception:
+        except Exception as exc:
+            logger.warning('Crawl task enqueue failed, running inline job_id=%s error=%s', job.id, exc)
             CrawlJobService.run_job(job)
         return Response(self.get_serializer(job).data, status=status.HTTP_202_ACCEPTED)
 
@@ -292,7 +298,8 @@ class HashBackfillJobViewSet(viewsets.ModelViewSet):
             from .tasks import run_hash_backfill_job
 
             run_hash_backfill_job.delay(str(job.id))
-        except Exception:
+        except Exception as exc:
+            logger.warning('Hash backfill enqueue failed, running inline job_id=%s error=%s', job.id, exc)
             HashBackfillJobService.run_job(job)
         return Response(self.get_serializer(job).data, status=status.HTTP_202_ACCEPTED)
 

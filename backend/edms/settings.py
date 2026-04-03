@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from shared.startup import enforce_startup_config
 
 from .settings_api import (
     ADDITIONAL_INSTALLED_APPS,
@@ -20,10 +21,16 @@ LOG_DIR = BASE_DIR / 'logs'
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
-DEBUG = os.getenv('DJANGO_DEBUG', 'true').lower() == 'true'
+DEBUG = os.getenv('DJANGO_DEBUG', os.getenv('DEBUG', 'false')).lower() == 'true'
 
 allowed_hosts = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0,testserver')
 ALLOWED_HOSTS = [host.strip() for host in allowed_hosts.split(',') if host.strip()]
+
+def _env_list(name: str, default_values):
+    configured = os.getenv(name)
+    if configured is None:
+        return list(default_values)
+    return [item.strip() for item in configured.split(',') if item.strip()]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -97,12 +104,27 @@ else:
         }
     }
 
-AUTH_PASSWORD_VALIDATORS = []
+AUTH_PASSWORD_VALIDATORS = [
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+]
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = os.getenv('DJANGO_TIME_ZONE', 'UTC')
 USE_I18N = True
 USE_TZ = True
+
+SESSION_COOKIE_SECURE = os.getenv('DJANGO_SESSION_COOKIE_SECURE', str(not DEBUG)).lower() == 'true'
+CSRF_COOKIE_SECURE = os.getenv('DJANGO_CSRF_COOKIE_SECURE', str(not DEBUG)).lower() == 'true'
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = os.getenv('DJANGO_SECURE_SSL_REDIRECT', 'false').lower() == 'true'
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = int(os.getenv('DJANGO_DATA_UPLOAD_MAX_MEMORY_SIZE', str(10 * 1024 * 1024)))
+FILE_UPLOAD_MAX_MEMORY_SIZE = int(os.getenv('DJANGO_FILE_UPLOAD_MAX_MEMORY_SIZE', str(10 * 1024 * 1024)))
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
@@ -121,9 +143,11 @@ SIMPLE_JWT = dict(SIMPLE_JWT)
 if not SIMPLE_JWT.get('SIGNING_KEY'):
     SIMPLE_JWT['SIGNING_KEY'] = SECRET_KEY
 CORS_ALLOWED_ORIGINS = CORS_ALLOWED_ORIGINS
+CORS_ALLOWED_ORIGINS = _env_list('CORS_ALLOWED_ORIGINS', CORS_ALLOWED_ORIGINS)
 CORS_EXPOSE_HEADERS = CORS_EXPOSE_HEADERS
 CORS_ALLOW_CREDENTIALS = CORS_ALLOW_CREDENTIALS
 CSRF_TRUSTED_ORIGINS = CSRF_TRUSTED_ORIGINS
+CSRF_TRUSTED_ORIGINS = _env_list('CSRF_TRUSTED_ORIGINS', CSRF_TRUSTED_ORIGINS)
 AUTHENTICATION_BACKENDS = AUTHENTICATION_BACKENDS
 ANONYMOUS_USER_NAME = ANONYMOUS_USER_NAME
 
@@ -141,6 +165,11 @@ for handler_name in ('file', 'api_file'):
     handler['filename'] = str(LOG_DIR / Path(handler['filename']).name)
 for handler_name in ('console', 'file', 'api_file'):
     LOGGING['handlers'][handler_name]['filters'] = ['request_context']
+
+if os.getenv('EDMS_JSON_LOGGING', 'true').lower() == 'true':
+    LOGGING['formatters']['json'] = {'()': 'shared.logging.JsonLogFormatter'}
+    for handler_name in ('console', 'file', 'api_file'):
+        LOGGING['handlers'][handler_name]['formatter'] = 'json'
 
 EDMS_RUNTIME = {
     'database_backend': db_engine,
@@ -167,3 +196,5 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+enforce_startup_config(debug=DEBUG, db_engine=db_engine)

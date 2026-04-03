@@ -1,6 +1,7 @@
 from datetime import datetime
 import hashlib
 import json
+import logging
 import re
 import uuid
 from django.conf import settings
@@ -17,6 +18,18 @@ from documents.indexing import PATTERN_ENTITY_TYPES, PATTERN_REGISTRY, DocumentD
 from documents.models import CrawlJob, DocumentMetadataAssertion, DocumentOcrEntity, DocumentOcrPage, DuplicateDecision, HashBackfillJob, IndexedSource, IndexedSourceFileState
 from shared.permissions import PermissionService
 from shared.services import AuditService, EventService
+
+logger = logging.getLogger(__name__)
+
+
+def _enqueue_or_inline(task_callable, task_arg, inline_callable, *, operation_name: str):
+    try:
+        task_result = task_callable.delay(str(task_arg))
+        return str(task_result.id), 'queued'
+    except Exception as exc:
+        logger.warning('%s task enqueue failed for %s: %s', operation_name, task_arg, exc)
+        inline_callable()
+        return None, 'inline'
 
 
 class DocumentService:
@@ -149,15 +162,16 @@ class DocumentService:
         index_job_mode = 'queued'
         ocr_job_mode = None
 
-        try:
-            from .tasks import index_single_document
+        from .tasks import index_single_document
 
-            task_result = index_single_document.delay(str(document.id))
-            index_job_id = str(task_result.id)
-        except Exception:
-            index_job_mode = 'inline'
-            indexed = DocumentIndexOrchestrator.index_document(document, force_hashes=True)
-            document = indexed
+        index_job_id, index_job_mode = _enqueue_or_inline(
+            index_single_document,
+            document.id,
+            inline_callable=lambda: DocumentIndexOrchestrator.index_document(document, force_hashes=True),
+            operation_name='document_index',
+        )
+        if index_job_mode == 'inline':
+            document = Document.objects.get(pk=document.pk)
 
         if linked_pl:
             from edms_api.models import PlDocumentLink, PlItem
@@ -232,12 +246,14 @@ class DocumentService:
                     requested_by=user,
                     previous_revision=previous_revision,
                 )
-        try:
-            from .tasks import index_single_document
+        from .tasks import index_single_document
 
-            index_single_document.delay(str(document.id))
-        except Exception:
-            DocumentIndexOrchestrator.index_document(document, force_hashes=True)
+        _enqueue_or_inline(
+            index_single_document,
+            document.id,
+            inline_callable=lambda: DocumentIndexOrchestrator.index_document(document, force_hashes=True),
+            operation_name='document_version_index',
+        )
 
         OcrApplicationService.start_job(str(document.id), user, request)
         AuditService.log('UPDATE', 'Document', user=user, entity=document.id, ip_address=request.META.get('REMOTE_ADDR'))

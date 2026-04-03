@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from django.contrib.auth import authenticate
 from django.core.exceptions import ObjectDoesNotExist
@@ -16,6 +18,9 @@ from edms_api.models import AuditLog
 
 from .serializers import AuditLogSerializer, ReportJobCreateSerializer, ReportJobSerializer, WorkflowActionSerializer
 from .services import AuditService, DashboardService, InboxService, ReportJobService, SearchService, WorkflowActionService
+from .api_response import error_response, success_response
+
+logger = logging.getLogger(__name__)
 
 
 def resolve_user_role(user):
@@ -51,7 +56,7 @@ class LoginView(APIView):
         password = request.data.get('password')
         user = authenticate(username=username, password=password)
         if not user:
-            return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+            return error_response('invalid_credentials', 'Invalid credentials', status_code=status.HTTP_401_UNAUTHORIZED)
 
         refresh = RefreshToken.for_user(user)
         AuditService.log(
@@ -62,7 +67,10 @@ class LoginView(APIView):
             details={'correlation_id': getattr(request, 'correlation_id', '')},
             ip_address=request.META.get('REMOTE_ADDR'),
         )
-        return Response({'access': str(refresh.access_token), 'refresh': str(refresh), 'user': serialize_user(user)})
+        return success_response(
+            {'access': str(refresh.access_token), 'refresh': str(refresh), 'user': serialize_user(user)},
+            status_code=status.HTTP_200_OK,
+        )
 
 
 class LogoutView(APIView):
@@ -81,7 +89,7 @@ class LogoutView(APIView):
             details={'correlation_id': getattr(request, 'correlation_id', '')},
             ip_address=request.META.get('REMOTE_ADDR'),
         )
-        return Response({'detail': 'Logged out successfully'})
+        return success_response({'message': 'Logged out successfully'})
 
 
 class SearchView(APIView):
@@ -102,7 +110,7 @@ class SearchView(APIView):
         pl_linked = request.query_params.get('pl_linked')
         date_range = request.query_params.get('date_range') or request.query_params.get('date_window')
         if len(query) < 2:
-            return Response({'detail': 'Query too short'}, status=status.HTTP_400_BAD_REQUEST)
+            return error_response('query_too_short', 'Query too short', status_code=status.HTTP_400_BAD_REQUEST)
         AuditService.log(
             'SEARCH',
             'System',
@@ -120,7 +128,7 @@ class SearchView(APIView):
             },
             ip_address=request.META.get('REMOTE_ADDR'),
         )
-        return Response(
+        return success_response(
             SearchService.search(
                 query,
                 scope,
@@ -132,7 +140,8 @@ class SearchView(APIView):
                 pl_linked=pl_linked,
                 status_filters=raw_status_filters,
                 date_range=date_range,
-            )
+            ),
+            meta={'query': query, 'scope': scope},
         )
 
 
@@ -140,14 +149,14 @@ class SearchHistoryView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response({'searches': SearchService.history_for_user(request.user)})
+        return success_response({'searches': SearchService.history_for_user(request.user)})
 
 
 class InboxView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response({'items': InboxService.items_for_user(request.user)})
+        return success_response({'items': InboxService.items_for_user(request.user)})
 
 
 class WorkflowItemActionView(APIView):
@@ -169,17 +178,17 @@ class WorkflowItemActionView(APIView):
                 request=request,
             )
         except ObjectDoesNotExist as exc:
-            return Response({'detail': str(exc)}, status=status.HTTP_404_NOT_FOUND)
+            return error_response('item_not_found', str(exc), status_code=status.HTTP_404_NOT_FOUND)
         except ValueError as exc:
             raise ValidationError({'action': [str(exc)]}) from exc
-        return Response(
+        return success_response(
             {
                 'item_id': result['item_id'],
                 'status': result['status'],
                 'result': result['result'],
                 'target': result['target'],
                 'payload': result['payload'],
-            }
+            },
         )
 
 
@@ -193,7 +202,10 @@ class ReportJobListCreateView(APIView):
             report_type=request.query_params.get('report_type'),
             export_format=request.query_params.get('export_format') or request.query_params.get('file_format'),
         )
-        return Response({'results': ReportJobSerializer(jobs[:100], many=True).data, 'total': jobs.count()})
+        return success_response(
+            {'results': ReportJobSerializer(jobs[:100], many=True).data},
+            meta={'total': jobs.count()},
+        )
 
     def post(self, request):
         serializer = ReportJobCreateSerializer(data=request.data)
@@ -205,7 +217,7 @@ class ReportJobListCreateView(APIView):
             parameters=serializer.validated_data.get('parameters', {}),
             user=request.user,
         )
-        return Response(ReportJobSerializer(job).data, status=status.HTTP_202_ACCEPTED)
+        return success_response(ReportJobSerializer(job).data, status_code=status.HTTP_202_ACCEPTED)
 
 
 class ReportJobDetailView(APIView):
@@ -213,7 +225,7 @@ class ReportJobDetailView(APIView):
 
     def get(self, request, job_id):
         job = get_object_or_404(ReportJobService.queryset(request.user), pk=job_id)
-        return Response(ReportJobSerializer(job).data)
+        return success_response(ReportJobSerializer(job).data)
 
 
 class ReportJobRetryView(APIView):
@@ -222,9 +234,13 @@ class ReportJobRetryView(APIView):
     def post(self, request, job_id):
         job = get_object_or_404(ReportJobService.queryset(request.user), pk=job_id)
         if job.status != 'FAILED':
-            return Response({'detail': 'Only failed report jobs can be retried.'}, status=status.HTTP_400_BAD_REQUEST)
+            return error_response(
+                'invalid_state',
+                'Only failed report jobs can be retried.',
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
         job = ReportJobService.retry(job, user=request.user)
-        return Response(ReportJobSerializer(job).data, status=status.HTTP_202_ACCEPTED)
+        return success_response(ReportJobSerializer(job).data, status_code=status.HTTP_202_ACCEPTED)
 
 
 class HealthStatusView(APIView):
@@ -241,13 +257,14 @@ class HealthStatusView(APIView):
                 cursor.fetchone()
             db_status = 'OK'
         except Exception as exc:  # pragma: no cover
-            db_status = f'Error: {exc}'
+            logger.exception('Health check database probe failed')
+            db_status = 'ERROR'
 
         cpu_percent = psutil.cpu_percent(interval=None)
         memory = psutil.virtual_memory()
         disk_root = settings.BASE_DIR.anchor or str(settings.BASE_DIR)
         disk = psutil.disk_usage(disk_root)
-        return Response(
+        return success_response(
             {
                 'status': 'OK',
                 'timestamp': timezone.now(),
@@ -257,7 +274,7 @@ class HealthStatusView(APIView):
                     'memory_percent': memory.percent,
                     'disk_percent': disk.percent,
                 },
-            }
+            },
         )
 
 
@@ -265,18 +282,20 @@ class DashboardStatsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response(DashboardService.stats())
+        return success_response(DashboardService.stats())
 
 
 class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = AuditLog.objects.all()
+    queryset = AuditLog.objects.select_related('user').all()
     serializer_class = AuditLogSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        if not (self.request.user.is_superuser or self.request.user.is_staff):
+            queryset = queryset.filter(user=self.request.user)
         user = self.request.query_params.get('user')
-        if user:
+        if user and (self.request.user.is_superuser or self.request.user.is_staff):
             queryset = queryset.filter(user__username=user)
         module = self.request.query_params.get('module')
         if module:

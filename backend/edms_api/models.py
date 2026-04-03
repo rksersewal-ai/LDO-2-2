@@ -117,11 +117,14 @@ class Document(models.Model):
             models.Index(fields=['search_indexed_at']),
             models.Index(fields=['source_system']),
             models.Index(fields=['source_system', 'duplicate_status']),
+            models.Index(fields=['source_system', 'created_at']),
             models.Index(fields=['duplicate_status']),
             models.Index(fields=['duplicate_group_key']),
             models.Index(fields=['document_family_key']),
             models.Index(fields=['category']),
             models.Index(fields=['linked_pl']),
+            models.Index(fields=['status', 'created_at']),
+            models.Index(fields=['linked_pl', 'created_at']),
             models.Index(fields=['size', 'fingerprint_3x64k']),
             models.Index(fields=['file_hash']),
         ]
@@ -243,6 +246,8 @@ class WorkRecord(models.Model):
             models.Index(fields=['status']),
             models.Index(fields=['user_name']),
             models.Index(fields=['date']),
+            models.Index(fields=['status', 'date']),
+            models.Index(fields=['status', 'created_at']),
         ]
     
     def __str__(self):
@@ -924,6 +929,9 @@ class AuditLog(models.Model):
             models.Index(fields=['module']),
             models.Index(fields=['severity']),
             models.Index(fields=['created_at']),
+            models.Index(fields=['user', 'created_at']),
+            models.Index(fields=['module', 'created_at']),
+            models.Index(fields=['severity', 'created_at']),
         ]
     
     def __str__(self):
