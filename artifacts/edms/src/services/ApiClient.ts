@@ -81,7 +81,7 @@ export class ApiClient {
     this.client.interceptors.response.use(
       (response) => response,
       (error: AxiosError<ApiErrorResponse>) => {
-        if (error.response?.status === 401) {
+        if (this.shouldRedirectOnUnauthorized(error)) {
           // Token expired or invalid
           this.clearStoredAuth();
           window.location.href = '/login';
@@ -105,6 +105,15 @@ export class ApiClient {
 
   private getStoredRefreshToken(): string | null {
     return localStorage.getItem(REFRESH_TOKEN_KEY);
+  }
+
+  private shouldRedirectOnUnauthorized(error: AxiosError<ApiErrorResponse>): boolean {
+    if (error.response?.status !== 401) {
+      return false;
+    }
+
+    const requestUrl = error.config?.url || '';
+    return !/\/auth\/login\/?$/.test(requestUrl);
   }
 
   private setStoredAuth(access: string, refresh?: string | null) {
@@ -1007,6 +1016,9 @@ export class ApiClient {
   // ─────────────────────────────────────────────────────────────────────────
 
   static getErrorMessage(error: AxiosError<any>): string {
+    if (!error.response && error.message === 'Network Error') {
+      return 'Cannot reach the backend. Verify the EDMS API server or preview proxy is running.';
+    }
     if (error.response?.data?.detail) {
       return error.response.data.detail;
     }
