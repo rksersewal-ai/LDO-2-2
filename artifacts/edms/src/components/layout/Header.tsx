@@ -153,7 +153,7 @@ export function Header() {
               <span className="font-semibold">System Maintenance:</span>
               <span>OCR Engine Restart scheduled for 03:00 AM UTC. Expect minor delays in processing.</span>
             </div>
-            <button onClick={() => setShowBanner(false)} className="shrink-0 p-1 hover:bg-teal-800/40 rounded-lg transition-colors">
+            <button onClick={() => setShowBanner(false)} aria-label="Dismiss banner" className="shrink-0 p-1 hover:bg-teal-800/40 rounded-lg transition-colors">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -200,6 +200,7 @@ export function Header() {
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
               title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
               aria-pressed={theme === 'light'}
               className={`flex h-10 w-10 items-center justify-center rounded-lg border transition-all ${
@@ -215,6 +216,7 @@ export function Header() {
             <div className="relative">
               <button
                 onClick={() => { setShowTextControls(!showTextControls); setShowNotifications(false); setShowProfile(false); }}
+                aria-label="Text size controls"
                 aria-pressed={showTextControls}
                 className={`flex h-10 w-10 items-center justify-center rounded-lg border transition-all ${floatingToggleClass(showTextControls)}`}
               >
@@ -222,10 +224,10 @@ export function Header() {
               </button>
               {showTextControls && (
                 <div className="absolute right-0 top-full mt-2 bg-card/95 backdrop-blur-xl border border-teal-500/20 rounded-xl shadow-xl p-3 flex items-center gap-2 z-50">
-                  <button onClick={() => adjustFontSize(-1)} className="w-7 h-7 rounded-lg bg-secondary text-muted-foreground hover:text-white flex items-center justify-center transition-colors"><Minus className="w-3 h-3" /></button>
+                  <button onClick={() => adjustFontSize(-1)} aria-label="Decrease text size" className="w-7 h-7 rounded-lg bg-secondary text-muted-foreground hover:text-white flex items-center justify-center transition-colors"><Minus className="w-3 h-3" /></button>
                   <span className="text-foreground/90 text-sm font-mono w-8 text-center">{fontSize}</span>
-                  <button onClick={() => adjustFontSize(1)} className="w-7 h-7 rounded-lg bg-secondary text-muted-foreground hover:text-white flex items-center justify-center transition-colors"><Plus className="w-3 h-3" /></button>
-                  <button onClick={resetFontSize} className="w-7 h-7 rounded-lg bg-secondary text-muted-foreground hover:text-white flex items-center justify-center transition-colors"><RotateCcw className="w-3 h-3" /></button>
+                  <button onClick={() => adjustFontSize(1)} aria-label="Increase text size" className="w-7 h-7 rounded-lg bg-secondary text-muted-foreground hover:text-white flex items-center justify-center transition-colors"><Plus className="w-3 h-3" /></button>
+                  <button onClick={resetFontSize} aria-label="Reset text size" className="w-7 h-7 rounded-lg bg-secondary text-muted-foreground hover:text-white flex items-center justify-center transition-colors"><RotateCcw className="w-3 h-3" /></button>
                 </div>
               )}
             </div>
@@ -234,6 +236,7 @@ export function Header() {
             <div className="relative">
               <button
                 onClick={() => { setShowNotifications(!showNotifications); setShowTextControls(false); setShowProfile(false); }}
+                aria-label="Notifications"
                 aria-pressed={showNotifications}
                 className={`relative flex h-10 w-10 items-center justify-center rounded-lg border transition-all ${floatingToggleClass(showNotifications)}`}
               >
@@ -262,6 +265,7 @@ export function Header() {
             <div className="relative">
               <button
                 onClick={() => { setShowProfile(!showProfile); setShowNotifications(false); setShowTextControls(false); }}
+                aria-label="Profile menu"
                 aria-pressed={showProfile}
                 className={`flex items-center gap-2 rounded-xl border pl-2 pr-3 py-1.5 transition-all ${floatingToggleClass(showProfile)}`}
               >
