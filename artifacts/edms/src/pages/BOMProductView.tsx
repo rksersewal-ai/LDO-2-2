@@ -29,7 +29,7 @@ interface DragItem {
 function NodeIcon({ type }: { type: string }) {
   if (type === 'assembly') return <Box className="w-4 h-4 text-blue-400 shrink-0" />;
   if (type === 'sub-assembly') return <Layers className="w-4 h-4 text-indigo-400 shrink-0" />;
-  return <Cpu className="w-4 h-4 text-slate-400 shrink-0" />;
+  return <Cpu className="w-4 h-4 text-muted-foreground shrink-0" />;
 }
 
 function tagColor(tag: string) {
@@ -38,7 +38,7 @@ function tagColor(tag: string) {
   if (t.includes('high voltage')) return 'bg-amber-900/40 text-amber-300 border-amber-500/30';
   if (t.includes('electrical') || t.includes('electronics')) return 'bg-blue-900/40 text-blue-300 border-blue-500/30';
   if (t.includes('safety')) return 'bg-rose-900/30 text-rose-300 border-rose-500/20';
-  return 'bg-slate-800/80 text-slate-400 border-slate-700/50';
+  return 'bg-secondary/80 text-muted-foreground border-border';
 }
 
 function containsNode(nodes: BOMNode[], id: string): boolean {
@@ -224,20 +224,20 @@ function DraggableBOMRow({
     <div ref={rowRef} style={{ opacity: isDragging ? 0.42 : 1 }}>
       <div
         className={`relative flex items-center gap-1.5 rounded-xl border px-2 py-2.5 transition-all group min-h-[46px] ${
-          isSelected ? 'bg-teal-500/15 border-teal-500/25' : 'hover:bg-slate-800/50 border-transparent'
+          isSelected ? 'bg-teal-500/15 border-teal-500/25' : 'hover:bg-secondary/50 border-transparent'
         } ${isMatch ? 'ring-1 ring-teal-500/40' : ''} ${showDropSuggestion ? 'bg-teal-500/10 border-teal-400/40 shadow-[0_0_0_1px_rgba(94,234,212,0.08)]' : ''}`}
         onClick={() => onSelect(node.id)}
       >
         {showDropSuggestion && dropPlacement === 'before' && <div className="absolute inset-x-3 top-0 h-px bg-teal-300/80 shadow-[0_0_10px_rgba(94,234,212,0.6)]" />}
         {showDropSuggestion && dropPlacement === 'after' && <div className="absolute inset-x-3 bottom-0 h-px bg-teal-300/80 shadow-[0_0_10px_rgba(94,234,212,0.6)]" />}
         {showDropSuggestion && (
-          <div className="absolute right-3 -top-2 rounded-full border border-teal-400/40 bg-slate-950/95 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-teal-300 shadow-lg">
+          <div className="absolute right-3 -top-2 rounded-full border border-teal-400/40 bg-slate-950/95 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-primary/90 shadow-lg">
             {placementLabel(dropPlacement)}
           </div>
         )}
 
         <div className="shrink-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity -ml-1" onClick={(event) => event.stopPropagation()}>
-          <div className="cursor-grab active:cursor-grabbing p-1 text-slate-500 hover:text-teal-400 transition-colors" title="Drag to restructure the hierarchy">
+          <div className="cursor-grab active:cursor-grabbing p-1 text-muted-foreground hover:text-primary transition-colors" title="Drag to restructure the hierarchy">
             <GripVertical className="w-3.5 h-3.5" />
           </div>
           <div className="flex flex-col gap-px">
@@ -247,7 +247,7 @@ function DraggableBOMRow({
                 event.stopPropagation();
                 onReorderWithinParent(parentId, index, index - 1);
               }}
-              className="p-0.5 text-slate-600 hover:text-teal-400 disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+              className="p-0.5 text-slate-600 hover:text-primary disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
               aria-label="Move up"
             >
               <ChevronUp className="w-2.5 h-2.5" />
@@ -258,7 +258,7 @@ function DraggableBOMRow({
                 event.stopPropagation();
                 onReorderWithinParent(parentId, index, index + 1);
               }}
-              className="p-0.5 text-slate-600 hover:text-teal-400 disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+              className="p-0.5 text-slate-600 hover:text-primary disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
               aria-label="Move down"
             >
               <ChevronDown className="w-2.5 h-2.5" />
@@ -268,11 +268,11 @@ function DraggableBOMRow({
 
         <div className="shrink-0 w-5">
           {hasChildren ? (
-            <button onClick={(event) => { event.stopPropagation(); toggleExpand(node.id); }} className="text-slate-500 hover:text-teal-400 transition-colors">
+            <button onClick={(event) => { event.stopPropagation(); toggleExpand(node.id); }} className="text-muted-foreground hover:text-primary transition-colors">
               {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
             </button>
           ) : (
-            <div className="w-2 h-2 mx-auto rounded-full border border-slate-700 bg-slate-800/60" />
+            <div className="w-2 h-2 mx-auto rounded-full border border-border bg-secondary/60" />
           )}
         </div>
 
@@ -280,11 +280,11 @@ function DraggableBOMRow({
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-medium text-slate-200 truncate leading-tight">{node.name}</span>
+            <span className="text-sm font-medium text-foreground truncate leading-tight">{node.name}</span>
             {plRecord?.safetyVital && <Shield className="w-3 h-3 text-rose-400 shrink-0" aria-label="Safety Vital" />}
           </div>
-          <div className="flex items-center gap-2 mt-0.5 text-[10px] text-slate-500">
-            <span className="font-mono text-teal-400">{node.id}</span>
+          <div className="flex items-center gap-2 mt-0.5 text-[10px] text-muted-foreground">
+            <span className="font-mono text-primary">{node.id}</span>
             <span>·</span>
             <span>Rev {node.revision}</span>
             <span>·</span>
@@ -336,8 +336,8 @@ function RootDropZone({
       }}
       className={`rounded-xl border border-dashed px-3 py-2 text-[11px] transition-all ${
         isOver && canDrop
-          ? 'border-teal-400/50 bg-teal-500/10 text-teal-300 shadow-[0_0_0_1px_rgba(94,234,212,0.08)]'
-          : 'border-white/8 bg-slate-950/25 text-slate-500'
+          ? 'border-teal-400/50 bg-teal-500/10 text-primary/90 shadow-[0_0_0_1px_rgba(94,234,212,0.08)]'
+          : 'border-white/8 bg-slate-950/25 text-muted-foreground'
       }`}
     >
       <div className="flex items-center gap-2">
@@ -421,25 +421,25 @@ function DetailPanel({ node, onClose }: { node: BOMNode; onClose: () => void }) 
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: 320, opacity: 0 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
-      className="w-80 flex-shrink-0 flex flex-col glass-card rounded-2xl overflow-hidden"
+      className="w-80 flex-shrink-0 flex flex-col bg-card border-border rounded-2xl overflow-hidden"
     >
-      <div className="flex items-center justify-between p-4 border-b border-white/5">
+      <div className="flex items-center justify-between p-4 border-b border-border">
         <div className="flex items-center gap-2 min-w-0">
           <NodeIcon type={node.type} />
           <h2 className="text-sm font-bold text-white truncate">{node.name}</h2>
         </div>
-        <button onClick={onClose} className="shrink-0 text-slate-500 hover:text-white transition-colors p-1 rounded-lg hover:bg-slate-700/50">
+        <button onClick={onClose} className="shrink-0 text-muted-foreground hover:text-white transition-colors p-1 rounded-lg hover:bg-slate-700/50">
           <X className="w-4 h-4" />
         </button>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-5 custom-scrollbar">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-2">PL Identity</p>
-          <div className="glass-card rounded-xl p-3 space-y-2.5">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">PL Identity</p>
+          <div className="bg-card border-border rounded-xl p-3 space-y-2.5">
             <div>
-              <p className="text-[10px] text-slate-500">PL Number</p>
-              <p className="font-mono text-sm font-semibold text-teal-400 flex items-center gap-1.5">
+              <p className="text-[10px] text-muted-foreground">PL Number</p>
+              <p className="font-mono text-sm font-semibold text-primary flex items-center gap-1.5">
                 <Hash className="w-3 h-3" />{node.id}
               </p>
             </div>
@@ -451,8 +451,8 @@ function DetailPanel({ node, onClose }: { node: BOMNode; onClose: () => void }) 
                 { label: 'Find No.', value: node.findNumber, mono: true },
               ].map((field) => (
                 <div key={field.label}>
-                  <p className="text-[10px] text-slate-500">{field.label}</p>
-                  <p className={`text-xs font-medium text-slate-200 capitalize ${field.mono ? 'font-mono' : ''}`}>{field.value}</p>
+                  <p className="text-[10px] text-muted-foreground">{field.label}</p>
+                  <p className={`text-xs font-medium text-foreground capitalize ${field.mono ? 'font-mono' : ''}`}>{field.value}</p>
                 </div>
               ))}
             </div>
@@ -461,7 +461,7 @@ function DetailPanel({ node, onClose }: { node: BOMNode; onClose: () => void }) 
 
         {node.tags.length > 0 && (
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-2">Tags</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">Tags</p>
             <div className="flex flex-wrap gap-1.5">
               {node.tags.map((tag) => (
                 <span key={tag} className={`px-2 py-0.5 border rounded-md text-[10px] font-medium ${tagColor(tag)}`}>{tag}</span>
@@ -472,8 +472,8 @@ function DetailPanel({ node, onClose }: { node: BOMNode; onClose: () => void }) 
 
         {plRecord && (
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-2">PL Record</p>
-            <div className="glass-card rounded-xl p-3 space-y-2.5">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">PL Record</p>
+            <div className="bg-card border-border rounded-xl p-3 space-y-2.5">
               {plRecord.safetyVital && (
                 <div className="flex items-center gap-2 px-2.5 py-1.5 bg-rose-900/20 border border-rose-500/20 rounded-lg">
                   <Shield className="w-3.5 h-3.5 text-rose-400 shrink-0" />
@@ -489,8 +489,8 @@ function DetailPanel({ node, onClose }: { node: BOMNode; onClose: () => void }) 
                 ...(plRecord.source ? [{ label: 'Source', value: plRecord.source }] : []),
               ].map((field) => (
                 <div key={field.label}>
-                  <p className="text-[10px] text-slate-500">{field.label}</p>
-                  <p className="text-xs text-slate-200">{field.value}</p>
+                  <p className="text-[10px] text-muted-foreground">{field.label}</p>
+                  <p className="text-xs text-foreground">{field.value}</p>
                 </div>
               ))}
             </div>
@@ -499,30 +499,30 @@ function DetailPanel({ node, onClose }: { node: BOMNode; onClose: () => void }) 
 
         {plRecord && plRecord.linkedDocuments.length > 0 && (
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-2">Linked Documents ({plRecord.linkedDocuments.length})</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">Linked Documents ({plRecord.linkedDocuments.length})</p>
             <div className="space-y-1.5">
               {plRecord.linkedDocuments.slice(0, 3).map((doc) => (
                 <div
                   key={doc.docId}
                   {...getDocumentContextAttributes(doc.docId, doc.title)}
-                  className="flex items-center gap-2 p-2 rounded-lg bg-slate-900/40 border border-white/5"
+                  className="flex items-center gap-2 p-2 rounded-lg bg-card/40 border border-border"
                 >
-                  <FileText className="w-3.5 h-3.5 text-teal-500 shrink-0" />
+                  <FileText className="w-3.5 h-3.5 text-primary shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] text-slate-300 truncate">{doc.title}</p>
-                    <p className="text-[9px] text-slate-500">{doc.type} · Rev {doc.revision}</p>
+                    <p className="text-[10px] text-foreground/90 truncate">{doc.title}</p>
+                    <p className="text-[9px] text-muted-foreground">{doc.type} · Rev {doc.revision}</p>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     <DocumentPreviewButton
                       documentId={doc.docId}
                       title={doc.title}
                       iconOnly
-                      className="h-7 min-h-0 px-2 text-slate-300 hover:text-teal-200"
+                      className="h-7 min-h-0 px-2 text-foreground/90 hover:text-teal-200"
                     />
                     <DocumentDetailsButton
                       documentId={doc.docId}
                       iconOnly
-                      className="h-7 min-h-0 px-2 text-slate-300 hover:text-white"
+                      className="h-7 min-h-0 px-2 text-foreground/90 hover:text-white"
                     />
                   </div>
                   <Badge
@@ -539,13 +539,13 @@ function DetailPanel({ node, onClose }: { node: BOMNode; onClose: () => void }) 
 
         {node.children.length > 0 && (
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-2">Children ({node.children.length})</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">Children ({node.children.length})</p>
             <div className="space-y-1">
               {node.children.map((child) => (
-                <div key={child.id} className="flex items-center gap-2 p-2 rounded-lg bg-slate-900/40 border border-white/5">
+                <div key={child.id} className="flex items-center gap-2 p-2 rounded-lg bg-card/40 border border-border">
                   <NodeIcon type={child.type} />
-                  <span className="text-xs text-slate-300 flex-1 truncate">{child.name}</span>
-                  <span className="font-mono text-[10px] text-teal-400">{child.id}</span>
+                  <span className="text-xs text-foreground/90 flex-1 truncate">{child.name}</span>
+                  <span className="font-mono text-[10px] text-primary">{child.id}</span>
                 </div>
               ))}
             </div>
@@ -553,7 +553,7 @@ function DetailPanel({ node, onClose }: { node: BOMNode; onClose: () => void }) 
         )}
       </div>
 
-      <div className="p-4 border-t border-white/5 space-y-2">
+      <div className="p-4 border-t border-border space-y-2">
         {plRecord ? (
           <Button className="w-full" onClick={() => navigate(`/pl/${node.id}`)}>
             <ExternalLink className="w-4 h-4" /> View Complete PL Details
@@ -686,16 +686,16 @@ function AddNodeModal({
         <div className="flex items-center justify-between mb-5">
           <div>
             <h2 className="text-lg font-bold text-white">Add PL Node</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Place a new PL anywhere in {workspaceName}. You can also drag it later to promote, demote, or re-nest it.</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Place a new PL anywhere in {workspaceName}. You can also drag it later to promote, demote, or re-nest it.</p>
           </div>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-300 hover:bg-slate-700/50 transition-colors">
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground/90 hover:bg-slate-700/50 transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="text-xs font-medium text-slate-400 mb-1.5 block">PL Number *</label>
+            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">PL Number *</label>
             <PLNumberSelect
               value={form.plNumber}
               onChange={handlePlNumberChange}
@@ -711,10 +711,10 @@ function AddNodeModal({
 
           {(plLookupResult || selectedPl) && (
             <div className="flex items-start gap-3 p-3 rounded-xl bg-teal-900/20 border border-teal-500/20">
-              <CheckCircle className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" />
+              <CheckCircle className="w-4 h-4 text-primary shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-semibold text-teal-300">{plLookupResult?.name ?? selectedPl?.name}</p>
-                <p className="text-xs text-slate-400">
+                <p className="text-sm font-semibold text-primary/90">{plLookupResult?.name ?? selectedPl?.name}</p>
+                <p className="text-xs text-muted-foreground">
                   {plLookupResult
                     ? `${plLookupResult.department} · Rev ${plLookupResult.revision} · ${plLookupResult.lifecycleState}`
                     : `${selectedPl?.controllingAgency ?? 'CLW'} · ${selectedPl?.status ?? 'ACTIVE'} record`}
@@ -729,7 +729,7 @@ function AddNodeModal({
           )}
 
           <div>
-            <label className="text-xs font-medium text-slate-400 mb-1.5 block">Component Name *</label>
+            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Component Name *</label>
             <Input
               value={form.name}
               onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
@@ -741,7 +741,7 @@ function AddNodeModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-medium text-slate-400 mb-1.5 block">Node Type</label>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Node Type</label>
               <Select value={form.nodeType} onChange={(event) => setForm((current) => ({ ...current, nodeType: event.target.value as AddNodeForm['nodeType'] }))} className="w-full">
                 <option value="assembly">Assembly</option>
                 <option value="sub-assembly">Sub-Assembly</option>
@@ -749,13 +749,13 @@ function AddNodeModal({
               </Select>
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-400 mb-1.5 block">Revision</label>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Revision</label>
               <Input value={form.revision} onChange={(event) => setForm((current) => ({ ...current, revision: event.target.value }))} placeholder="e.g. A" className="w-full font-mono" />
             </div>
           </div>
 
           <div>
-            <label className="text-xs font-medium text-slate-400 mb-1.5 block">Place Under</label>
+            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Place Under</label>
             <Select value={form.parentId} onChange={(event) => setForm((current) => ({ ...current, parentId: event.target.value }))} className="w-full">
               {parentOptions.map((parent) => (
                 <option key={parent.id} value={parent.id}>
@@ -768,12 +768,12 @@ function AddNodeModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-medium text-slate-400 mb-1.5 block">Quantity</label>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Quantity</label>
               <Input type="number" min={1} value={form.quantity} onChange={(event) => setForm((current) => ({ ...current, quantity: Number(event.target.value) }))} className={`w-full ${errors.quantity ? 'border-rose-500/50' : ''}`} />
               {errors.quantity && <p className="text-[10px] text-rose-400 mt-1">{errors.quantity}</p>}
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-400 mb-1.5 block">Find Number</label>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Find Number</label>
               <Input value={form.findNumber} onChange={(event) => setForm((current) => ({ ...current, findNumber: event.target.value }))} placeholder="e.g. 10" className="w-full font-mono" />
             </div>
           </div>
@@ -786,7 +786,7 @@ function AddNodeModal({
           />
         </div>
 
-        <div className="flex gap-3 mt-6 pt-5 border-t border-slate-700/50">
+        <div className="flex gap-3 mt-6 pt-5 border-t border-border">
           <Button variant="secondary" onClick={onClose} className="flex-1">Cancel</Button>
           <Button onClick={handleSubmit} className="flex-1">
             <Plus className="w-4 h-4" /> Add to BOM
@@ -902,8 +902,8 @@ function BOMProductViewInner() {
       <div className="flex items-center justify-center h-64">
         <GlassCard className="p-12 text-center">
           <AlertCircle className="w-10 h-10 text-amber-400 mx-auto mb-3" />
-          <p className="text-slate-300 font-medium">Product not found</p>
-          <p className="text-slate-500 text-sm mb-4">The BOM for "{productId}" does not exist</p>
+          <p className="text-foreground/90 font-medium">Product not found</p>
+          <p className="text-muted-foreground text-sm mb-4">The BOM for "{productId}" does not exist</p>
           <Button onClick={() => navigate('/bom')}><ArrowLeft className="w-4 h-4" /> Back to Explorer</Button>
         </GlassCard>
       </div>
@@ -918,12 +918,12 @@ function BOMProductViewInner() {
         title={`${product.name} — Bill of Materials`}
         subtitle={isDraftWorkspace ? 'Draft workspace. Structure changes are saved locally in the browser until the backend contract is finalized.' : product.subtitle}
         breadcrumb={(
-          <nav className="flex items-center gap-1.5 text-xs text-slate-500">
-            <button onClick={() => navigate('/bom')} className="hover:text-teal-400 transition-colors flex items-center gap-1">
+          <nav className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <button onClick={() => navigate('/bom')} className="hover:text-primary transition-colors flex items-center gap-1">
               <GitBranch className="w-3 h-3" /> BOM Explorer
             </button>
             <ChevronRight className="w-3 h-3" />
-            <span className="text-slate-300">{product.name}</span>
+            <span className="text-foreground/90">{product.name}</span>
           </nav>
         )}
         actions={(
@@ -950,8 +950,8 @@ function BOMProductViewInner() {
           { label: 'Parts', value: stats.parts },
         ].map((stat) => (
           <GlassCard key={stat.label} className="px-3 py-2 flex items-center gap-2">
-            <span className="text-slate-500">{stat.label}</span>
-            <span className={`font-bold text-teal-400 ${stat.mono ? 'font-mono' : ''}`}>{stat.value}</span>
+            <span className="text-muted-foreground">{stat.label}</span>
+            <span className={`font-bold text-primary ${stat.mono ? 'font-mono' : ''}`}>{stat.value}</span>
           </GlassCard>
         ))}
         {isDraftWorkspace && <Badge variant="info" className="self-center">Draft</Badge>}
@@ -965,10 +965,10 @@ function BOMProductViewInner() {
 
       <div className="flex-1 flex gap-4 min-h-0">
         <GlassCard className="flex flex-col flex-1 min-w-0">
-          <div className="p-4 border-b border-white/5">
+          <div className="p-4 border-b border-border">
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                 <Input
                   placeholder="Search by name, PL number, or tag..."
                   className="pl-9 w-full py-2"
@@ -976,18 +976,18 @@ function BOMProductViewInner() {
                   onChange={(event) => setSearch(event.target.value)}
                 />
               </div>
-              <button onClick={expandAll} className="px-2.5 py-2 text-xs text-slate-400 hover:text-teal-300 border border-slate-700/60 rounded-lg transition-colors whitespace-nowrap">Expand All</button>
-              <button onClick={collapseAll} className="px-2.5 py-2 text-xs text-slate-400 hover:text-teal-300 border border-slate-700/60 rounded-lg transition-colors">Collapse</button>
+              <button onClick={expandAll} className="px-2.5 py-2 text-xs text-muted-foreground hover:text-primary/90 border border-border/60 rounded-lg transition-colors whitespace-nowrap">Expand All</button>
+              <button onClick={collapseAll} className="px-2.5 py-2 text-xs text-muted-foreground hover:text-primary/90 border border-border/60 rounded-lg transition-colors">Collapse</button>
             </div>
             {search && searchMatches.size > 0 && (
-              <p className="text-xs text-teal-400 mt-2 flex items-center gap-1">
+              <p className="text-xs text-primary mt-2 flex items-center gap-1">
                 <Search className="w-3 h-3" />{searchMatches.size} match{searchMatches.size !== 1 ? 'es' : ''} for "{search}"
               </p>
             )}
           </div>
 
-          <div className="border-b border-white/5 px-4 py-2.5 text-[11px] text-slate-500 flex flex-wrap items-center gap-2">
-            <Sparkles className="w-3.5 h-3.5 text-teal-400" />
+          <div className="border-b border-border px-4 py-2.5 text-[11px] text-muted-foreground flex flex-wrap items-center gap-2">
+            <Sparkles className="w-3.5 h-3.5 text-primary" />
             <span>Drag a PL above, below, or into another node. Drop hints snap into place so you can promote to a higher level or nest deeper without guessing.</span>
           </div>
 

@@ -41,7 +41,7 @@ function categoryIconColor(cat: string): string {
   if (cat.includes('Freight')) return 'text-amber-400';
   if (cat.includes('EMU')) return 'text-purple-400';
   if (cat.includes('Electrical')) return 'text-emerald-400';
-  return 'text-teal-400';
+  return 'text-primary';
 }
 
 const CATEGORIES = ['All', 'Passenger Locomotive', 'Freight Locomotive', 'EMU Rolling Stock', 'Electrical Component'];
@@ -59,7 +59,7 @@ function ProductCard({ product, index, isDraft = false }: { product: Product; in
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, delay: index * 0.06, ease: 'easeOut' }}
       whileHover={{ y: -3, transition: { duration: 0.15 } }}
-      className={`relative group glass-card rounded-2xl bg-gradient-to-br ${gradClass} border cursor-pointer overflow-hidden transition-shadow duration-200 hover:shadow-xl hover:shadow-teal-950/40`}
+      className={`relative group bg-card border-border rounded-2xl bg-gradient-to-br ${gradClass} border cursor-pointer overflow-hidden transition-shadow duration-200 hover:shadow-xl hover:shadow-teal-950/40`}
       onClick={() => navigate(`/bom/${product.id}`)}
       role="button"
       tabIndex={0}
@@ -70,7 +70,7 @@ function ProductCard({ product, index, isDraft = false }: { product: Product; in
       <div className="p-6">
         {/* Icon + Badge row */}
         <div className="flex items-start justify-between mb-4">
-          <div className={`w-11 h-11 rounded-xl bg-slate-900/60 border border-white/5 flex items-center justify-center ${iconColor}`}>
+          <div className={`w-11 h-11 rounded-xl bg-card border border-border flex items-center justify-center ${iconColor}`}>
             <Icon className="w-5 h-5" />
           </div>
           <div className="flex items-center gap-2">
@@ -81,33 +81,33 @@ function ProductCard({ product, index, isDraft = false }: { product: Product; in
 
         {/* Name + subtitle */}
         <h3 className="text-base font-bold text-white mb-0.5 tracking-tight">{product.name}</h3>
-        <p className="text-xs text-slate-400 mb-1">{product.subtitle}</p>
-        <p className="text-[11px] text-slate-500 line-clamp-2 mb-4 leading-relaxed">{product.description}</p>
+        <p className="text-xs text-muted-foreground mb-1">{product.subtitle}</p>
+        <p className="text-[11px] text-muted-foreground line-clamp-2 mb-4 leading-relaxed">{product.description}</p>
 
         {/* Stats row */}
         <div className="flex items-center gap-3 mb-4">
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
-            <GitBranch className="w-3 h-3 text-teal-500" />
-            <span className="font-mono text-teal-400 font-semibold">{product.total}</span>
+          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+            <GitBranch className="w-3 h-3 text-primary" />
+            <span className="font-mono text-primary font-semibold">{product.total}</span>
             <span>nodes</span>
           </div>
           <span className="w-px h-3 bg-slate-700" />
-          <div className="text-[11px] text-slate-400">
+          <div className="text-[11px] text-muted-foreground">
             <span className="font-mono text-blue-400">{product.assemblies}</span> assy
           </div>
           <span className="w-px h-3 bg-slate-700" />
-          <div className="text-[11px] text-slate-400">
-            <span className="font-mono text-slate-300">{product.parts}</span> parts
+          <div className="text-[11px] text-muted-foreground">
+            <span className="font-mono text-foreground/90">{product.parts}</span> parts
           </div>
         </div>
 
         {/* Footer row */}
-        <div className="flex items-center justify-between pt-3 border-t border-white/5">
+        <div className="flex items-center justify-between pt-3 border-t border-border">
           <div>
-            <p className="text-[10px] text-slate-500 uppercase tracking-wider">Root PL</p>
-            <p className="font-mono text-[11px] text-teal-400">{product.rootPL}</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Root PL</p>
+            <p className="font-mono text-[11px] text-primary">{product.rootPL}</p>
           </div>
-          <div className="flex items-center gap-1.5 text-xs font-medium text-teal-400 group-hover:text-teal-300 transition-colors">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-primary group-hover:text-primary/90 transition-colors">
             <span>View BOM</span>
             <ArrowRight className="w-3.5 h-3.5 translate-x-0 group-hover:translate-x-0.5 transition-transform" />
           </div>
@@ -126,7 +126,7 @@ function CreateNewCard() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, delay: 4 * 0.06, ease: 'easeOut' }}
       whileHover={{ y: -3, transition: { duration: 0.15 } }}
-      className="relative glass-card rounded-2xl border-2 border-dashed border-teal-500/25 hover:border-teal-400/50 cursor-pointer group transition-all duration-200 overflow-hidden"
+      className="relative bg-card border-border rounded-2xl border-2 border-dashed border-teal-500/25 hover:border-teal-400/50 cursor-pointer group transition-all duration-200 overflow-hidden"
       onClick={() => navigate('/bom/new')}
       role="button"
       tabIndex={0}
@@ -135,10 +135,10 @@ function CreateNewCard() {
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-teal-500/5 pointer-events-none" />
       <div className="p-6 h-full flex flex-col items-center justify-center text-center min-h-[240px]">
         <div className="w-12 h-12 rounded-2xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center mb-3 group-hover:bg-teal-500/20 transition-colors">
-          <Plus className="w-5 h-5 text-teal-400" />
+          <Plus className="w-5 h-5 text-primary" />
         </div>
-        <p className="text-sm font-semibold text-teal-400 mb-1 group-hover:text-teal-300 transition-colors">Create New BOM</p>
-        <p className="text-[11px] text-slate-500 leading-relaxed">Define a new product structure and start building your bill of materials</p>
+        <p className="text-sm font-semibold text-primary mb-1 group-hover:text-primary/90 transition-colors">Create New BOM</p>
+        <p className="text-[11px] text-muted-foreground leading-relaxed">Define a new product structure and start building your bill of materials</p>
       </div>
     </motion.div>
   );
@@ -227,14 +227,14 @@ export default function BOMExplorer() {
                   <Filter className="w-3.5 h-3.5" /> Export
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52 border border-slate-700/60 bg-slate-950 text-slate-200">
-                <DropdownMenuItem className="focus:bg-slate-800" onSelect={() => exportProducts('excel')}>
+              <DropdownMenuContent align="end" className="w-52 border border-border/60 bg-slate-950 text-foreground">
+                <DropdownMenuItem className="focus:bg-secondary" onSelect={() => exportProducts('excel')}>
                   Export filtered list to Excel
                 </DropdownMenuItem>
-                <DropdownMenuItem className="focus:bg-slate-800" onSelect={() => exportProducts('word')}>
+                <DropdownMenuItem className="focus:bg-secondary" onSelect={() => exportProducts('word')}>
                   Export filtered list to Word
                 </DropdownMenuItem>
-                <DropdownMenuItem className="focus:bg-slate-800" onSelect={() => exportProducts('pdf')}>
+                <DropdownMenuItem className="focus:bg-secondary" onSelect={() => exportProducts('pdf')}>
                   Export filtered list to PDF
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -255,8 +255,8 @@ export default function BOMExplorer() {
           { label: 'Total Parts', value: totalParts, accent: false },
         ].map(s => (
           <GlassCard key={s.label} className="px-4 py-3">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-0.5">{s.label}</p>
-            <p className={`text-2xl font-bold ${s.accent ? 'text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400' : 'text-slate-100'}`}>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-0.5">{s.label}</p>
+            <p className={`text-2xl font-bold ${s.accent ? 'text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400' : 'text-foreground'}`}>
               {s.value}
             </p>
           </GlassCard>
@@ -267,7 +267,7 @@ export default function BOMExplorer() {
       <GlassCard className="p-4">
         <div className="flex flex-wrap gap-4 items-end">
           <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search products, PL numbers..."
               className="pl-9 w-full"
@@ -277,21 +277,21 @@ export default function BOMExplorer() {
           </div>
           <div className="flex flex-wrap gap-4 items-center">
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-1.5 font-semibold">Category</p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5 font-semibold">Category</p>
               <FilterPills options={CATEGORIES} value={categoryFilter} onChange={setCategoryFilter} />
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-1.5 font-semibold">Lifecycle</p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5 font-semibold">Lifecycle</p>
               <FilterPills options={LIFECYCLES} value={lifecycleFilter} onChange={setLifecycleFilter} />
             </div>
           </div>
         </div>
         {(categoryFilter !== 'All' || lifecycleFilter !== 'All' || search) && (
-          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/5">
-            <span className="text-xs text-slate-400">Showing <span className="text-teal-400 font-semibold">{filtered.length}</span> of {allProducts.length} products</span>
+          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
+            <span className="text-xs text-muted-foreground">Showing <span className="text-primary font-semibold">{filtered.length}</span> of {allProducts.length} products</span>
             <button
               onClick={() => { setSearch(''); setCategoryFilter('All'); setLifecycleFilter('All'); }}
-              className="text-xs text-slate-500 hover:text-slate-300 underline transition-colors"
+              className="text-xs text-muted-foreground hover:text-foreground/90 underline transition-colors"
             >
               Clear filters
             </button>
@@ -309,11 +309,11 @@ export default function BOMExplorer() {
         </div>
       ) : (
         <GlassCard className="p-16 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-slate-800/60 border border-slate-700/50 flex items-center justify-center mx-auto mb-4">
-            <Search className="w-6 h-6 text-slate-500" />
+          <div className="w-14 h-14 rounded-2xl bg-secondary/60 border border-border flex items-center justify-center mx-auto mb-4">
+            <Search className="w-6 h-6 text-muted-foreground" />
           </div>
-          <p className="text-slate-300 font-medium mb-1">No products found</p>
-          <p className="text-slate-500 text-sm mb-4">Try adjusting your search or filter criteria</p>
+          <p className="text-foreground/90 font-medium mb-1">No products found</p>
+          <p className="text-muted-foreground text-sm mb-4">Try adjusting your search or filter criteria</p>
           <Button variant="ghost" size="sm" onClick={() => { setSearch(''); setCategoryFilter('All'); setLifecycleFilter('All'); }}>
             Clear filters
           </Button>
@@ -323,8 +323,8 @@ export default function BOMExplorer() {
       {/* Recent activity */}
       <GlassCard className="p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Clock className="w-4 h-4 text-slate-500" />
-          <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-500">Recently Modified</h3>
+          <Clock className="w-4 h-4 text-muted-foreground" />
+          <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Recently Modified</h3>
         </div>
         <div className="space-y-2">
           {[...allProducts].sort((a, b) => b.lastModified.localeCompare(a.lastModified)).slice(0, 3).map(p => (
@@ -332,16 +332,16 @@ export default function BOMExplorer() {
               type="button"
               key={p.id}
               onClick={() => navigate(`/bom/${p.id}`)}
-              className="w-full flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-slate-800/40 transition-colors cursor-pointer group text-left"
+              className="w-full flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-secondary/40 transition-colors cursor-pointer group text-left"
             >
               <div className="flex items-center gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-teal-500" />
-                <span className="text-sm text-slate-300 group-hover:text-white transition-colors">{p.name}</span>
-                <span className="text-xs text-slate-500">{p.subtitle}</span>
+                <span className="text-sm text-foreground/90 group-hover:text-white transition-colors">{p.name}</span>
+                <span className="text-xs text-muted-foreground">{p.subtitle}</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-xs text-slate-500">{p.lastModified}</span>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-teal-400 transition-colors" />
+                <span className="text-xs text-muted-foreground">{p.lastModified}</span>
+                <ChevronRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-primary transition-colors" />
               </div>
             </button>
           ))}

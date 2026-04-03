@@ -76,29 +76,29 @@ function AnalyticsPanel({ records }: { records: WorkRecord[] }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <div>
-        <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">By Category</h3>
+        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">By Category</h3>
         <div className="space-y-2">
           {analytics.byCategory.sort((a, b) => b.count - a.count).map(c => (
             <div key={c.category} className="flex items-center gap-3">
-              <span className="text-xs text-slate-400 w-28 text-right shrink-0">{CATEGORY_LABEL[c.category as WorkCategory] ?? c.category}</span>
-              <div className="flex-1 h-2 bg-slate-800/60 rounded-full overflow-hidden">
+              <span className="text-xs text-muted-foreground w-28 text-right shrink-0">{CATEGORY_LABEL[c.category as WorkCategory] ?? c.category}</span>
+              <div className="flex-1 h-2 bg-secondary/60 rounded-full overflow-hidden">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-teal-500 to-teal-400"
                   style={{ width: `${(c.count / maxCategoryCount) * 100}%` }}
                 />
               </div>
-              <span className="text-xs text-teal-300 font-mono w-4">{c.count}</span>
+              <span className="text-xs text-primary/90 font-mono w-4">{c.count}</span>
             </div>
           ))}
         </div>
       </div>
       <div>
-        <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Average Completion (days)</h3>
+        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">Average Completion (days)</h3>
         <div className="space-y-2">
           {analytics.avgDaysByType.slice(0, 5).map(t => (
             <div key={t.workType} className="flex items-center gap-3">
-              <span className="text-xs text-slate-400 w-36 truncate shrink-0" title={t.workType}>{t.workType}</span>
-              <div className="flex-1 h-2 bg-slate-800/60 rounded-full overflow-hidden">
+              <span className="text-xs text-muted-foreground w-36 truncate shrink-0" title={t.workType}>{t.workType}</span>
+              <div className="flex-1 h-2 bg-secondary/60 rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full ${t.avgDays <= t.targetDays ? 'bg-emerald-500' : 'bg-rose-500'}`}
                   style={{ width: `${Math.min(100, (t.avgDays / (t.targetDays * 1.5)) * 100)}%` }}
@@ -169,7 +169,7 @@ function PlLookupField({
 }) {
   return (
     <div className="space-y-2">
-      <label className="text-xs font-medium text-slate-400">Linked PL Number</label>
+      <label className="text-xs font-medium text-muted-foreground">Linked PL Number</label>
       <PLNumberSelect
         value={value}
         onChange={onSelect}
@@ -267,10 +267,10 @@ function CreateWorkModal({
     <GlassCard className="w-full p-6">
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h2 className="text-lg font-bold text-white flex items-center gap-2"><Plus className="w-4 h-4 text-teal-400" /> Log Work Activity</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Record a new work item in the Work Ledger with full audit trail</p>
+            <h2 className="text-lg font-bold text-white flex items-center gap-2"><Plus className="w-4 h-4 text-primary" /> Log Work Activity</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Record a new work item in the Work Ledger with full audit trail</p>
           </div>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-300 hover:bg-slate-700/50 transition-colors">
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground/90 hover:bg-slate-700/50 transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -286,21 +286,21 @@ function CreateWorkModal({
           </button>
         )}
         {showDuplicates && duplicates.map(d => (
-          <div key={d.id} className="mb-2 p-2 rounded-lg bg-slate-800/40 border border-amber-500/20 text-xs">
-            <span className="font-mono text-teal-400">{d.id}</span> — {d.description.substring(0, 80)}...
+          <div key={d.id} className="mb-2 p-2 rounded-lg bg-secondary/40 border border-amber-500/20 text-xs">
+            <span className="font-mono text-primary">{d.id}</span> — {d.description.substring(0, 80)}...
           </div>
         ))}
 
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-medium text-slate-400 mb-1.5 block">Work Category *</label>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Work Category *</label>
               <Select value={form.workCategory} onChange={e => setForm(f => ({ ...f, workCategory: e.target.value as WorkCategory, workType: '' }))} className="w-full work-ledger-select">
                 {WORK_CATEGORIES.map(c => <option key={c} value={c}>{CATEGORY_LABEL[c]}</option>)}
               </Select>
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-400 mb-1.5 block">Work Type *</label>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Work Type *</label>
               <Select value={form.workType} onChange={e => setForm(f => ({ ...f, workType: e.target.value }))} className={`w-full work-ledger-select ${errors.workType ? 'border-rose-500/50' : ''}`}>
                 <option value="">— Select Type —</option>
                 {typesForCategory.map(t => <option key={t.code} value={t.label}>{t.label}</option>)}
@@ -311,26 +311,26 @@ function CreateWorkModal({
 
           {form.workType && (
             <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-teal-500/8 border border-teal-500/20">
-              <Clock className="w-3.5 h-3.5 text-teal-400" />
-              <span className="text-xs text-teal-300">Target disposal: <strong>{targetDays} days</strong></span>
+              <Clock className="w-3.5 h-3.5 text-primary" />
+              <span className="text-xs text-primary/90">Target disposal: <strong>{targetDays} days</strong></span>
               {selectedTypeDef?.priority && (
                 <span className={`ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
                   selectedTypeDef.priority === 'CRITICAL' ? 'bg-rose-500/20 text-rose-300' :
                   selectedTypeDef.priority === 'HIGH' ? 'bg-amber-500/20 text-amber-300' :
-                  'bg-slate-700/50 text-slate-400'
+                  'bg-slate-700/50 text-muted-foreground'
                 }`}>{selectedTypeDef.priority}</span>
               )}
             </div>
           )}
 
           <div>
-            <label className="text-xs font-medium text-slate-400 mb-1.5 block">Description / Work Details *</label>
+            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Description / Work Details *</label>
             <textarea
               value={form.description}
               onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
               placeholder="Describe the work, item, and any relevant technical context..."
               rows={3}
-              className={`w-full bg-slate-950/60 border text-slate-200 text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/30 transition-all placeholder:text-slate-600 resize-none ${errors.description ? 'border-rose-500/50' : 'border-slate-700/50'}`}
+              className={`w-full bg-slate-950/60 border text-foreground text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/30 transition-all placeholder:text-slate-600 resize-none ${errors.description ? 'border-rose-500/50' : 'border-border'}`}
             />
             {errors.description && <p className="text-[10px] text-rose-400 mt-1">{errors.description}</p>}
           </div>
@@ -344,36 +344,36 @@ function CreateWorkModal({
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label className="text-xs font-medium text-slate-400 mb-1.5 block">Tender Number</label>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Tender Number</label>
               <Input value={form.tenderNumber} onChange={e => setForm(f => ({ ...f, tenderNumber: e.target.value }))} placeholder="e.g. CLW/TENDER/2026/001" className="w-full font-mono text-xs" />
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-400 mb-1.5 block">e-Office Case No. <span className="text-rose-400">*</span></label>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">e-Office Case No. <span className="text-rose-400">*</span></label>
               <Input value={form.eOfficeNumber} onChange={e => setForm(f => ({ ...f, eOfficeNumber: e.target.value }))} placeholder="e.g. CLW/DESIGN/2026/0001" className={`w-full font-mono text-xs ${errors.eOfficeNumber ? 'border-rose-500/50' : ''}`} />
               {errors.eOfficeNumber && <p className="text-[10px] text-rose-400 mt-1">{errors.eOfficeNumber}</p>}
             </div>
           </div>
 
           <div>
-            <label className="text-xs font-medium text-slate-400 mb-1.5 block">Remarks / Additional Notes</label>
+            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Remarks / Additional Notes</label>
             <textarea
               value={form.remarks}
               onChange={e => setForm(f => ({ ...f, remarks: e.target.value }))}
               placeholder="Any additional remarks, observations, or context for this work record..."
               rows={2}
-              className="w-full bg-slate-950/60 border border-slate-700/50 text-slate-200 text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/30 transition-all placeholder:text-slate-600 resize-none"
+              className="w-full bg-slate-950/60 border border-border text-foreground text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/30 transition-all placeholder:text-slate-600 resize-none"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-medium text-slate-400 mb-1.5 block">Section</label>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Section</label>
               <Select value={form.sectionType} onChange={e => setForm(f => ({ ...f, sectionType: e.target.value }))} className="w-full work-ledger-select">
                 {SECTION_TYPES.map(s => <option key={s} value={s}>{s}</option>)}
               </Select>
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-400 mb-1.5 block">Concerned Officer</label>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Concerned Officer</label>
               <Select value={form.concernedOfficer} onChange={e => setForm(f => ({ ...f, concernedOfficer: e.target.value }))} className="w-full work-ledger-select">
                 <option value="">— Select —</option>
                 {CONCERNED_OFFICERS.map(o => <option key={o} value={o}>{o}</option>)}
@@ -397,7 +397,7 @@ function CreateWorkModal({
             />
             {consentApplicable && (
               <div>
-                <label className="text-xs font-medium text-slate-400 mb-1.5 block">Consent Given</label>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Consent Given</label>
                 <Select value={form.consentGiven} onChange={e => setForm(f => ({ ...f, consentGiven: e.target.value }))} className="w-full work-ledger-select">
                   <option value="N/A">N/A</option>
                   <option value="Y">Yes</option>
@@ -414,7 +414,7 @@ function CreateWorkModal({
           )}
         </div>
 
-        <div className="flex gap-3 mt-6 pt-5 border-t border-slate-700/50">
+        <div className="flex gap-3 mt-6 pt-5 border-t border-border">
           <Button variant="secondary" onClick={onClose} className="flex-1">Cancel</Button>
           <Button onClick={handleSubmit} disabled={saving} className="flex-1">
             {saving ? 'Saving...' : <><Plus className="w-4 h-4" /> Log Activity</>}
@@ -433,14 +433,14 @@ function RecordDetail({ record, onVerify, onClose, canVerify }: { record: WorkRe
       <div className="flex items-start justify-between mb-4">
         <div>
           <div className="flex items-center gap-2 mb-1 flex-wrap">
-            {record.isLocked ? <Lock className="w-4 h-4 text-slate-500" /> : <Briefcase className="w-4 h-4 text-teal-400" />}
+            {record.isLocked ? <Lock className="w-4 h-4 text-muted-foreground" /> : <Briefcase className="w-4 h-4 text-primary" />}
             <h2 className="text-base font-bold text-white">{record.description}</h2>
             <Badge variant={STATUS_VARIANT[record.status]}>{STATUS_LABEL[record.status]}</Badge>
-            {record.isLocked && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-700/60 text-slate-500 border border-slate-600/40 flex items-center gap-1"><Lock className="w-2.5 h-2.5" /> Locked</span>}
+            {record.isLocked && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-700/60 text-muted-foreground border border-slate-600/40 flex items-center gap-1"><Lock className="w-2.5 h-2.5" /> Locked</span>}
           </div>
-          <p className="font-mono text-xs text-teal-400">{record.id}</p>
+          <p className="font-mono text-xs text-primary">{record.id}</p>
         </div>
-        <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-300 transition-colors">
+        <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground/90 transition-colors">
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -457,10 +457,10 @@ function RecordDetail({ record, onVerify, onClose, canVerify }: { record: WorkRe
           { label: 'Days Taken', value: record.daysTaken != null ? `${record.daysTaken}d` : record.closingDate ? `${calcDaysBetween(record.date, record.closingDate) ?? '—'}d` : '—' },
         ])().map(f => (
           <div key={f.label}>
-            <p className="text-[10px] text-slate-500 mb-0.5 flex items-center gap-1">
+            <p className="text-[10px] text-muted-foreground mb-0.5 flex items-center gap-1">
               {f.icon}{f.label}
             </p>
-            <p className="text-sm text-slate-200 font-medium">{f.value}</p>
+            <p className="text-sm text-foreground font-medium">{f.value}</p>
           </div>
         ))}
       </div>
@@ -474,8 +474,8 @@ function RecordDetail({ record, onVerify, onClose, canVerify }: { record: WorkRe
       {/* References */}
       <div className="flex flex-wrap gap-2 mb-4">
         {record.eOfficeNumber && (
-          <span className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-800/50 border border-slate-700/40 rounded-lg text-xs text-slate-400">
-            <Hash className="w-3 h-3 text-teal-400" /> {record.eOfficeNumber}
+          <span className="flex items-center gap-1.5 px-2.5 py-1 bg-secondary/50 border border-border/40 rounded-lg text-xs text-muted-foreground">
+            <Hash className="w-3 h-3 text-primary" /> {record.eOfficeNumber}
           </span>
         )}
         {record.plNumber && (
@@ -493,7 +493,7 @@ function RecordDetail({ record, onVerify, onClose, canVerify }: { record: WorkRe
           >
             <button
               onClick={() => navigate(`/documents/${record.documentRef}`)}
-              className="flex items-center gap-1.5 px-1 text-xs text-teal-300 hover:bg-teal-500/15 transition-colors rounded-md"
+              className="flex items-center gap-1.5 px-1 text-xs text-primary/90 hover:bg-teal-500/15 transition-colors rounded-md"
             >
               <FileText className="w-3 h-3" /> {record.documentRef}
             </button>
@@ -501,7 +501,7 @@ function RecordDetail({ record, onVerify, onClose, canVerify }: { record: WorkRe
               documentId={record.documentRef}
               title={record.documentRef}
               iconOnly
-              className="h-7 min-h-0 px-2 text-slate-200 hover:text-white"
+              className="h-7 min-h-0 px-2 text-foreground hover:text-white"
             />
           </div>
         )}
@@ -655,7 +655,7 @@ export default function WorkLedger() {
       <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-white mb-1">Work Ledger</h1>
-          <p className="text-slate-400 text-sm">Track and manage engineering work records with immutable audit history.</p>
+          <p className="text-muted-foreground text-sm">Track and manage engineering work records with immutable audit history.</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Button variant="secondary" size="sm" onClick={() => setShowAnalytics(v => !v)}>
@@ -694,16 +694,16 @@ export default function WorkLedger() {
       {/* KPI Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Total Records', value: stats.total, icon: <Briefcase className="w-4 h-4 text-teal-400" />, color: '' },
+          { label: 'Total Records', value: stats.total, icon: <Briefcase className="w-4 h-4 text-primary" />, color: '' },
           { label: 'Open Items', value: stats.open, icon: <Clock className="w-4 h-4 text-blue-400" />, color: '' },
           { label: 'Overdue', value: stats.overdue, icon: <AlertCircle className="w-4 h-4 text-rose-400" />, color: stats.overdue > 0 ? 'border-rose-500/20' : '' },
           { label: 'On-time Rate', value: `${stats.onTimeRate}%`, icon: <TrendingUp className="w-4 h-4 text-emerald-400" />, color: '' },
         ].map(s => (
           <GlassCard key={s.label} className={`px-4 py-3 flex items-center gap-3 ${s.color}`}>
-            <div className="w-8 h-8 rounded-lg bg-slate-800/60 flex items-center justify-center shrink-0">{s.icon}</div>
+            <div className="w-8 h-8 rounded-lg bg-secondary/60 flex items-center justify-center shrink-0">{s.icon}</div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">{s.label}</p>
-              <p className="text-xl font-bold text-slate-100">{s.value}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{s.label}</p>
+              <p className="text-xl font-bold text-foreground">{s.value}</p>
             </div>
           </GlassCard>
         ))}
@@ -713,7 +713,7 @@ export default function WorkLedger() {
       {showAnalytics && (
         <GlassCard className="p-6">
           <h2 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 text-teal-400" /> Work Ledger Analytics
+            <BarChart3 className="w-4 h-4 text-primary" /> Work Ledger Analytics
           </h2>
           <AnalyticsPanel records={records} />
         </GlassCard>
@@ -723,7 +723,7 @@ export default function WorkLedger() {
       <GlassCard className="p-4">
         <div className="flex flex-wrap gap-2 mb-4">
           <div className="relative flex-1 min-w-[220px]">
-            <FileSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <FileSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search ID, description, type, PL, eOffice, tender, officer..."
               className="pl-9 w-full"
@@ -736,7 +736,7 @@ export default function WorkLedger() {
               <button
                 key={s}
                 onClick={() => setStatusFilter(s)}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors ${statusFilter === s ? 'bg-teal-500/20 border-teal-500/40 text-teal-300' : 'bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-slate-200'}`}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors ${statusFilter === s ? 'bg-teal-500/20 border-teal-500/40 text-primary/90' : 'bg-secondary/50 border-border text-muted-foreground hover:text-foreground'}`}
               >
                 {s === 'ALL' ? 'All' : STATUS_LABEL[s as WorkRecord['status']]}
               </button>
@@ -745,7 +745,7 @@ export default function WorkLedger() {
         </div>
         {/* Date range filter */}
         <div className="flex flex-wrap items-center gap-2 mb-4">
-          <span className="text-[11px] text-slate-500 font-medium uppercase tracking-wide">Date:</span>
+          <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">Date:</span>
           <div className="flex items-center gap-1.5">
             <DatePicker
               value={dateFrom}
@@ -759,7 +759,7 @@ export default function WorkLedger() {
               placeholder="To date"
             />
             {(dateFrom || dateTo) && (
-              <button onClick={() => { setDateFrom(''); setDateTo(''); }} className="text-[10px] text-slate-500 hover:text-teal-400 transition-colors px-1.5">✕ Clear</button>
+              <button onClick={() => { setDateFrom(''); setDateTo(''); }} className="text-[10px] text-muted-foreground hover:text-primary transition-colors px-1.5">✕ Clear</button>
             )}
           </div>
         </div>
@@ -768,7 +768,7 @@ export default function WorkLedger() {
         <div className="flex flex-wrap gap-1.5 mb-4">
           <button
             onClick={() => setCategoryFilter('ALL')}
-            className={`px-2 py-1 rounded-md text-[10px] font-medium border transition-colors ${categoryFilter === 'ALL' ? 'bg-teal-500/20 border-teal-500/40 text-teal-300' : 'bg-slate-800/40 border-slate-700/40 text-slate-500 hover:text-slate-300'}`}
+            className={`px-2 py-1 rounded-md text-[10px] font-medium border transition-colors ${categoryFilter === 'ALL' ? 'bg-teal-500/20 border-teal-500/40 text-primary/90' : 'bg-secondary/40 border-border/40 text-muted-foreground hover:text-foreground/90'}`}
           >
             All Categories
           </button>
@@ -776,7 +776,7 @@ export default function WorkLedger() {
             <button
               key={c}
               onClick={() => setCategoryFilter(c)}
-              className={`px-2 py-1 rounded-md text-[10px] font-medium border transition-colors ${categoryFilter === c ? 'bg-teal-500/20 border-teal-500/40 text-teal-300' : 'bg-slate-800/40 border-slate-700/40 text-slate-500 hover:text-slate-300'}`}
+              className={`px-2 py-1 rounded-md text-[10px] font-medium border transition-colors ${categoryFilter === c ? 'bg-teal-500/20 border-teal-500/40 text-primary/90' : 'bg-secondary/40 border-border/40 text-muted-foreground hover:text-foreground/90'}`}
             >
               {CATEGORY_LABEL[c]}
             </button>
@@ -788,29 +788,29 @@ export default function WorkLedger() {
           <span className="text-[11px] text-slate-600 font-medium uppercase tracking-wide">Quick:</span>
           <button
             onClick={() => setShowMine(v => !v)}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-all ${showMine ? 'bg-teal-500/20 border-teal-500/40 text-teal-300' : 'bg-slate-800/40 border-slate-700/40 text-slate-500 hover:text-slate-300'}`}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-all ${showMine ? 'bg-teal-500/20 border-teal-500/40 text-primary/90' : 'bg-secondary/40 border-border/40 text-muted-foreground hover:text-foreground/90'}`}
           >
             <UserIcon className="w-3 h-3" /> My Records
           </button>
           <button
             onClick={() => setShowOverdue(v => !v)}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-all ${showOverdue ? 'bg-rose-500/20 border-rose-500/40 text-rose-300' : 'bg-slate-800/40 border-slate-700/40 text-slate-500 hover:text-slate-300'}`}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-all ${showOverdue ? 'bg-rose-500/20 border-rose-500/40 text-rose-300' : 'bg-secondary/40 border-border/40 text-muted-foreground hover:text-foreground/90'}`}
           >
             <AlertCircle className="w-3 h-3" /> Overdue
           </button>
           {(showMine || showOverdue) && (
-            <button onClick={() => { setShowMine(false); setShowOverdue(false); }} className="text-[11px] text-slate-600 hover:text-slate-400 transition-colors">✕ Clear</button>
+            <button onClick={() => { setShowMine(false); setShowOverdue(false); }} className="text-[11px] text-slate-600 hover:text-muted-foreground transition-colors">✕ Clear</button>
           )}
-          <span className="ml-auto text-xs text-slate-500">
-            Showing <span className="text-teal-400 font-semibold">{filtered.length}</span> of {records.length} records
-            {totalPages > 1 && <> · Page <span className="text-teal-400 font-semibold tabular-nums">{page}/{totalPages}</span></>}
+          <span className="ml-auto text-xs text-muted-foreground">
+            Showing <span className="text-primary font-semibold">{filtered.length}</span> of {records.length} records
+            {totalPages > 1 && <> · Page <span className="text-primary font-semibold tabular-nums">{page}/{totalPages}</span></>}
           </span>
         </div>
 
         <div className="overflow-x-auto -mx-1">
           <table className="w-full text-left text-sm whitespace-nowrap">
             <thead>
-              <tr className="border-b border-white/5 text-slate-500">
+              <tr className="border-b border-border text-muted-foreground">
                 <th className="pb-3 pl-3 font-semibold text-[11px] uppercase tracking-wide">Work ID</th>
                 <th className="pb-3 font-semibold text-[11px] uppercase tracking-wide">Description</th>
                 <th className="pb-3 font-semibold text-[11px] uppercase tracking-wide">Category / Type</th>
@@ -827,32 +827,32 @@ export default function WorkLedger() {
               {paginated.map(w => (
                 <tr
                   key={w.id}
-                  className={`cursor-pointer transition-colors group ${selectedId === w.id ? 'bg-teal-500/5 border-l-2 border-teal-500/30' : 'hover:bg-slate-800/30'}`}
+                  className={`cursor-pointer transition-colors group ${selectedId === w.id ? 'bg-teal-500/5 border-l-2 border-teal-500/30' : 'hover:bg-secondary/30'}`}
                   onClick={() => openRecord(selectedId === w.id ? null : w.id)}
                 >
                   <td className="py-3 pl-3">
                     <div className="flex items-center gap-1.5">
                       {w.isLocked ? <Lock className="w-3 h-3 text-slate-600" /> : <Unlock className="w-3 h-3 text-slate-700" />}
-                      <span className="font-mono text-teal-400 text-xs">{w.id}</span>
+                      <span className="font-mono text-primary text-xs">{w.id}</span>
                       <button
                         onClick={e => copyId(w.id, e)}
                         title="Copy ID"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity ml-0.5 text-slate-600 hover:text-teal-400"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity ml-0.5 text-slate-600 hover:text-primary"
                       >
                         {copiedId === w.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                       </button>
                     </div>
                   </td>
                   <td className="py-3 max-w-[240px]">
-                    <p className="text-slate-200 font-medium text-sm truncate">{w.description}</p>
+                    <p className="text-foreground font-medium text-sm truncate">{w.description}</p>
                   </td>
                   <td className="py-3">
-                    <p className="text-xs text-slate-400">{CATEGORY_LABEL[w.workCategory]}</p>
+                    <p className="text-xs text-muted-foreground">{CATEGORY_LABEL[w.workCategory]}</p>
                     <p className="text-[10px] text-slate-600">{w.workType}</p>
                   </td>
                   <td className="py-3">
-                    {w.plNumber && <p className="font-mono text-[11px] text-teal-500/80 leading-tight">{w.plNumber}</p>}
-                    {w.eOfficeNumber && <p className="font-mono text-[10px] text-slate-500 leading-tight">{w.eOfficeNumber}</p>}
+                    {w.plNumber && <p className="font-mono text-[11px] text-primary/80 leading-tight">{w.plNumber}</p>}
+                    {w.eOfficeNumber && <p className="font-mono text-[10px] text-muted-foreground leading-tight">{w.eOfficeNumber}</p>}
                     {!w.plNumber && !w.eOfficeNumber && <span className="text-slate-700 text-xs">—</span>}
                   </td>
                   <td className="py-3">
@@ -871,21 +871,21 @@ export default function WorkLedger() {
                       <span className="text-slate-600"> / {w.targetDays}d</span>
                     )}
                   </td>
-                  <td className="py-3 text-slate-400 text-xs truncate max-w-[100px]">
+                  <td className="py-3 text-muted-foreground text-xs truncate max-w-[100px]">
                     {w.concernedOfficer || w.userName || '—'}
                   </td>
-                  <td className="py-3 text-slate-500 text-xs">{w.date}</td>
+                  <td className="py-3 text-muted-foreground text-xs">{w.date}</td>
                   <td className="py-3 pr-3">
-                    <ChevronRight className={`w-4 h-4 transition-all ${selectedId === w.id ? 'rotate-90 text-teal-400' : 'text-slate-600 group-hover:text-teal-400'}`} />
+                    <ChevronRight className={`w-4 h-4 transition-all ${selectedId === w.id ? 'rotate-90 text-primary' : 'text-slate-600 group-hover:text-primary'}`} />
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
           {filtered.length === 0 && (
-            <div className="text-center py-14 text-slate-500">
+            <div className="text-center py-14 text-muted-foreground">
               <Briefcase className="w-10 h-10 mx-auto mb-3 opacity-20" />
-              <p className="font-medium text-slate-400 mb-1">No work records found</p>
+              <p className="font-medium text-muted-foreground mb-1">No work records found</p>
               <p className="text-sm mb-4">Try adjusting the search or category filter</p>
               {canCreate && (
                 <Button size="sm" onClick={() => setShowForm(true)}>
@@ -898,15 +898,15 @@ export default function WorkLedger() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between pt-4 border-t border-white/5 mt-2">
-            <span className="text-xs text-slate-500 tabular-nums">
+          <div className="flex items-center justify-between pt-4 border-t border-border mt-2">
+            <span className="text-xs text-muted-foreground tabular-nums">
               {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, filtered.length)} of {filtered.length}
             </span>
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="w-7 h-7 rounded-lg bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                className="w-7 h-7 rounded-lg bg-secondary/50 border border-border text-muted-foreground hover:text-white disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
@@ -916,7 +916,7 @@ export default function WorkLedger() {
                   <button
                     key={p}
                     onClick={() => setPage(p)}
-                    className={`w-7 h-7 rounded-lg text-xs font-medium transition-colors ${p === page ? 'bg-teal-500/20 border border-teal-500/40 text-teal-300' : 'bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:text-white'}`}
+                    className={`w-7 h-7 rounded-lg text-xs font-medium transition-colors ${p === page ? 'bg-teal-500/20 border border-teal-500/40 text-primary/90' : 'bg-secondary/50 border border-border text-muted-foreground hover:text-white'}`}
                   >
                     {p}
                   </button>
@@ -925,7 +925,7 @@ export default function WorkLedger() {
               <button
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="w-7 h-7 rounded-lg bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                className="w-7 h-7 rounded-lg bg-secondary/50 border border-border text-muted-foreground hover:text-white disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
               >
                 <ChevronRightIcon className="w-4 h-4" />
               </button>
@@ -939,13 +939,13 @@ export default function WorkLedger() {
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <GlassCard className="w-full max-w-2xl p-6 relative">
             <button onClick={() => { setShowImportModal(false); setImportFile(null); setImportPreview([]); }} className="absolute top-4 right-4">
-              <X className="w-4 h-4 text-slate-500 hover:text-white" />
+              <X className="w-4 h-4 text-muted-foreground hover:text-white" />
             </button>
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-9 h-9 rounded-xl bg-teal-500/10 flex items-center justify-center"><Upload className="w-4 h-4 text-teal-400" /></div>
+              <div className="w-9 h-9 rounded-xl bg-teal-500/10 flex items-center justify-center"><Upload className="w-4 h-4 text-primary" /></div>
               <div>
                 <h3 className="text-sm font-semibold text-white">Import Work Records</h3>
-                <p className="text-xs text-slate-500">Upload a CSV or Excel file with work records</p>
+                <p className="text-xs text-muted-foreground">Upload a CSV or Excel file with work records</p>
               </div>
             </div>
             <input ref={importInputRef} type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={async e => {
@@ -960,24 +960,24 @@ export default function WorkLedger() {
             {!importFile ? (
               <div
                 onClick={() => importInputRef.current?.click()}
-                className="border-2 border-dashed border-slate-700 rounded-xl p-10 text-center cursor-pointer hover:border-teal-500/40 transition-colors"
+                className="border-2 border-dashed border-border rounded-xl p-10 text-center cursor-pointer hover:border-teal-500/40 transition-colors"
               >
                 <Upload className="w-8 h-8 mx-auto mb-3 text-slate-600" />
-                <p className="text-sm text-slate-400 mb-1">Click to upload CSV or Excel file</p>
+                <p className="text-sm text-muted-foreground mb-1">Click to upload CSV or Excel file</p>
                 <p className="text-xs text-slate-600">Supported: .csv, .xlsx, .xls</p>
               </div>
             ) : (
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm text-slate-300">{importFile.name}</span>
-                  <button onClick={() => { setImportFile(null); setImportPreview([]); }} className="text-xs text-slate-500 hover:text-rose-400">Remove</button>
+                  <span className="text-sm text-foreground/90">{importFile.name}</span>
+                  <button onClick={() => { setImportFile(null); setImportPreview([]); }} className="text-xs text-muted-foreground hover:text-rose-400">Remove</button>
                 </div>
                 {importPreview.length > 0 && (
                   <div className="overflow-x-auto mb-4">
-                    <p className="text-xs text-slate-500 mb-2">Preview (first {importPreview.length} rows):</p>
+                    <p className="text-xs text-muted-foreground mb-2">Preview (first {importPreview.length} rows):</p>
                     <table className="w-full text-xs text-left">
-                      <thead><tr>{Object.keys(importPreview[0]).slice(0, 6).map(h => <th key={h} className="py-1 pr-4 text-slate-500 font-medium uppercase text-[10px]">{h}</th>)}</tr></thead>
-                      <tbody>{importPreview.map((row, i) => <tr key={i} className="border-t border-white/5">{Object.values(row).slice(0, 6).map((v, j) => <td key={j} className="py-1.5 pr-4 text-slate-400 truncate max-w-[120px]">{String(v)}</td>)}</tr>)}</tbody>
+                      <thead><tr>{Object.keys(importPreview[0]).slice(0, 6).map(h => <th key={h} className="py-1 pr-4 text-muted-foreground font-medium uppercase text-[10px]">{h}</th>)}</tr></thead>
+                      <tbody>{importPreview.map((row, i) => <tr key={i} className="border-t border-border">{Object.values(row).slice(0, 6).map((v, j) => <td key={j} className="py-1.5 pr-4 text-muted-foreground truncate max-w-[120px]">{String(v)}</td>)}</tr>)}</tbody>
                     </table>
                   </div>
                 )}

@@ -5,7 +5,7 @@ import { Input as ShadcnInput } from './input';
 
 export function GlassCard({ children, className = "", ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`glass-card rounded-xl ${className}`} {...props}>
+    <div className={`bg-card border-border rounded-xl ${className}`} {...props}>
       {children}
     </div>
   );
@@ -13,7 +13,7 @@ export function GlassCard({ children, className = "", ...props }: React.HTMLAttr
 
 export function GlassCardTeal({ children, className = "", ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`glass-card-teal rounded-xl ${className}`} {...props}>
+    <div className={`bg-card border-border-teal rounded-xl ${className}`} {...props}>
       {children}
     </div>
   );
@@ -31,8 +31,8 @@ export function Badge({
   className?: string;
 }) {
   const variants: Record<string, string> = {
-    default: "bg-slate-800/80 text-slate-300 border border-slate-700/60",
-    success: "bg-teal-900/40 text-teal-300 border border-teal-500/30",
+    default: "bg-secondary/80 text-foreground/90 border border-border/60",
+    success: "bg-teal-900/40 text-primary/90 border border-teal-500/30",
     warning: "bg-amber-900/40 text-amber-300 border border-amber-500/30",
     danger: "bg-rose-900/40 text-rose-300 border border-rose-500/30",
     processing: "bg-blue-900/40 text-blue-300 border border-blue-500/30 animate-pulse",
@@ -86,10 +86,10 @@ export function Button({
   };
   const variantClasses: Record<string, string> = {
     primary: "rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-md shadow-teal-900/30 border border-teal-400/20 hover:from-teal-500 hover:to-emerald-500",
-    secondary: "rounded-xl bg-slate-800/80 text-slate-200 border border-slate-600/60 hover:bg-slate-700/80 hover:border-slate-500",
-    ghost: "rounded-xl bg-transparent text-slate-300 hover:bg-white/5 hover:text-slate-100",
+    secondary: "rounded-xl bg-secondary/80 text-foreground border border-slate-600/60 hover:bg-slate-700/80 hover:border-slate-500",
+    ghost: "rounded-xl bg-transparent text-foreground/90 hover:bg-white/5 hover:text-foreground",
     danger: "rounded-xl bg-rose-600/20 text-rose-400 border border-rose-500/30 hover:bg-rose-600/30 hover:border-rose-500/50",
-    "teal-outline": "rounded-xl bg-teal-500/10 text-teal-300 border border-teal-500/30 hover:bg-teal-500/20 hover:border-teal-400/50",
+    "teal-outline": "rounded-xl bg-teal-500/10 text-primary/90 border border-teal-500/30 hover:bg-teal-500/20 hover:border-teal-400/50",
   };
   const sizeClasses: Record<string, string> = {
     sm: "min-h-9 px-3 py-2 text-xs gap-1.5",
@@ -117,7 +117,7 @@ export function Input({ className = "", ...props }: React.InputHTMLAttributes<HT
   return (
     <ShadcnInput
       className={cn(
-        "h-10 rounded-lg border-slate-700/50 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-200 placeholder:text-slate-600 focus-visible:border-teal-500/50 focus-visible:ring-1 focus-visible:ring-teal-500/30 focus-visible:ring-offset-0",
+        "h-10 rounded-lg border-border bg-slate-950/60 px-3 py-2.5 text-sm text-foreground placeholder:text-slate-600 focus-visible:border-teal-500/50 focus-visible:ring-1 focus-visible:ring-teal-500/30 focus-visible:ring-offset-0",
         className
       )}
       {...props}
@@ -129,7 +129,7 @@ export function Select({ className = "", children, ...props }: React.SelectHTMLA
   return (
     <select
       className={cn(
-        "h-10 w-full cursor-pointer rounded-lg border border-slate-700/50 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-200 transition-all focus:border-teal-500/50 focus:outline-none focus:ring-1 focus:ring-teal-500/30",
+        "h-10 w-full cursor-pointer rounded-lg border border-border bg-slate-950/60 px-3 py-2.5 text-sm text-foreground transition-all focus:border-teal-500/50 focus:outline-none focus:ring-1 focus:ring-teal-500/30",
         className
       )}
       {...props}
@@ -141,12 +141,12 @@ export function Select({ className = "", children, ...props }: React.SelectHTMLA
 
 export function StatCard({ label, value, sub, accent = false }: { label: string; value: string | number; sub?: string; accent?: boolean }) {
   return (
-    <div className="glass-card rounded-xl px-4 py-3 flex flex-col gap-0.5">
-      <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{label}</span>
-      <span className={`text-xl font-bold tabular-nums ${accent ? 'text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400' : 'text-slate-100'}`}>
+    <div className="bg-card border-border rounded-xl px-4 py-3 flex flex-col gap-0.5">
+      <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
+      <span className={`text-xl font-bold tabular-nums ${accent ? 'text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400' : 'text-foreground'}`}>
         {value}
       </span>
-      {sub && <span className="text-xs text-slate-500">{sub}</span>}
+      {sub && <span className="text-xs text-muted-foreground">{sub}</span>}
     </div>
   );
 }
@@ -222,12 +222,12 @@ export function PageHeader({
 
   return (
     <div className="flex flex-col gap-4 mb-6">
-      {breadcrumb && <div className="text-sm text-slate-400">{breadcrumb}</div>}
+      {breadcrumb && <div className="text-sm text-muted-foreground">{breadcrumb}</div>}
       
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-white tracking-tight mb-1">{title}</h1>
-          {subtitle && <p className="text-slate-400 text-sm">{subtitle}</p>}
+          {subtitle && <p className="text-muted-foreground text-sm">{subtitle}</p>}
         </div>
 
         {/* Actions */}

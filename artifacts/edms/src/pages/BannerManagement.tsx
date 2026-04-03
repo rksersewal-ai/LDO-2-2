@@ -92,7 +92,7 @@ export default function BannerManagement() {
       <div className="flex items-end justify-between">
         <div>
           <h1 className="text-3xl font-bold text-white mb-2">Announcement Management</h1>
-          <p className="text-slate-400 text-sm">Create and manage running banner announcements visible to all users.</p>
+          <p className="text-muted-foreground text-sm">Create and manage running banner announcements visible to all users.</p>
         </div>
         <Button onClick={() => { setEditBanner(null); setNewTitle(''); setNewMessage(''); setNewLink(''); setNewValidFrom(''); setNewValidTo(''); setShowForm(true); }}>
           <Plus className="w-4 h-4" /> New Announcement
@@ -100,9 +100,9 @@ export default function BannerManagement() {
       </div>
 
       <GlassCard className="p-4">
-        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Live Preview</h3>
+        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">Live Preview</h3>
         <div className="bg-gradient-to-r from-teal-900 to-emerald-900 border border-teal-500/30 text-teal-100 text-xs px-4 py-2 rounded-xl flex items-center gap-2">
-          <AlertCircle className="w-3.5 h-3.5 shrink-0 text-teal-400" />
+          <AlertCircle className="w-3.5 h-3.5 shrink-0 text-primary" />
           <div className="flex-1 overflow-hidden">
             {activeBanners.length > 0 ? (
               <div className="flex gap-8 animate-pulse">
@@ -111,7 +111,7 @@ export default function BannerManagement() {
                 ))}
               </div>
             ) : (
-              <span className="text-teal-300/50">No active announcements</span>
+              <span className="text-primary/90/50">No active announcements</span>
             )}
           </div>
         </div>
@@ -124,11 +124,11 @@ export default function BannerManagement() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-1">
                   <Megaphone className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span className="text-sm font-semibold text-slate-200">{banner.title}</span>
+                  <span className="text-sm font-semibold text-foreground">{banner.title}</span>
                   <Badge variant={banner.active ? 'success' : 'default'}>{banner.active ? 'Active' : 'Inactive'}</Badge>
-                  <span className="font-mono text-xs text-teal-400">{banner.id}</span>
+                  <span className="font-mono text-xs text-primary">{banner.id}</span>
                 </div>
-                <p className="text-sm text-slate-400 pl-7">{banner.message}</p>
+                <p className="text-sm text-muted-foreground pl-7">{banner.message}</p>
                 <div className="flex gap-4 text-xs text-slate-600 mt-1 pl-7">
                   <span>From: {banner.validFrom}</span>
                   {banner.validTo && <span>To: {banner.validTo}</span>}
@@ -139,7 +139,7 @@ export default function BannerManagement() {
                 {banner.link ? (
                   <button
                     onClick={() => navigate(banner.link!)}
-                    className="p-1.5 rounded-lg bg-slate-800/50 text-slate-400 hover:text-teal-300 transition-colors"
+                    className="p-1.5 rounded-lg bg-secondary/50 text-muted-foreground hover:text-primary/90 transition-colors"
                     title="Open banner link"
                   >
                     <Eye className="w-4 h-4" />
@@ -149,8 +149,8 @@ export default function BannerManagement() {
                   onClick={() => toggleActive(banner.id)}
                   className={`px-3 py-1 rounded-lg text-xs font-medium border transition-colors ${
                     banner.active
-                      ? 'bg-slate-800 border-slate-600 text-slate-400 hover:text-slate-200'
-                      : 'bg-teal-500/10 border-teal-500/30 text-teal-400 hover:bg-teal-500/20'
+                      ? 'bg-secondary border-slate-600 text-muted-foreground hover:text-foreground'
+                      : 'bg-teal-500/10 border-teal-500/30 text-primary hover:bg-teal-500/20'
                   }`}
                 >
                   {banner.active ? 'Deactivate' : 'Activate'}
@@ -165,7 +165,7 @@ export default function BannerManagement() {
                     setNewValidTo(banner.validTo);
                     setShowForm(true);
                   }}
-                  className="p-1.5 rounded-lg bg-slate-800/50 text-slate-400 hover:text-slate-200 transition-colors"
+                  className="p-1.5 rounded-lg bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <Edit3 className="w-4 h-4" />
                 </button>
@@ -186,19 +186,19 @@ export default function BannerManagement() {
           <GlassCard className="p-6 w-full max-w-md">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-white">{editBanner ? 'Edit Announcement' : 'New Announcement'}</h2>
-              <button onClick={resetForm} className="text-slate-500 hover:text-white">
+              <button onClick={resetForm} className="text-muted-foreground hover:text-white">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="text-xs text-slate-400 mb-1 block">Title</label>
+                <label className="text-xs text-muted-foreground mb-1 block">Title</label>
                 <Input className="w-full" placeholder="e.g. System Maintenance" value={newTitle} onChange={e => setNewTitle(e.target.value)} />
               </div>
               <div>
-                <label className="text-xs text-slate-400 mb-1 block">Message</label>
+                <label className="text-xs text-muted-foreground mb-1 block">Message</label>
                 <textarea
-                  className="w-full bg-slate-950/50 border border-teal-500/20 text-slate-200 text-sm rounded-xl px-4 py-2 focus:outline-none focus:border-teal-400/50 resize-none placeholder:text-slate-500"
+                  className="w-full bg-slate-950/50 border border-teal-500/20 text-foreground text-sm rounded-xl px-4 py-2 focus:outline-none focus:border-teal-400/50 resize-none placeholder:text-muted-foreground"
                   rows={3}
                   placeholder="Announcement message visible to all users..."
                   value={newMessage}
@@ -206,16 +206,16 @@ export default function BannerManagement() {
                 />
               </div>
               <div>
-                <label className="text-xs text-slate-400 mb-1 block">Optional Link</label>
+                <label className="text-xs text-muted-foreground mb-1 block">Optional Link</label>
                 <Input className="w-full" placeholder="e.g. /documents or /bom" value={newLink} onChange={e => setNewLink(e.target.value)} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs text-slate-400 mb-1 block">Valid From</label>
+                  <label className="text-xs text-muted-foreground mb-1 block">Valid From</label>
                   <DatePicker value={newValidFrom} onChange={setNewValidFrom} placeholder="From date" />
                 </div>
                 <div>
-                  <label className="text-xs text-slate-400 mb-1 block">Valid To</label>
+                  <label className="text-xs text-muted-foreground mb-1 block">Valid To</label>
                   <DatePicker value={newValidTo} onChange={setNewValidTo} placeholder="To date" />
                 </div>
               </div>

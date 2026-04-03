@@ -16,13 +16,13 @@ const typeIcon = (type: string) => {
   if (type === 'approval') return <CheckSquare className="w-4 h-4 text-amber-400" />;
   if (type === 'ocr') return <ServerCog className="w-4 h-4 text-blue-400" />;
   if (type === 'case') return <AlertCircle className="w-4 h-4 text-rose-400" />;
-  if (type === 'work') return <Briefcase className="w-4 h-4 text-teal-400" />;
+  if (type === 'work') return <Briefcase className="w-4 h-4 text-primary" />;
   if (type === 'design-change') return <AlertTriangle className="w-4 h-4 text-amber-300" />;
   if (type === 'dedup_review') return <AlertTriangle className="w-4 h-4 text-violet-300" />;
   if (type === 'indexing_failure') return <ServerCog className="w-4 h-4 text-rose-300" />;
   if (type === 'change_request') return <GitBranch className="w-4 h-4 text-cyan-300" />;
   if (type === 'change_notice') return <GitCommitHorizontal className="w-4 h-4 text-indigo-300" />;
-  return <Bell className="w-4 h-4 text-slate-400" />;
+  return <Bell className="w-4 h-4 text-muted-foreground" />;
 };
 
 export default function NotificationsPage() {
@@ -84,19 +84,19 @@ export default function NotificationsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <GlassCard className="p-4">
-          <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Open Items</p>
+          <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Open Items</p>
           <p className="mt-2 text-3xl font-bold text-white">{unreadCount}</p>
-          <p className="text-xs text-slate-400 mt-1">Items still requiring review or acknowledgement.</p>
+          <p className="text-xs text-muted-foreground mt-1">Items still requiring review or acknowledgement.</p>
         </GlassCard>
         <GlassCard className="p-4">
-          <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Document Change Reviews</p>
+          <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Document Change Reviews</p>
           <p className="mt-2 text-3xl font-bold text-amber-300">{documentChangeAlerts.length}</p>
-          <p className="text-xs text-slate-400 mt-1">Supervisor reviews waiting on approval or bypass.</p>
+          <p className="text-xs text-muted-foreground mt-1">Supervisor reviews waiting on approval or bypass.</p>
         </GlassCard>
         <GlassCard className="p-4">
-          <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Standard Alerts</p>
-          <p className="mt-2 text-3xl font-bold text-teal-300">{standardInboxItems.length}</p>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Standard Alerts</p>
+          <p className="mt-2 text-3xl font-bold text-primary/90">{standardInboxItems.length}</p>
+          <p className="text-xs text-muted-foreground mt-1">
             Workflow, OCR, deduplication, and indexing items from the {source === 'backend' ? 'backend inbox' : 'fallback queue'}.
           </p>
         </GlassCard>
@@ -107,7 +107,7 @@ export default function NotificationsPage() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-lg font-semibold text-white">Document Change Reviews</h2>
-              <p className="text-sm text-slate-400">Persistent supervisor alerts for linked PL documents.</p>
+              <p className="text-sm text-muted-foreground">Persistent supervisor alerts for linked PL documents.</p>
             </div>
           </div>
           <div className="space-y-3">
@@ -152,7 +152,7 @@ export default function NotificationsPage() {
       <GlassCard className="p-5">
         <div className="mb-4">
           <h2 className="text-lg font-semibold text-white">Notification Stream</h2>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted-foreground">
             Open the affected page directly from each alert, or act from here where the workflow supports it.
           </p>
         </div>
@@ -169,11 +169,11 @@ export default function NotificationsPage() {
                 <div className="mt-0.5 shrink-0">{typeIcon(notification.type)}</div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-slate-100">{notification.title}</span>
+                    <span className="text-sm font-semibold text-foreground">{notification.title}</span>
                     <span className="h-2 w-2 rounded-full bg-teal-400" />
                   </div>
-                  <p className="text-sm text-slate-300 mt-1">{notification.subtitle || 'Action required in the EDMS workflow queue.'}</p>
-                  <p className="text-[11px] text-slate-500 mt-2">{notification.created_at || 'Now'}</p>
+                  <p className="text-sm text-foreground/90 mt-1">{notification.subtitle || 'Action required in the EDMS workflow queue.'}</p>
+                  <p className="text-[11px] text-muted-foreground mt-2">{notification.created_at || 'Now'}</p>
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     {previewDocumentId && (
                       <Button
@@ -201,12 +201,12 @@ export default function NotificationsPage() {
                             Actions
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 border border-slate-700/60 bg-slate-950 text-slate-200">
+                        <DropdownMenuContent align="end" className="w-48 border border-border/60 bg-slate-950 text-foreground">
                           {notification.actions.map((action) => (
                             <DropdownMenuItem
                               key={action.key}
                               disabled={busyItemId === `${notification.id}:${action.key}`}
-                              className={`focus:bg-slate-800 ${action.variant === 'danger' ? 'text-rose-200 focus:text-rose-100' : ''}`}
+                              className={`focus:bg-secondary ${action.variant === 'danger' ? 'text-rose-200 focus:text-rose-100' : ''}`}
                               onSelect={() => void handleWorkflowAction(notification, action)}
                             >
                               {busyItemId === `${notification.id}:${action.key}` ? 'Working...' : action.label}
@@ -217,7 +217,7 @@ export default function NotificationsPage() {
                     )}
                   </div>
                 </div>
-                <ExternalLink className="w-4 h-4 shrink-0 text-slate-500 mt-1" />
+                <ExternalLink className="w-4 h-4 shrink-0 text-muted-foreground mt-1" />
               </div>
             </div>
               );

@@ -19,7 +19,7 @@ interface ToastProps extends ToastMessage {
 function getToastIcon(type: ToastType) {
   switch (type) {
     case 'success':
-      return <CheckCircle className="w-5 h-5 text-teal-400" />;
+      return <CheckCircle className="w-5 h-5 text-primary" />;
     case 'error':
       return <AlertCircle className="w-5 h-5 text-rose-400" />;
     case 'warning':

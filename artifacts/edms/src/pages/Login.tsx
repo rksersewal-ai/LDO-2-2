@@ -29,13 +29,13 @@ export default function Login() {
             <span className="text-white font-bold text-2xl">L2</span>
           </div>
           <h1 className="text-3xl font-bold text-white mb-1">LDO-2 EDMS</h1>
-          <p className="text-slate-400 text-sm">Enterprise Document Management System</p>
+          <p className="text-muted-foreground text-sm">Enterprise Document Management System</p>
         </div>
 
-        <div className="bg-slate-900/60 backdrop-blur-xl border border-teal-500/20 rounded-2xl p-8 shadow-2xl shadow-teal-950/50">
+        <div className="bg-card backdrop-blur-xl border border-teal-500/20 rounded-2xl p-8 shadow-2xl shadow-teal-950/50">
           <div className="flex items-center gap-2 mb-6">
-            <Shield className="w-5 h-5 text-teal-400" />
-            <h2 className="text-lg font-semibold text-slate-100">Secure Sign In</h2>
+            <Shield className="w-5 h-5 text-primary" />
+            <h2 className="text-lg font-semibold text-foreground">Secure Sign In</h2>
           </div>
 
           {sessionExpired && (
@@ -54,25 +54,25 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1.5">Username</label>
+              <label className="block text-sm font-medium text-muted-foreground mb-1.5">Username</label>
               <input
                 type="text"
                 value={username}
                 onChange={e => setUsername(e.target.value)}
-                className="w-full bg-slate-950/50 border border-teal-500/20 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-teal-400/50 focus:ring-1 focus:ring-teal-400/50 transition-all placeholder:text-slate-500"
+                className="w-full bg-slate-950/50 border border-teal-500/20 text-foreground text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-teal-400/50 focus:ring-1 focus:ring-teal-400/50 transition-all placeholder:text-muted-foreground"
                 placeholder="e.g. a.kowalski"
                 required
                 autoComplete="username"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1.5">Password</label>
+              <label className="block text-sm font-medium text-muted-foreground mb-1.5">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="w-full bg-slate-950/50 border border-teal-500/20 text-slate-200 text-sm rounded-xl px-4 py-3 pr-11 focus:outline-none focus:border-teal-400/50 focus:ring-1 focus:ring-teal-400/50 transition-all placeholder:text-slate-500"
+                  className="w-full bg-slate-950/50 border border-teal-500/20 text-foreground text-sm rounded-xl px-4 py-3 pr-11 focus:outline-none focus:border-teal-400/50 focus:ring-1 focus:ring-teal-400/50 transition-all placeholder:text-muted-foreground"
                   placeholder="••••••••"
                   required
                   autoComplete="current-password"
@@ -80,7 +80,7 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-300 transition-colors"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground/90 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -100,8 +100,8 @@ export default function Login() {
           </form>
         </div>
 
-        <div className="mt-6 p-4 bg-slate-900/30 border border-slate-800/50 rounded-xl">
-          <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-2">Demo Credentials</p>
+        <div className="mt-6 p-4 bg-card/30 border border-border/50 rounded-xl">
+          <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-2">Demo Credentials</p>
           <div className="space-y-1">
             {[
               { u: 'admin', p: 'admin123', r: 'Admin' },
@@ -112,9 +112,9 @@ export default function Login() {
               <button
                 key={c.u}
                 onClick={() => { setUsername(c.u); setPassword(c.p); clearError(); }}
-                className="w-full text-left text-xs text-slate-400 hover:text-teal-300 transition-colors px-2 py-1 rounded-lg hover:bg-slate-800/50"
+                className="w-full text-left text-xs text-muted-foreground hover:text-primary/90 transition-colors px-2 py-1 rounded-lg hover:bg-secondary/50"
               >
-                <span className="font-mono text-teal-400">{c.u}</span> / <span className="font-mono text-slate-500">{c.p}</span>
+                <span className="font-mono text-primary">{c.u}</span> / <span className="font-mono text-muted-foreground">{c.p}</span>
                 <span className="ml-2 text-slate-600">({c.r})</span>
               </button>
             ))}

@@ -184,8 +184,8 @@ export default function UserManagement() {
             { label: 'Engineers', value: users.filter((entry) => entry.role === 'engineer').length },
           ].map((stat) => (
             <GlassCard key={stat.label} className="px-4 py-3">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{stat.label}</p>
-              <p className={`mt-1 text-2xl font-bold ${stat.accent ? 'text-teal-300' : 'text-white'}`}>{stat.value}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">{stat.label}</p>
+              <p className={`mt-1 text-2xl font-bold ${stat.accent ? 'text-primary/90' : 'text-white'}`}>{stat.value}</p>
             </GlassCard>
           ))}
         </div>
@@ -193,7 +193,7 @@ export default function UserManagement() {
         <GlassCard className="p-4">
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative min-w-[260px] flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
@@ -211,7 +211,7 @@ export default function UserManagement() {
         </GlassCard>
 
         <GlassCard className="overflow-hidden">
-          <div className="grid grid-cols-[1.3fr_1.1fr_1fr_0.8fr_0.7fr_1fr] gap-4 border-b border-white/6 px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+          <div className="grid grid-cols-[1.3fr_1.1fr_1fr_0.8fr_0.7fr_1fr] gap-4 border-b border-white/6 px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             <span>User</span>
             <span>Role & Department</span>
             <span>Contact</span>
@@ -229,23 +229,23 @@ export default function UserManagement() {
                     </div>
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold text-white">{entry.name}</p>
-                      <p className="truncate text-xs font-mono text-teal-300">{entry.username} · {entry.employeeId ?? entry.id}</p>
+                      <p className="truncate text-xs font-mono text-primary/90">{entry.username} · {entry.employeeId ?? entry.id}</p>
                     </div>
                   </div>
                 </div>
                 <div className="min-w-0">
                   <Badge variant={roleVariant(entry.role)} className="mb-2 capitalize">{entry.role}</Badge>
-                  <p className="truncate text-sm text-slate-300">{entry.designation}</p>
-                  <p className="truncate text-xs text-slate-500">{entry.department}</p>
+                  <p className="truncate text-sm text-foreground/90">{entry.designation}</p>
+                  <p className="truncate text-xs text-muted-foreground">{entry.department}</p>
                 </div>
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2 text-sm text-slate-300"><Mail className="w-3.5 h-3.5 text-slate-500" /> {entry.email}</div>
-                  <div className="flex items-center gap-2 text-xs text-slate-500"><Phone className="w-3.5 h-3.5" /> {entry.phone ?? 'No phone set'}</div>
+                  <div className="flex items-center gap-2 text-sm text-foreground/90"><Mail className="w-3.5 h-3.5 text-muted-foreground" /> {entry.email}</div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground"><Phone className="w-3.5 h-3.5" /> {entry.phone ?? 'No phone set'}</div>
                 </div>
                 <div className="flex items-center">
                   <Badge variant={entry.isActive ? 'success' : 'default'}>{entry.isActive ? 'Active' : 'Inactive'}</Badge>
                 </div>
-                <div className="text-sm text-slate-400">
+                <div className="text-sm text-muted-foreground">
                   {formatDateTime(entry.lastLogin)}
                 </div>
                 <div className="flex items-center justify-end gap-2">
@@ -262,7 +262,7 @@ export default function UserManagement() {
               </div>
             ))}
             {filtered.length === 0 && (
-              <div className="px-5 py-12 text-center text-sm text-slate-500">
+              <div className="px-5 py-12 text-center text-sm text-muted-foreground">
                 No users match the current filters.
               </div>
             )}
@@ -271,28 +271,28 @@ export default function UserManagement() {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="border border-slate-700/60 bg-slate-950 text-slate-100 sm:max-w-[760px]">
+        <DialogContent className="border border-border/60 bg-slate-950 text-foreground sm:max-w-[760px]">
           <DialogHeader>
             <DialogTitle>{editingUser ? 'Update User' : 'Create User'}</DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogDescription className="text-muted-foreground">
               Maintain account identity, responsibility, and role scope for the EDMS workspace.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Full Name</label>
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Full Name</label>
               <Input value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Username</label>
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Username</label>
               <Input value={form.username} onChange={(event) => setForm((current) => ({ ...current, username: event.target.value }))} />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Email</label>
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Email</label>
               <Input value={form.email} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Role</label>
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Role</label>
               <Select value={form.role} onChange={(event) => setForm((current) => ({ ...current, role: event.target.value as UserRole }))}>
                 {UserService.getRoleOptions().map((role) => (
                   <option key={role} value={role}>{role}</option>
@@ -300,25 +300,25 @@ export default function UserManagement() {
               </Select>
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Designation</label>
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Designation</label>
               <Input value={form.designation} onChange={(event) => setForm((current) => ({ ...current, designation: event.target.value }))} />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Department</label>
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Department</label>
               <Input value={form.department} onChange={(event) => setForm((current) => ({ ...current, department: event.target.value }))} />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Phone</label>
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Phone</label>
               <Input value={form.phone} onChange={(event) => setForm((current) => ({ ...current, phone: event.target.value }))} />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Employee ID</label>
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Employee ID</label>
               <Input value={form.employeeId} onChange={(event) => setForm((current) => ({ ...current, employeeId: event.target.value }))} />
             </div>
-            <div className="md:col-span-2 flex items-center justify-between rounded-xl border border-white/6 bg-slate-900/40 px-4 py-3">
+            <div className="md:col-span-2 flex items-center justify-between rounded-xl border border-white/6 bg-card/40 px-4 py-3">
               <div>
-                <p className="text-sm font-medium text-slate-100">Account Active</p>
-                <p className="text-xs text-slate-500">Inactive users remain visible in history but lose operational access.</p>
+                <p className="text-sm font-medium text-foreground">Account Active</p>
+                <p className="text-xs text-muted-foreground">Inactive users remain visible in history but lose operational access.</p>
               </div>
               <Switch checked={form.isActive} onCheckedChange={(checked) => setForm((current) => ({ ...current, isActive: checked }))} />
             </div>
@@ -333,14 +333,14 @@ export default function UserManagement() {
       </Dialog>
 
       <Dialog open={Boolean(pendingDelete)} onOpenChange={(open) => !open && setPendingDelete(null)}>
-        <DialogContent className="border border-rose-500/25 bg-slate-950 text-slate-100 sm:max-w-[460px]">
+        <DialogContent className="border border-rose-500/25 bg-slate-950 text-foreground sm:max-w-[460px]">
           <DialogHeader>
             <DialogTitle>Remove User</DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogDescription className="text-muted-foreground">
               This removes the user from the local admin directory used by the current frontend workspace.
             </DialogDescription>
           </DialogHeader>
-          <div className="rounded-xl border border-white/6 bg-slate-900/40 px-4 py-3 text-sm text-slate-300">
+          <div className="rounded-xl border border-white/6 bg-card/40 px-4 py-3 text-sm text-foreground/90">
             {pendingDelete ? (
               <span>Remove <strong className="text-white">{pendingDelete.name}</strong> from the user registry?</span>
             ) : null}

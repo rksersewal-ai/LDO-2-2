@@ -120,7 +120,7 @@ export function DatePicker({
   return (
     <div className={`relative ${className}`} ref={containerRef}>
       {label && (
-        <label className="text-xs font-medium text-slate-400 mb-1.5 block">
+        <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
           {label}
           {required && <span className="ml-1 text-rose-400">*</span>}
         </label>
@@ -133,19 +133,19 @@ export function DatePicker({
         aria-haspopup="dialog"
         className={`w-full flex items-center gap-2 rounded-xl border px-4 py-2.5 text-left text-sm tabular-nums transition-all ${
           disabled
-            ? 'bg-slate-900/30 border-slate-800/50 text-slate-600 cursor-not-allowed'
+            ? 'bg-card/30 border-border/50 text-slate-600 cursor-not-allowed'
             : open
-              ? 'bg-slate-950/90 border-teal-400/60 ring-1 ring-teal-400/30 shadow-[0_18px_40px_rgba(13,148,136,0.16)] text-slate-100'
-              : 'bg-slate-950/65 border-slate-700/60 text-slate-200 hover:border-teal-400/35 hover:bg-slate-950/80'
+              ? 'bg-slate-950/90 border-teal-400/60 ring-1 ring-teal-400/30 shadow-[0_18px_40px_rgba(13,148,136,0.16)] text-foreground'
+              : 'bg-slate-950/65 border-border/60 text-foreground hover:border-teal-400/35 hover:bg-slate-950/80'
         }`}
       >
-        <Calendar className={`w-4 h-4 shrink-0 ${value ? 'text-teal-300' : 'text-slate-500'}`} />
-        <span className={`flex-1 ${value ? 'text-slate-200' : 'text-slate-500'}`}>
+        <Calendar className={`w-4 h-4 shrink-0 ${value ? 'text-primary/90' : 'text-muted-foreground'}`} />
+        <span className={`flex-1 ${value ? 'text-foreground' : 'text-muted-foreground'}`}>
           {value ? formatDisplay(value) : placeholder}
         </span>
         {value && !disabled && (
           <X
-            className="w-3.5 h-3.5 shrink-0 text-slate-500 transition-colors hover:text-rose-400"
+            className="w-3.5 h-3.5 shrink-0 text-muted-foreground transition-colors hover:text-rose-400"
             onClick={e => { e.stopPropagation(); onChange(''); setOpen(false); }}
           />
         )}
@@ -158,43 +158,43 @@ export function DatePicker({
           className="absolute left-0 top-full z-[9999] mt-2 w-72 overflow-hidden rounded-2xl border border-teal-400/20 bg-[linear-gradient(180deg,rgba(5,12,20,0.98),rgba(9,19,30,0.96))] backdrop-blur-2xl shadow-[0_28px_90px_rgba(2,8,23,0.72)]"
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-white/5 bg-gradient-to-r from-slate-950/40 via-slate-900/20 to-teal-500/5 px-4 py-3">
+          <div className="flex items-center justify-between border-b border-border bg-gradient-to-r from-slate-950/40 via-slate-900/20 to-teal-500/5 px-4 py-3">
             {view === 'day' && (
               <>
-                <button onClick={prevMonth} className="rounded-lg p-1.5 text-slate-400 transition-all hover:bg-slate-800/70 hover:text-teal-300">
+                <button onClick={prevMonth} className="rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-secondary/70 hover:text-primary/90">
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => setView('month')}
-                    className="rounded-lg px-2 py-1 text-sm font-semibold text-slate-100 transition-colors hover:bg-slate-800/70 hover:text-teal-200"
+                    className="rounded-lg px-2 py-1 text-sm font-semibold text-foreground transition-colors hover:bg-secondary/70 hover:text-teal-200"
                   >
                     {MONTHS[month]}
                   </button>
                   <button
                     onClick={() => setView('year')}
-                    className="rounded-lg px-2 py-1 text-sm font-semibold text-slate-100 transition-colors hover:bg-slate-800/70 hover:text-teal-200"
+                    className="rounded-lg px-2 py-1 text-sm font-semibold text-foreground transition-colors hover:bg-secondary/70 hover:text-teal-200"
                   >
                     {year}
                   </button>
                 </div>
-                <button onClick={nextMonth} className="rounded-lg p-1.5 text-slate-400 transition-all hover:bg-slate-800/70 hover:text-teal-300">
+                <button onClick={nextMonth} className="rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-secondary/70 hover:text-primary/90">
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </>
             )}
             {view === 'month' && (
               <>
-                <button onClick={prevYear} className="rounded-lg p-1.5 text-slate-400 transition-all hover:bg-slate-800/70 hover:text-teal-300"><ChevronLeft className="w-4 h-4" /></button>
-                <button onClick={() => setView('year')} className="rounded-lg px-2 py-1 text-sm font-semibold text-slate-100 transition-colors hover:bg-slate-800/70 hover:text-teal-200">{year}</button>
-                <button onClick={nextYear} className="rounded-lg p-1.5 text-slate-400 transition-all hover:bg-slate-800/70 hover:text-teal-300"><ChevronRight className="w-4 h-4" /></button>
+                <button onClick={prevYear} className="rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-secondary/70 hover:text-primary/90"><ChevronLeft className="w-4 h-4" /></button>
+                <button onClick={() => setView('year')} className="rounded-lg px-2 py-1 text-sm font-semibold text-foreground transition-colors hover:bg-secondary/70 hover:text-teal-200">{year}</button>
+                <button onClick={nextYear} className="rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-secondary/70 hover:text-primary/90"><ChevronRight className="w-4 h-4" /></button>
               </>
             )}
             {view === 'year' && (
               <>
-                <button onClick={() => setViewDate(new Date(year - 12, month, 1))} className="rounded-lg p-1.5 text-slate-400 transition-all hover:bg-slate-800/70 hover:text-teal-300"><ChevronLeft className="w-4 h-4" /></button>
-                <span className="text-sm font-semibold text-slate-100">{yearRange[0]} – {yearRange[11]}</span>
-                <button onClick={() => setViewDate(new Date(year + 12, month, 1))} className="rounded-lg p-1.5 text-slate-400 transition-all hover:bg-slate-800/70 hover:text-teal-300"><ChevronRight className="w-4 h-4" /></button>
+                <button onClick={() => setViewDate(new Date(year - 12, month, 1))} className="rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-secondary/70 hover:text-primary/90"><ChevronLeft className="w-4 h-4" /></button>
+                <span className="text-sm font-semibold text-foreground">{yearRange[0]} – {yearRange[11]}</span>
+                <button onClick={() => setViewDate(new Date(year + 12, month, 1))} className="rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-secondary/70 hover:text-primary/90"><ChevronRight className="w-4 h-4" /></button>
               </>
             )}
           </div>
@@ -202,10 +202,10 @@ export function DatePicker({
           {/* Day view */}
           {view === 'day' && (
             <div className="p-3.5">
-              <div className="mb-2 flex items-center justify-between rounded-xl border border-white/5 bg-slate-950/40 px-3 py-2">
+              <div className="mb-2 flex items-center justify-between rounded-xl border border-border bg-slate-950/40 px-3 py-2">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">Selected</p>
-                  <p className="mt-0.5 text-sm font-semibold text-slate-100">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Selected</p>
+                  <p className="mt-0.5 text-sm font-semibold text-foreground">
                     {value ? formatDisplay(value) : 'No date selected'}
                   </p>
                 </div>
@@ -215,7 +215,7 @@ export function DatePicker({
               </div>
               <div className="mb-1 grid grid-cols-7">
                 {DAYS.map(d => (
-                  <div key={d} className="py-1 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">{d}</div>
+                  <div key={d} className="py-1 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{d}</div>
                 ))}
               </div>
               <div className="grid grid-cols-7 gap-1">
@@ -235,10 +235,10 @@ export function DatePicker({
                         isSel
                           ? 'bg-gradient-to-br from-teal-500 to-emerald-500 text-white shadow-[0_10px_24px_rgba(20,184,166,0.35)]'
                           : isToday
-                            ? 'border border-teal-400/40 bg-slate-800/85 text-teal-200'
+                            ? 'border border-teal-400/40 bg-secondary/85 text-teal-200'
                             : isOff
                               ? 'text-slate-700 cursor-not-allowed'
-                              : 'text-slate-300 hover:bg-slate-800/85 hover:text-teal-200'
+                              : 'text-foreground/90 hover:bg-secondary/85 hover:text-teal-200'
                       }`}
                     >
                       {day}
@@ -246,7 +246,7 @@ export function DatePicker({
                   );
                 })}
               </div>
-              <div className="mt-3 flex items-center justify-between border-t border-white/5 pt-3">
+              <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
                 <button
                   onClick={() => {
                     const t = new Date();
@@ -259,7 +259,7 @@ export function DatePicker({
                 </button>
                 <button
                   onClick={() => { onChange(''); setOpen(false); }}
-                  className="rounded-full border border-slate-700/70 bg-slate-900/70 px-3 py-1.5 text-xs font-semibold text-slate-400 transition-colors hover:border-rose-400/30 hover:text-rose-300"
+                  className="rounded-full border border-border/70 bg-card/70 px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-rose-400/30 hover:text-rose-300"
                 >
                   Clear
                 </button>
@@ -275,7 +275,7 @@ export function DatePicker({
                   key={m}
                   onClick={() => { setViewDate(new Date(year, i, 1)); setView('day'); }}
                   className={`rounded-xl py-2.5 text-xs font-semibold transition-all ${
-                    i === month ? 'bg-gradient-to-br from-teal-500 to-emerald-500 text-white shadow-[0_8px_20px_rgba(20,184,166,0.28)]' : 'text-slate-300 hover:bg-slate-800/85 hover:text-teal-200'
+                    i === month ? 'bg-gradient-to-br from-teal-500 to-emerald-500 text-white shadow-[0_8px_20px_rgba(20,184,166,0.28)]' : 'text-foreground/90 hover:bg-secondary/85 hover:text-teal-200'
                   }`}
                 >
                   {m.slice(0, 3)}
@@ -292,7 +292,7 @@ export function DatePicker({
                   key={y}
                   onClick={() => { setViewDate(new Date(y, month, 1)); setView('month'); }}
                   className={`rounded-xl py-2.5 text-xs font-semibold tabular-nums transition-all ${
-                    y === year ? 'bg-gradient-to-br from-teal-500 to-emerald-500 text-white shadow-[0_8px_20px_rgba(20,184,166,0.28)]' : 'text-slate-300 hover:bg-slate-800/85 hover:text-teal-200'
+                    y === year ? 'bg-gradient-to-br from-teal-500 to-emerald-500 text-white shadow-[0_8px_20px_rgba(20,184,166,0.28)]' : 'text-foreground/90 hover:bg-secondary/85 hover:text-teal-200'
                   }`}
                 >
                   {y}

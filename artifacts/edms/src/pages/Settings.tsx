@@ -117,7 +117,7 @@ export default function Settings() {
       <div className="flex items-end justify-between gap-3">
         <div>
           <h1 className="text-3xl font-bold text-white mb-2">Settings</h1>
-          <p className="text-slate-400 text-sm">System configuration and workspace preferences.</p>
+          <p className="text-muted-foreground text-sm">System configuration and workspace preferences.</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="secondary" onClick={handleReset}>
@@ -138,12 +138,12 @@ export default function Settings() {
                 onClick={() => setActiveGroup(group.label)}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-colors text-left ${
                   activeGroup === group.label
-                    ? 'bg-teal-500/15 text-teal-300 border border-teal-500/25'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                    ? 'bg-teal-500/15 text-primary/90 border border-teal-500/25'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                 }`}
               >
                 <span className="font-medium">{group.label}</span>
-                <ChevronRight className={`w-4 h-4 transition-transform ${activeGroup === group.label ? 'text-teal-400 rotate-90' : ''}`} />
+                <ChevronRight className={`w-4 h-4 transition-transform ${activeGroup === group.label ? 'text-primary rotate-90' : ''}`} />
               </button>
             ))}
           </nav>
@@ -152,16 +152,16 @@ export default function Settings() {
         <div className="lg:col-span-3">
           <GlassCard className="p-6">
             <h2 className="text-lg font-bold text-white mb-5 flex items-center gap-2">
-              <SettingsIcon className="w-5 h-5 text-teal-400" />{activeGroup}
+              <SettingsIcon className="w-5 h-5 text-primary" />{activeGroup}
             </h2>
             <div className="space-y-5">
               {currentGroup?.settings.map((setting) => {
                 const settingKey = setting.key as SettingsKey;
                 const settingValue = values[settingKey];
                 return (
-                  <div key={setting.key} className="flex items-center justify-between gap-4 py-3 border-b border-slate-800/50 last:border-0">
+                  <div key={setting.key} className="flex items-center justify-between gap-4 py-3 border-b border-border/50 last:border-0">
                     <div className="max-w-md">
-                      <p className="text-sm font-medium text-slate-200">{setting.label}</p>
+                      <p className="text-sm font-medium text-foreground">{setting.label}</p>
                     </div>
                     <div className="min-w-[180px]">
                       {setting.type === 'toggle' && (
@@ -175,7 +175,7 @@ export default function Settings() {
                       )}
                       {setting.type === 'select' && (
                         <select
-                          className="bg-slate-950/50 border border-teal-500/20 text-slate-200 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:border-teal-500/40 w-full"
+                          className="bg-slate-950/50 border border-teal-500/20 text-foreground text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:border-teal-500/40 w-full"
                           value={String(settingValue)}
                           onChange={(event) => setValue(settingKey, event.target.value)}
                         >

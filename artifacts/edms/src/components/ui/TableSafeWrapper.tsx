@@ -64,11 +64,11 @@ export function TableSafeWrapper({
         ) : itemCount === 0 ? (
           <div className="h-full flex items-center justify-center">
             <div className="text-center">
-              <p className="text-sm text-slate-500 mb-3">{emptyMessage}</p>
+              <p className="text-sm text-muted-foreground mb-3">{emptyMessage}</p>
               {onRetry && (
                 <button
                   onClick={onRetry}
-                  className="text-xs text-teal-400 hover:text-teal-300 transition-colors"
+                  className="text-xs text-primary hover:text-primary/90 transition-colors"
                 >
                   Try again
                 </button>

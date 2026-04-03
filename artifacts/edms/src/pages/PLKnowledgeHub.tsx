@@ -37,7 +37,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   'CAT-A': 'bg-rose-500/10 text-rose-300 border-rose-500/30',
   'CAT-B': 'bg-amber-500/10 text-amber-300 border-amber-500/30',
   'CAT-C': 'bg-blue-500/10 text-blue-300 border-blue-500/30',
-  'CAT-D': 'bg-slate-700/50 text-slate-400 border-slate-600/40',
+  'CAT-D': 'bg-slate-700/50 text-muted-foreground border-slate-600/40',
 };
 
 type SortKey = 'plNumber' | 'name' | 'category' | 'controllingAgency' | 'status' | 'docs' | 'ecs' | 'works';
@@ -106,7 +106,7 @@ const DOC_STATUS_VARIANT: Record<string, 'success' | 'warning' | 'default' | 'da
 function PlModalField({ label, error, children }: { label: string; error?: string; children: ReactNode }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-slate-400 mb-1.5">{label}</label>
+      <label className="block text-xs font-medium text-muted-foreground mb-1.5">{label}</label>
       {children}
       {error && <p className="text-[10px] text-rose-400 mt-1">{error}</p>}
     </div>
@@ -115,7 +115,7 @@ function PlModalField({ label, error, children }: { label: string; error?: strin
 
 function PlModalSectionHeading({ title }: { title: string }) {
   return (
-    <p className="text-[10px] uppercase tracking-widest font-semibold text-teal-500 mb-3 pt-1 border-t border-slate-700/40">
+    <p className="text-[10px] uppercase tracking-widest font-semibold text-primary mb-3 pt-1 border-t border-border/40">
       {title}
     </p>
   );
@@ -124,8 +124,8 @@ function PlModalSectionHeading({ title }: { title: string }) {
 function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey | null; sortDir: 'asc' | 'desc' }) {
   if (sortKey !== col) return <ChevronsUpDown className="w-3 h-3 text-slate-600 ml-0.5 shrink-0" />;
   return sortDir === 'asc'
-    ? <ChevronUp className="w-3 h-3 text-teal-400 ml-0.5 shrink-0" />
-    : <ChevronDown className="w-3 h-3 text-teal-400 ml-0.5 shrink-0" />;
+    ? <ChevronUp className="w-3 h-3 text-primary ml-0.5 shrink-0" />
+    : <ChevronDown className="w-3 h-3 text-primary ml-0.5 shrink-0" />;
 }
 
 function LinkDocumentsModal({
@@ -167,11 +167,11 @@ function LinkDocumentsModal({
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-lg font-bold text-white">Link Documents</h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              <span className="font-mono text-teal-400">{pl.plNumber}</span> — {pl.name}
+            <p className="text-xs text-muted-foreground mt-0.5">
+              <span className="font-mono text-primary">{pl.plNumber}</span> — {pl.name}
             </p>
           </div>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-300 hover:bg-slate-700/50 transition-colors">
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground/90 hover:bg-slate-700/50 transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -181,10 +181,10 @@ function LinkDocumentsModal({
             {linked.map(id => {
               const doc = documents.find(d => d.id === id);
               return doc ? (
-                <span key={id} className="inline-flex items-center gap-1 px-2 py-0.5 bg-teal-500/10 border border-teal-500/30 rounded-full text-xs text-teal-300">
+                <span key={id} className="inline-flex items-center gap-1 px-2 py-0.5 bg-teal-500/10 border border-teal-500/30 rounded-full text-xs text-primary/90">
                   <FileText className="w-3 h-3" />
                   {doc.id}
-                  <button onClick={() => toggle(id)} className="ml-0.5 text-slate-500 hover:text-rose-400 transition-colors">
+                  <button onClick={() => toggle(id)} className="ml-0.5 text-muted-foreground hover:text-rose-400 transition-colors">
                     <X className="w-3 h-3" />
                   </button>
                 </span>
@@ -194,7 +194,7 @@ function LinkDocumentsModal({
         )}
 
         <div className="relative mb-3">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Search documents by ID, name or category..."
             className="pl-10 w-full"
@@ -205,7 +205,7 @@ function LinkDocumentsModal({
 
         <div className="flex-1 overflow-y-auto space-y-1.5 min-h-0 pr-0.5 custom-scrollbar">
           {documentsLoading && (
-            <div className="text-center py-6 text-slate-500 text-sm">Loading documents...</div>
+            <div className="text-center py-6 text-muted-foreground text-sm">Loading documents...</div>
           )}
           {filtered.map(doc => {
             const isLinked = linked.includes(doc.id);
@@ -214,33 +214,33 @@ function LinkDocumentsModal({
                 key={doc.id}
                 data-document-id={doc.id}
                 data-document-title={doc.name}
-                className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${isLinked ? 'bg-teal-900/20 border-teal-500/30' : 'bg-slate-800/30 border-slate-700/40 hover:border-slate-600/60'}`}
+                className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${isLinked ? 'bg-teal-900/20 border-teal-500/30' : 'bg-secondary/30 border-border/40 hover:border-slate-600/60'}`}
                 onClick={() => toggle(doc.id)}
               >
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${isLinked ? 'bg-teal-500/20' : 'bg-slate-700/40'}`}>
-                  <FileText className={`w-4 h-4 ${isLinked ? 'text-teal-400' : 'text-slate-500'}`} />
+                  <FileText className={`w-4 h-4 ${isLinked ? 'text-primary' : 'text-muted-foreground'}`} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-mono text-xs text-slate-400">{doc.id}</span>
+                    <span className="font-mono text-xs text-muted-foreground">{doc.id}</span>
                     <Badge variant={DOC_STATUS_VARIANT[doc.status] ?? 'default'} className="text-[9px]">{doc.status}</Badge>
                   </div>
-                  <p className="text-sm text-slate-200 truncate">{doc.name}</p>
-                  <p className="text-[10px] text-slate-500">{doc.category} · Rev {doc.revision} · {doc.size}</p>
+                  <p className="text-sm text-foreground truncate">{doc.name}</p>
+                  <p className="text-[10px] text-muted-foreground">{doc.category} · Rev {doc.revision} · {doc.size}</p>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
                   {isLinked ? (
-                    <span className="flex items-center gap-1 text-[10px] text-teal-400 font-medium">
+                    <span className="flex items-center gap-1 text-[10px] text-primary font-medium">
                       <LinkIcon className="w-3 h-3" /> Linked
                     </span>
                   ) : (
-                    <span className="flex items-center gap-1 text-[10px] text-slate-500">
+                    <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
                       <FilePlus className="w-3 h-3" /> Link
                     </span>
                   )}
                   <button
                     onClick={e => { e.stopPropagation(); navigate(resolveDocumentPreviewPath(doc.id)); }}
-                    className="w-6 h-6 rounded-lg flex items-center justify-center text-slate-500 hover:text-teal-400 hover:bg-slate-700/50 transition-colors"
+                    className="w-6 h-6 rounded-lg flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-slate-700/50 transition-colors"
                     title="Open preview"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
@@ -250,12 +250,12 @@ function LinkDocumentsModal({
             );
           })}
           {filtered.length === 0 && (
-            <div className="text-center py-10 text-slate-500 text-sm">No documents match your search</div>
+            <div className="text-center py-10 text-muted-foreground text-sm">No documents match your search</div>
           )}
         </div>
 
-        <div className="flex gap-3 mt-4 pt-4 border-t border-slate-700/50 shrink-0">
-          <div className="flex-1 text-xs text-slate-500 self-center">
+        <div className="flex gap-3 mt-4 pt-4 border-t border-border shrink-0">
+          <div className="flex-1 text-xs text-muted-foreground self-center">
             {linked.length} document{linked.length !== 1 ? 's' : ''} linked
           </div>
           <Button variant="secondary" onClick={onClose}>Cancel</Button>
@@ -299,18 +299,18 @@ function CreatePLModal({
     finally { setSaving(false); }
   };
 
-  const ta = `w-full bg-slate-950/60 border border-slate-700/50 text-slate-200 text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/30 transition-all placeholder:text-slate-600 resize-none`;
+  const ta = `w-full bg-slate-950/60 border border-border text-foreground text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/30 transition-all placeholder:text-slate-600 resize-none`;
 
   return (
     <>
       <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-xl bg-slate-900/98 backdrop-blur-xl border-l border-white/8 shadow-2xl flex flex-col slide-in-right">
+      <div className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-xl bg-card/98 backdrop-blur-xl border-l border-white/8 shadow-2xl flex flex-col slide-in-right">
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/8 shrink-0">
           <div>
             <h2 className="text-base font-bold text-white">Create New PL Record</h2>
-            <p className="text-slate-500 text-xs mt-0.5">Register a new 8-digit PL Number in the knowledge base</p>
+            <p className="text-muted-foreground text-xs mt-0.5">Register a new 8-digit PL Number in the knowledge base</p>
           </div>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-200 hover:bg-slate-800/60 transition-all">
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -381,10 +381,10 @@ function CreatePLModal({
 
           {/* Safety */}
           <PlModalSectionHeading title="Safety" />
-          <div className="flex items-center justify-between p-3 rounded-xl bg-slate-800/40 border border-slate-700/30">
+          <div className="flex items-center justify-between p-3 rounded-xl bg-secondary/40 border border-border/30">
             <div>
-              <p className="text-sm font-medium text-slate-200">Safety Vital Component</p>
-              <p className="text-xs text-slate-500">Triggers additional oversight requirements</p>
+              <p className="text-sm font-medium text-foreground">Safety Vital Component</p>
+              <p className="text-xs text-muted-foreground">Triggers additional oversight requirements</p>
             </div>
             <Switch
               checked={form.safetyCritical}
@@ -611,10 +611,10 @@ export default function PLKnowledgeHub() {
 
   const ThCol = ({ col, label, className = '' }: { col: SortKey; label: string; className?: string }) => (
     <th
-      className={`pb-3 text-left font-semibold text-slate-400 text-xs cursor-pointer select-none group ${className}`}
+      className={`pb-3 text-left font-semibold text-muted-foreground text-xs cursor-pointer select-none group ${className}`}
       onClick={() => handleSort(col)}
     >
-      <span className="inline-flex items-center gap-0.5 hover:text-slate-200 transition-colors">
+      <span className="inline-flex items-center gap-0.5 hover:text-foreground transition-colors">
         {label}
         <SortIcon col={col} sortKey={sortKey} sortDir={sortDir} />
       </span>
@@ -626,7 +626,7 @@ export default function PLKnowledgeHub() {
       <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-white mb-1">PL Knowledge Hub</h1>
-          <p className="text-slate-400 text-sm">Central repository for all parts and components — identified by 8-digit PL numbers.</p>
+          <p className="text-muted-foreground text-sm">Central repository for all parts and components — identified by 8-digit PL numbers.</p>
         </div>
         <Button onClick={() => setShowCreateModal(true)}>
           <Plus className="w-4 h-4" /> Create PL Record
@@ -635,16 +635,16 @@ export default function PLKnowledgeHub() {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Total PL Items', value: stats.total, icon: <DatabaseBackup className="w-4 h-4 text-teal-400" /> },
+          { label: 'Total PL Items', value: stats.total, icon: <DatabaseBackup className="w-4 h-4 text-primary" /> },
           { label: 'Active', value: stats.active, icon: <CheckCircle className="w-4 h-4 text-emerald-400" /> },
           { label: 'Safety Vital', value: stats.safetyVital, icon: <Shield className="w-4 h-4 text-rose-400" /> },
           { label: 'Under Review', value: stats.underReview, icon: <Clock className="w-4 h-4 text-amber-400" /> },
         ].map(s => (
           <GlassCard key={s.label} className="px-4 py-3 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-slate-800/60 flex items-center justify-center shrink-0">{s.icon}</div>
+            <div className="w-8 h-8 rounded-lg bg-secondary/60 flex items-center justify-center shrink-0">{s.icon}</div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">{s.label}</p>
-              <p className="text-xl font-bold text-slate-100">{s.value}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{s.label}</p>
+              <p className="text-xl font-bold text-foreground">{s.value}</p>
             </div>
           </GlassCard>
         ))}
@@ -653,7 +653,7 @@ export default function PLKnowledgeHub() {
       <GlassCard className="p-6">
         {/* Search */}
         <div className="relative mb-4">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Search PL records by number, name, or drawing..."
             className="pl-11 w-full"
@@ -665,7 +665,7 @@ export default function PLKnowledgeHub() {
         {/* Filter pills — always visible */}
         <div className="space-y-2 mb-4">
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-500 w-16 shrink-0">Status</span>
+            <span className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground w-16 shrink-0">Status</span>
             {['ALL', 'ACTIVE', 'UNDER_REVIEW', 'OBSOLETE'].map(s => (
               <button
                 key={s}
@@ -677,7 +677,7 @@ export default function PLKnowledgeHub() {
             ))}
           </div>
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-500 w-16 shrink-0">Category</span>
+            <span className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground w-16 shrink-0">Category</span>
             {['ALL', 'CAT-A', 'CAT-B', 'CAT-C', 'CAT-D'].map(c => (
               <button
                 key={c}
@@ -689,7 +689,7 @@ export default function PLKnowledgeHub() {
             ))}
           </div>
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-500 w-16 shrink-0">Safety</span>
+            <span className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground w-16 shrink-0">Safety</span>
             {[['ALL', 'All'], ['SAFETY', 'Safety Vital'], ['NON_SAFETY', 'Standard']].map(([v, l]) => (
               <button
                 key={v}
@@ -702,7 +702,7 @@ export default function PLKnowledgeHub() {
             {activeFilters > 0 && (
               <button
                 onClick={() => { setStatusFilter('ALL'); setCategoryFilter('ALL'); setSafetyFilter('ALL'); }}
-                className="text-xs text-slate-500 hover:text-teal-400 underline transition-colors ml-1"
+                className="text-xs text-muted-foreground hover:text-primary underline transition-colors ml-1"
               >
                 Clear all
               </button>
@@ -710,9 +710,9 @@ export default function PLKnowledgeHub() {
           </div>
         </div>
 
-        <div className="text-xs text-slate-500 mb-4 font-medium">
-          Showing <span className="text-teal-400 font-semibold">{filtered.length}</span> of {plItems.length} PL records
-          {search && <span className="text-slate-500"> matching "<span className="text-slate-300">{search}</span>"</span>}
+        <div className="text-xs text-muted-foreground mb-4 font-medium">
+          Showing <span className="text-primary font-semibold">{filtered.length}</span> of {plItems.length} PL records
+          {search && <span className="text-muted-foreground"> matching "<span className="text-foreground/90">{search}</span>"</span>}
         </div>
 
         {/* Sortable Table */}
@@ -723,7 +723,7 @@ export default function PLKnowledgeHub() {
                 <ThCol col="plNumber" label="PL Number" className="pl-3 w-36" />
                 <ThCol col="name" label="Name" />
                 <ThCol col="category" label="CAT" className="w-20" />
-                <th className="pb-3 text-left font-semibold text-slate-400 text-xs w-10">
+                <th className="pb-3 text-left font-semibold text-muted-foreground text-xs w-10">
                   <Shield className="w-3.5 h-3.5" />
                 </th>
                 <ThCol col="controllingAgency" label="Agency" className="w-24" />
@@ -741,66 +741,66 @@ export default function PLKnowledgeHub() {
                   className="group cursor-pointer"
                   onClick={() => navigate(`/pl/${pl.plNumber}`)}
                 >
-                  <td className="py-2.5 pl-3 pr-2 rounded-l-xl bg-slate-800/30 group-hover:bg-slate-800/50 border-y border-l border-slate-700/30 group-hover:border-teal-500/20 transition-all">
-                    <span className="font-mono text-xs text-teal-400 flex items-center gap-1">
+                  <td className="py-2.5 pl-3 pr-2 rounded-l-xl bg-secondary/30 group-hover:bg-secondary/50 border-y border-l border-border/30 group-hover:border-teal-500/20 transition-all">
+                    <span className="font-mono text-xs text-primary flex items-center gap-1">
                       <Hash className="w-3 h-3 shrink-0" />{pl.plNumber}
                     </span>
                   </td>
-                  <td className="py-2.5 px-2 bg-slate-800/30 group-hover:bg-slate-800/50 border-y border-slate-700/30 group-hover:border-teal-500/20 transition-all max-w-[220px]">
-                    <p className="text-sm font-medium text-slate-200 group-hover:text-teal-200 transition-colors truncate">{pl.name}</p>
+                  <td className="py-2.5 px-2 bg-secondary/30 group-hover:bg-secondary/50 border-y border-border/30 group-hover:border-teal-500/20 transition-all max-w-[220px]">
+                    <p className="text-sm font-medium text-foreground group-hover:text-teal-200 transition-colors truncate">{pl.name}</p>
                     {pl.description && <p className="text-[10px] text-slate-600 truncate">{pl.description}</p>}
                   </td>
-                  <td className="py-2.5 px-2 bg-slate-800/30 group-hover:bg-slate-800/50 border-y border-slate-700/30 group-hover:border-teal-500/20 transition-all">
-                    <span className={`px-1.5 py-0.5 rounded border text-[10px] font-semibold ${CATEGORY_COLORS[pl.category] ?? 'bg-slate-700/50 text-slate-400 border-slate-600'}`}>
+                  <td className="py-2.5 px-2 bg-secondary/30 group-hover:bg-secondary/50 border-y border-border/30 group-hover:border-teal-500/20 transition-all">
+                    <span className={`px-1.5 py-0.5 rounded border text-[10px] font-semibold ${CATEGORY_COLORS[pl.category] ?? 'bg-slate-700/50 text-muted-foreground border-slate-600'}`}>
                       {pl.category}
                     </span>
                   </td>
-                  <td className="py-2.5 px-2 bg-slate-800/30 group-hover:bg-slate-800/50 border-y border-slate-700/30 group-hover:border-teal-500/20 transition-all">
+                  <td className="py-2.5 px-2 bg-secondary/30 group-hover:bg-secondary/50 border-y border-border/30 group-hover:border-teal-500/20 transition-all">
                     {pl.safetyCritical && (
                       <span title="Safety Vital">
                         <Shield className="w-3.5 h-3.5 text-rose-400" />
                       </span>
                     )}
                   </td>
-                  <td className="py-2.5 px-2 bg-slate-800/30 group-hover:bg-slate-800/50 border-y border-slate-700/30 group-hover:border-teal-500/20 transition-all">
-                    <span className="text-xs text-slate-400 flex items-center gap-1">
+                  <td className="py-2.5 px-2 bg-secondary/30 group-hover:bg-secondary/50 border-y border-border/30 group-hover:border-teal-500/20 transition-all">
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
                       <Building2 className="w-3 h-3 text-slate-600 shrink-0" />{pl.controllingAgency || '—'}
                     </span>
                   </td>
-                  <td className="py-2.5 px-2 bg-slate-800/30 group-hover:bg-slate-800/50 border-y border-slate-700/30 group-hover:border-teal-500/20 transition-all">
+                  <td className="py-2.5 px-2 bg-secondary/30 group-hover:bg-secondary/50 border-y border-border/30 group-hover:border-teal-500/20 transition-all">
                     <Badge variant={STATUS_VARIANT[pl.status] ?? 'default'}>
                       {STATUS_LABEL[pl.status] ?? pl.status}
                     </Badge>
                   </td>
-                  <td className="py-2.5 px-2 bg-slate-800/30 group-hover:bg-slate-800/50 border-y border-slate-700/30 group-hover:border-teal-500/20 transition-all text-center">
-                    <span className={`text-xs font-semibold ${pl.linkedDocumentIds.length > 0 ? 'text-teal-400' : 'text-slate-600'}`}>
+                  <td className="py-2.5 px-2 bg-secondary/30 group-hover:bg-secondary/50 border-y border-border/30 group-hover:border-teal-500/20 transition-all text-center">
+                    <span className={`text-xs font-semibold ${pl.linkedDocumentIds.length > 0 ? 'text-primary' : 'text-slate-600'}`}>
                       {pl.linkedDocumentIds.length}
                     </span>
                   </td>
-                  <td className="py-2.5 px-2 bg-slate-800/30 group-hover:bg-slate-800/50 border-y border-slate-700/30 group-hover:border-teal-500/20 transition-all text-center">
+                  <td className="py-2.5 px-2 bg-secondary/30 group-hover:bg-secondary/50 border-y border-border/30 group-hover:border-teal-500/20 transition-all text-center">
                     <span className={`text-xs font-semibold ${(pl.linkedWorkIds?.length ?? 0) > 0 ? 'text-blue-400' : 'text-slate-600'}`}>
                       {pl.linkedWorkIds?.length ?? 0}
                     </span>
                   </td>
-                  <td className="py-2.5 px-2 bg-slate-800/30 group-hover:bg-slate-800/50 border-y border-slate-700/30 group-hover:border-teal-500/20 transition-all text-center">
+                  <td className="py-2.5 px-2 bg-secondary/30 group-hover:bg-secondary/50 border-y border-border/30 group-hover:border-teal-500/20 transition-all text-center">
                     <span className={`text-xs font-semibold ${(pl.engineeringChanges?.length ?? 0) > 0 ? 'text-amber-400' : 'text-slate-600'}`}>
                       {pl.engineeringChanges?.length ?? 0}
                     </span>
                   </td>
-                  <td className="py-2.5 pl-2 pr-3 rounded-r-xl bg-slate-800/30 group-hover:bg-slate-800/50 border-y border-r border-slate-700/30 group-hover:border-teal-500/20 transition-all">
+                  <td className="py-2.5 pl-2 pr-3 rounded-r-xl bg-secondary/30 group-hover:bg-secondary/50 border-y border-r border-border/30 group-hover:border-teal-500/20 transition-all">
                     <div className="flex items-center gap-1.5 justify-end">
                       <button
                         onClick={e => { e.stopPropagation(); setLinkingPL(pl); }}
                         title="Link / Unlink Documents"
                         className={`w-6 h-6 flex items-center justify-center rounded-lg border transition-all ${
                           pl.linkedDocumentIds.length > 0
-                            ? 'bg-teal-500/10 border-teal-500/30 text-teal-400 hover:bg-teal-500/20'
-                            : 'bg-slate-800/50 border-slate-700/40 text-slate-600 hover:text-slate-300 hover:border-slate-600'
+                            ? 'bg-teal-500/10 border-teal-500/30 text-primary hover:bg-teal-500/20'
+                            : 'bg-secondary/50 border-border/40 text-slate-600 hover:text-foreground/90 hover:border-slate-600'
                         }`}
                       >
                         <LinkIcon className="w-3 h-3" />
                       </button>
-                      <ArrowRight className="w-4 h-4 text-slate-600 group-hover:text-teal-400 transition-colors" />
+                      <ArrowRight className="w-4 h-4 text-slate-600 group-hover:text-primary transition-colors" />
                     </div>
                   </td>
                 </tr>
@@ -811,7 +811,7 @@ export default function PLKnowledgeHub() {
           {filtered.length === 0 && (
             <div className="text-center py-14">
               <DatabaseBackup className="w-10 h-10 mx-auto mb-3 text-slate-600 opacity-50" />
-              <p className="text-slate-400 font-medium mb-1">No PL records match</p>
+              <p className="text-muted-foreground font-medium mb-1">No PL records match</p>
               <p className="text-slate-600 text-sm mb-4">Try adjusting your search or filters</p>
               <div className="flex gap-2 justify-center">
                 {activeFilters > 0 && (

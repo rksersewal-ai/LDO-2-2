@@ -87,17 +87,17 @@ export default function AlertRules() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Total Rules', value: rules.length, icon: Bell, color: 'text-teal-400 bg-teal-500/10' },
+          { label: 'Total Rules', value: rules.length, icon: Bell, color: 'text-primary bg-teal-500/10' },
           { label: 'Active', value: rules.filter(r => r.enabled).length, icon: CheckCircle, color: 'text-emerald-400 bg-emerald-500/10' },
           { label: 'Overdue Triggers', value: rules.filter(r => r.trigger === 'OVERDUE').length, icon: Clock, color: 'text-amber-400 bg-amber-500/10' },
-          { label: 'Disabled', value: rules.filter(r => !r.enabled).length, icon: AlertTriangle, color: 'text-slate-400 bg-slate-500/10' },
+          { label: 'Disabled', value: rules.filter(r => !r.enabled).length, icon: AlertTriangle, color: 'text-muted-foreground bg-slate-500/10' },
         ].map(s => (
           <GlassCard key={s.label} className="p-4">
             <div className={`w-8 h-8 rounded-lg ${s.color} flex items-center justify-center mb-2`}>
               <s.icon className="w-4 h-4" />
             </div>
             <div className="text-xl font-bold text-white tabular-nums">{s.value}</div>
-            <div className="text-xs text-slate-500">{s.label}</div>
+            <div className="text-xs text-muted-foreground">{s.label}</div>
           </GlassCard>
         ))}
       </div>
@@ -107,15 +107,15 @@ export default function AlertRules() {
         <GlassCard className="p-5 border-teal-500/30">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-white">{editRule ? 'Edit Rule' : 'New Alert Rule'}</h3>
-            <button onClick={() => { setCreating(false); setEditRule(null); }}><X className="w-4 h-4 text-slate-500 hover:text-white" /></button>
+            <button onClick={() => { setCreating(false); setEditRule(null); }}><X className="w-4 h-4 text-muted-foreground hover:text-white" /></button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className="text-xs text-slate-400 mb-1 block">Rule Name *</label>
+              <label className="text-xs text-muted-foreground mb-1 block">Rule Name *</label>
               <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Work Record Overdue" />
             </div>
             <div>
-              <label className="text-xs text-slate-400 mb-1 block">Trigger Type</label>
+              <label className="text-xs text-muted-foreground mb-1 block">Trigger Type</label>
               <Select value={form.trigger} onChange={e => setForm(f => ({ ...f, trigger: e.target.value as TriggerType }))}>
                 <option value="OVERDUE">Overdue</option>
                 <option value="STATUS_CHANGE">Status Change</option>
@@ -124,7 +124,7 @@ export default function AlertRules() {
               </Select>
             </div>
             <div>
-              <label className="text-xs text-slate-400 mb-1 block">Notification Channel</label>
+              <label className="text-xs text-muted-foreground mb-1 block">Notification Channel</label>
               <Select value={form.channel} onChange={e => setForm(f => ({ ...f, channel: e.target.value as NotifyChannel }))}>
                 <option value="IN_APP">In-App Only</option>
                 <option value="EMAIL">Email Only</option>
@@ -132,11 +132,11 @@ export default function AlertRules() {
               </Select>
             </div>
             <div className="md:col-span-2">
-              <label className="text-xs text-slate-400 mb-1 block">Condition</label>
+              <label className="text-xs text-muted-foreground mb-1 block">Condition</label>
               <Input value={form.condition} onChange={e => setForm(f => ({ ...f, condition: e.target.value }))} placeholder="e.g. daysTaken > targetDays" className="font-mono text-xs" />
             </div>
             <div>
-              <label className="text-xs text-slate-400 mb-1 block">Notify Roles (comma-separated)</label>
+              <label className="text-xs text-muted-foreground mb-1 block">Notify Roles (comma-separated)</label>
               <Input value={form.notifyRoles.join(', ')} onChange={e => setForm(f => ({ ...f, notifyRoles: e.target.value.split(',').map(s => s.trim()) }))} placeholder="admin, supervisor" />
             </div>
           </div>
@@ -155,8 +155,8 @@ export default function AlertRules() {
         <div className="divide-y divide-white/[0.04]">
           {rules.map(rule => (
             <div key={rule.id} className={`flex items-center gap-4 px-5 py-4 ${!rule.enabled ? 'opacity-50' : ''}`}>
-              <button onClick={() => toggleRule(rule.id)} className="shrink-0 text-slate-500 hover:text-teal-400 transition-colors">
-                {rule.enabled ? <ToggleRight className="w-5 h-5 text-teal-400" /> : <ToggleLeft className="w-5 h-5" />}
+              <button onClick={() => toggleRule(rule.id)} className="shrink-0 text-muted-foreground hover:text-primary transition-colors">
+                {rule.enabled ? <ToggleRight className="w-5 h-5 text-primary" /> : <ToggleLeft className="w-5 h-5" />}
               </button>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
@@ -164,17 +164,17 @@ export default function AlertRules() {
                   <Badge variant={TRIGGER_COLORS[rule.trigger]} size="sm">{TRIGGER_LABELS[rule.trigger]}</Badge>
                   <Badge variant="default" size="sm">{CHANNEL_LABELS[rule.channel]}</Badge>
                 </div>
-                <div className="text-xs text-slate-500 font-mono">{rule.condition}</div>
+                <div className="text-xs text-muted-foreground font-mono">{rule.condition}</div>
                 <div className="text-xs text-slate-600 mt-0.5">
                   Notifies: {rule.notifyRoles.join(', ')} ·{' '}
                   {rule.lastFired ? `Last fired: ${rule.lastFired}` : 'Never fired'}
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={() => openEdit(rule)} className="w-7 h-7 rounded-lg hover:bg-white/5 text-slate-500 hover:text-slate-300 flex items-center justify-center transition-colors">
+                <button onClick={() => openEdit(rule)} className="w-7 h-7 rounded-lg hover:bg-white/5 text-muted-foreground hover:text-foreground/90 flex items-center justify-center transition-colors">
                   <Pencil className="w-3.5 h-3.5" />
                 </button>
-                <button onClick={() => deleteRule(rule.id)} className="w-7 h-7 rounded-lg hover:bg-rose-500/10 text-slate-500 hover:text-rose-400 flex items-center justify-center transition-colors">
+                <button onClick={() => deleteRule(rule.id)} className="w-7 h-7 rounded-lg hover:bg-rose-500/10 text-muted-foreground hover:text-rose-400 flex items-center justify-center transition-colors">
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>

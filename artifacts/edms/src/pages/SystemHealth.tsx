@@ -74,7 +74,7 @@ export default function SystemHealth() {
     <div className="space-y-6 max-w-6xl mx-auto">
       <PageHeader title="System Health" subtitle="Real-time service metrics, performance indicators, and backup status.">
         <div className="flex items-center gap-3">
-          <span className="text-xs text-slate-500">Updated {refreshTime.toLocaleTimeString()}</span>
+          <span className="text-xs text-muted-foreground">Updated {refreshTime.toLocaleTimeString()}</span>
           <Button size="sm" variant="ghost" onClick={refresh} className="flex items-center gap-2">
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} /> Refresh
           </Button>
@@ -84,7 +84,7 @@ export default function SystemHealth() {
       {/* Top Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Services Online', value: `${healthyCount}/${SERVICES.length}`, icon: Server, color: 'text-teal-400 bg-teal-500/10' },
+          { label: 'Services Online', value: `${healthyCount}/${SERVICES.length}`, icon: Server, color: 'text-primary bg-teal-500/10' },
           { label: 'CPU Usage', value: `${currentCPU}%`, icon: Cpu, color: currentCPU > 80 ? 'text-rose-400 bg-rose-500/10' : 'text-emerald-400 bg-emerald-500/10' },
           { label: 'Memory', value: `${currentMem}%`, icon: Activity, color: currentMem > 85 ? 'text-amber-400 bg-amber-500/10' : 'text-emerald-400 bg-emerald-500/10' },
           { label: 'Disk Usage', value: `${currentDisk}%`, icon: HardDrive, color: currentDisk > 90 ? 'text-rose-400 bg-rose-500/10' : 'text-blue-400 bg-blue-500/10' },
@@ -92,7 +92,7 @@ export default function SystemHealth() {
           <GlassCard key={s.label} className="p-4">
             <div className={`w-8 h-8 rounded-lg ${s.color} flex items-center justify-center mb-2`}><s.icon className="w-4 h-4" /></div>
             <div className="text-2xl font-bold text-white tabular-nums">{s.value}</div>
-            <div className="text-xs text-slate-500">{s.label}</div>
+            <div className="text-xs text-muted-foreground">{s.label}</div>
           </GlassCard>
         ))}
       </div>
@@ -105,7 +105,7 @@ export default function SystemHealth() {
           { label: 'Disk Usage %', data: diskData, color: '#3b82f6' },
         ].map(chart => (
           <GlassCard key={chart.label} className="p-4">
-            <div className="text-xs text-slate-400 font-medium mb-3">{chart.label}</div>
+            <div className="text-xs text-muted-foreground font-medium mb-3">{chart.label}</div>
             <ResponsiveContainer width="100%" height={80}>
               <AreaChart data={chart.data}>
                 <defs>
@@ -128,7 +128,7 @@ export default function SystemHealth() {
       {/* Services */}
       <GlassCard className="overflow-hidden">
         <div className="px-5 py-4 border-b border-white/6 flex items-center gap-2">
-          <Zap className="w-4 h-4 text-teal-400" />
+          <Zap className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-semibold text-white">Service Status</h3>
         </div>
         <div className="divide-y divide-white/[0.04]">
@@ -137,10 +137,10 @@ export default function SystemHealth() {
               <div className={`w-2 h-2 rounded-full ${svc.status === 'healthy' ? 'bg-emerald-500' : svc.status === 'warning' ? 'bg-amber-500' : 'bg-rose-500'} shrink-0`} />
               <div className="flex-1">
                 <div className="text-sm font-medium text-white">{svc.name}</div>
-                <div className="text-xs text-slate-500">Last checked: {svc.lastCheck}</div>
+                <div className="text-xs text-muted-foreground">Last checked: {svc.lastCheck}</div>
               </div>
               <div className="text-right hidden sm:block">
-                <div className="text-xs text-slate-400 tabular-nums">Uptime: {svc.uptime}</div>
+                <div className="text-xs text-muted-foreground tabular-nums">Uptime: {svc.uptime}</div>
                 <div className="text-xs text-slate-600">Latency: {svc.latency}</div>
               </div>
               <Badge variant={svc.status === 'healthy' ? 'success' : svc.status === 'warning' ? 'warning' : 'danger'} size="sm">
@@ -164,7 +164,7 @@ export default function SystemHealth() {
                 <div className={`w-2 h-2 rounded-full ${b.status === 'success' ? 'bg-emerald-500' : 'bg-slate-600'} shrink-0`} />
                 <div className="flex-1">
                   <div className="text-xs font-medium text-white">{b.label}</div>
-                  <div className="text-xs text-slate-500">{b.time} · {b.size}</div>
+                  <div className="text-xs text-muted-foreground">{b.time} · {b.size}</div>
                 </div>
                 <Badge variant={b.status === 'success' ? 'success' : 'default'} size="sm">{b.status}</Badge>
               </div>
@@ -180,7 +180,7 @@ export default function SystemHealth() {
           <div className="divide-y divide-white/[0.04]">
             {SLOW_QUERIES.map((q, i) => (
               <div key={i} className="px-5 py-3">
-                <div className="text-xs font-mono text-slate-400 truncate mb-1">{q.query}</div>
+                <div className="text-xs font-mono text-muted-foreground truncate mb-1">{q.query}</div>
                 <div className="flex gap-4 text-xs text-slate-600">
                   <span className="text-amber-400 tabular-nums">{q.duration}</span>
                   <span>{q.hits} hits</span>

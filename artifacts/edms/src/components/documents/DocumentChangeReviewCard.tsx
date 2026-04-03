@@ -142,35 +142,35 @@ function DeltaTable({
 }) {
   if (!rows.length) {
     return (
-      <div className="rounded-xl border border-slate-800/80 bg-slate-950/30 p-4">
-        <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-100">
+      <div className="rounded-xl border border-border/80 bg-slate-950/30 p-4">
+        <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground">
           {icon}
           {title}
         </div>
-        <p className="text-xs text-slate-500">{emptyLabel}</p>
+        <p className="text-xs text-muted-foreground">{emptyLabel}</p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-xl border border-slate-800/80 bg-slate-950/30">
-      <div className="flex items-center gap-2 border-b border-slate-800/80 px-4 py-3 text-sm font-semibold text-slate-100">
+    <div className="rounded-xl border border-border/80 bg-slate-950/30">
+      <div className="flex items-center gap-2 border-b border-border/80 px-4 py-3 text-sm font-semibold text-foreground">
         {icon}
         {title}
       </div>
       <div className="divide-y divide-slate-800/70">
         {rows.map((row) => (
           <div key={row.key} className="grid gap-3 px-4 py-3 md:grid-cols-[180px_minmax(0,1fr)_minmax(0,1fr)_72px]">
-            <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+            <div className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               {humanizeToken(row.key)}
             </div>
             <div>
-              <p className="mb-1 text-[11px] uppercase tracking-[0.12em] text-slate-500">Previous</p>
-              <p className="text-sm text-slate-300">{formatValues(row.previousValues)}</p>
+              <p className="mb-1 text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Previous</p>
+              <p className="text-sm text-foreground/90">{formatValues(row.previousValues)}</p>
             </div>
             <div>
-              <p className="mb-1 text-[11px] uppercase tracking-[0.12em] text-slate-500">Latest</p>
-              <p className="text-sm text-slate-100">{formatValues(row.latestValues)}</p>
+              <p className="mb-1 text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Latest</p>
+              <p className="text-sm text-foreground">{formatValues(row.latestValues)}</p>
             </div>
             <div className="flex items-start justify-start md:justify-end">
               <Badge variant={stateBadgeVariant(row.state)} size="sm">
@@ -262,7 +262,7 @@ export function DocumentChangeReviewCard({
               <div className="flex flex-wrap items-center gap-2">
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="h-4 w-4 text-amber-300" />
-                  <span className="text-sm font-semibold text-slate-100">PL {alert.plNumber} change review</span>
+                  <span className="text-sm font-semibold text-foreground">PL {alert.plNumber} change review</span>
                 </div>
                 <Badge variant={alert.status === 'PENDING' ? 'warning' : alert.status === 'APPROVED' ? 'success' : 'danger'} size="sm">
                   {alert.status}
@@ -273,9 +273,9 @@ export function DocumentChangeReviewCard({
                   </Badge>
                 )}
               </div>
-              <p className="mt-2 text-sm text-slate-100">{alert.documentName}</p>
+              <p className="mt-2 text-sm text-foreground">{alert.documentName}</p>
               <p className="mt-1 text-xs text-amber-200">{alert.message}</p>
-              <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-slate-400">
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
                 <span>Latest rev {alert.revision || 'N/A'}</span>
                 <span className="text-slate-600">/</span>
                 <span>Previous rev {alert.previousRevision || 'N/A'}</span>
@@ -313,13 +313,13 @@ export function DocumentChangeReviewCard({
                       Decide
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-52 border border-slate-700/60 bg-slate-950 text-slate-200">
-                    <DropdownMenuItem className="focus:bg-slate-800" onSelect={() => void onApprove?.()} disabled={!onApprove || busy}>
+                  <DropdownMenuContent align="end" className="w-52 border border-border/60 bg-slate-950 text-foreground">
+                    <DropdownMenuItem className="focus:bg-secondary" onSelect={() => void onApprove?.()} disabled={!onApprove || busy}>
                       Approve update
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-slate-800" />
+                    <DropdownMenuSeparator className="bg-secondary" />
                     <DropdownMenuItem
-                      className="text-rose-200 focus:bg-slate-800 focus:text-rose-100"
+                      className="text-rose-200 focus:bg-secondary focus:text-rose-100"
                       onSelect={() => void onBypass?.()}
                       disabled={!onBypass || busy}
                     >
@@ -341,16 +341,16 @@ export function DocumentChangeReviewCard({
           {(alert.changeSummary || alert.resolutionNotes || alert.bypassReason || alert.resolvedAt) && (
             <div className="rounded-xl border border-amber-500/15 bg-slate-950/35 px-3 py-3 text-sm">
               {alert.changeSummary && (
-                <p className="text-slate-300">{alert.changeSummary}</p>
+                <p className="text-foreground/90">{alert.changeSummary}</p>
               )}
               {alert.resolutionNotes && (
-                <p className="mt-2 text-xs text-slate-400">Resolution notes: {alert.resolutionNotes}</p>
+                <p className="mt-2 text-xs text-muted-foreground">Resolution notes: {alert.resolutionNotes}</p>
               )}
               {alert.bypassReason && (
                 <p className="mt-1 text-xs text-rose-200">Bypass reason: {alert.bypassReason}</p>
               )}
               {alert.resolvedAt && (
-                <p className="mt-1 text-xs text-slate-500">Resolved at {new Date(alert.resolvedAt).toLocaleString()}</p>
+                <p className="mt-1 text-xs text-muted-foreground">Resolved at {new Date(alert.resolvedAt).toLocaleString()}</p>
               )}
             </div>
           )}
@@ -359,7 +359,7 @@ export function DocumentChangeReviewCard({
         <CollapsibleContent>
           <div className="border-t border-amber-500/15 px-4 pb-4 pt-4">
             {loading ? (
-              <div className="flex items-center gap-2 rounded-xl border border-slate-800/80 bg-slate-950/30 px-4 py-4 text-sm text-slate-400">
+              <div className="flex items-center gap-2 rounded-xl border border-border/80 bg-slate-950/30 px-4 py-4 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Loading comparison evidence...
               </div>
@@ -370,33 +370,33 @@ export function DocumentChangeReviewCard({
             ) : (
               <div className="space-y-4">
                 <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                  <div className="rounded-xl border border-slate-800/80 bg-slate-950/35 px-4 py-3">
-                    <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">Latest document</p>
+                  <div className="rounded-xl border border-border/80 bg-slate-950/35 px-4 py-3">
+                    <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Latest document</p>
                     <p className="mt-2 text-sm font-semibold text-white">{alert.documentName}</p>
-                    <p className="mt-1 text-xs text-slate-400">{alert.documentId}</p>
-                    {alert.documentStatus && <p className="mt-2 text-xs text-slate-500">Status: {alert.documentStatus}</p>}
+                    <p className="mt-1 text-xs text-muted-foreground">{alert.documentId}</p>
+                    {alert.documentStatus && <p className="mt-2 text-xs text-muted-foreground">Status: {alert.documentStatus}</p>}
                   </div>
-                  <div className="rounded-xl border border-slate-800/80 bg-slate-950/35 px-4 py-3">
-                    <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">Previous document</p>
+                  <div className="rounded-xl border border-border/80 bg-slate-950/35 px-4 py-3">
+                    <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Previous document</p>
                     <p className="mt-2 text-sm font-semibold text-white">{alert.previousDocumentName || 'No previous linked document'}</p>
-                    <p className="mt-1 text-xs text-slate-400">{alert.previousDocumentId || '—'}</p>
-                    {alert.previousDocumentStatus && <p className="mt-2 text-xs text-slate-500">Status: {alert.previousDocumentStatus}</p>}
+                    <p className="mt-1 text-xs text-muted-foreground">{alert.previousDocumentId || '—'}</p>
+                    {alert.previousDocumentStatus && <p className="mt-2 text-xs text-muted-foreground">Status: {alert.previousDocumentStatus}</p>}
                   </div>
-                  <div className="rounded-xl border border-slate-800/80 bg-slate-950/35 px-4 py-3">
-                    <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">Approved assertion delta</p>
+                  <div className="rounded-xl border border-border/80 bg-slate-950/35 px-4 py-3">
+                    <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Approved assertion delta</p>
                     <p className="mt-2 text-2xl font-semibold text-white">{latestChangedCount}</p>
-                    <p className="mt-1 text-xs text-slate-400">Changed or newly governed metadata fields.</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Changed or newly governed metadata fields.</p>
                   </div>
-                  <div className="rounded-xl border border-slate-800/80 bg-slate-950/35 px-4 py-3">
-                    <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">Extracted entity delta</p>
+                  <div className="rounded-xl border border-border/80 bg-slate-950/35 px-4 py-3">
+                    <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Extracted entity delta</p>
                     <p className="mt-2 text-2xl font-semibold text-white">{entityChangedCount}</p>
-                    <p className="mt-1 text-xs text-slate-400">Changed OCR/entity groups across revisions.</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Changed OCR/entity groups across revisions.</p>
                   </div>
                 </div>
 
                 <DeltaTable
                   title="Approved identifiers"
-                  icon={<ShieldCheck className="h-4 w-4 text-teal-300" />}
+                  icon={<ShieldCheck className="h-4 w-4 text-primary/90" />}
                   rows={assertionRows}
                   emptyLabel="No approved metadata assertions are available for this document pair yet."
                 />

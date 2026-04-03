@@ -276,8 +276,8 @@ export function RightClickPalette() {
           <Icon className="h-4 w-4" />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-sm font-medium text-slate-100">{action.label}</div>
-          <div className="truncate text-[11px] text-slate-500">{action.description}</div>
+          <div className="text-sm font-medium text-foreground">{action.label}</div>
+          <div className="truncate text-[11px] text-muted-foreground">{action.description}</div>
         </div>
         <ArrowRight className="h-3.5 w-3.5 text-slate-600" />
       </button>
@@ -292,7 +292,7 @@ export function RightClickPalette() {
 
     return (
       <div className="px-2 py-1">
-        <div className="px-2 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+        <div className="px-2 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
           {label}
         </div>
         <div className="space-y-1">{sectionActions.map(renderAction)}</div>
@@ -314,8 +314,8 @@ export function RightClickPalette() {
             <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-cyan-300/75">
               Mouse Palette
             </div>
-            <p className="mt-1 text-xs text-slate-400">
-              Right-click anywhere on the workspace. Hold <span className="font-mono text-slate-300">Shift</span> for the browser menu.
+            <p className="mt-1 text-xs text-muted-foreground">
+              Right-click anywhere on the workspace. Hold <span className="font-mono text-foreground/90">Shift</span> for the browser menu.
             </p>
           </div>
 
@@ -326,7 +326,7 @@ export function RightClickPalette() {
             {renderSection('Tools', 'tools')}
           </div>
 
-          <div className="border-t border-white/6 px-4 py-3 text-[11px] text-slate-500">
+          <div className="border-t border-white/6 px-4 py-3 text-[11px] text-muted-foreground">
             Built for quick mouse travel: jump back, reopen previews, or continue a workflow without expanding the sidebar.
           </div>
         </div>

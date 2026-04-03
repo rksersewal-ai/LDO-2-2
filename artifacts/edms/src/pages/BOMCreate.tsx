@@ -114,7 +114,7 @@ export default function BOMCreate() {
         <GlassCard className="p-6">
           <div className="grid gap-5 md:grid-cols-2">
             <div className="md:col-span-2">
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Product Name</label>
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Product Name</label>
               <Input
                 value={form.productName}
                 onChange={(event) => setForm((current) => ({ ...current, productName: event.target.value }))}
@@ -125,7 +125,7 @@ export default function BOMCreate() {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Subtitle</label>
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Subtitle</label>
               <Input
                 value={form.subtitle}
                 onChange={(event) => setForm((current) => ({ ...current, subtitle: event.target.value }))}
@@ -134,7 +134,7 @@ export default function BOMCreate() {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Lifecycle</label>
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Lifecycle</label>
               <Select
                 value={form.lifecycle}
                 onChange={(event) => setForm((current) => ({ ...current, lifecycle: event.target.value as LifecycleOption }))}
@@ -146,7 +146,7 @@ export default function BOMCreate() {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Category</label>
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Category</label>
               <Input
                 value={form.category}
                 onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))}
@@ -155,17 +155,17 @@ export default function BOMCreate() {
             </div>
 
             <div className="md:col-span-2">
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Description</label>
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Description</label>
               <textarea
                 value={form.description}
                 onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
                 placeholder="Optional summary for the BOM workspace"
-                className="min-h-28 w-full rounded-lg border border-slate-700/50 bg-slate-950/60 px-3 py-3 text-sm text-slate-200 placeholder:text-slate-600 focus:border-teal-500/50 focus:outline-none focus:ring-1 focus:ring-teal-500/30"
+                className="min-h-28 w-full rounded-lg border border-border bg-slate-950/60 px-3 py-3 text-sm text-foreground placeholder:text-slate-600 focus:border-teal-500/50 focus:outline-none focus:ring-1 focus:ring-teal-500/30"
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Root PL Number</label>
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Root PL Number</label>
               <PLNumberSelect
                 value={form.rootPlNumber}
                 onChange={(rootPlNumber) => setForm((current) => ({ ...current, rootPlNumber }))}
@@ -191,7 +191,7 @@ export default function BOMCreate() {
         <div className="space-y-4">
           <GlassCard className="overflow-hidden">
             <div className="border-b border-white/6 px-5 py-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Root PL Preview</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Root PL Preview</p>
             </div>
             <div className="p-5">
               {matchedPL || selectedPl ? (
@@ -199,26 +199,26 @@ export default function BOMCreate() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-base font-semibold text-white">{matchedPL?.name ?? selectedPl?.name}</p>
-                      <p className="mt-1 text-xs text-slate-400">{matchedPL?.description ?? selectedPl?.description}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{matchedPL?.description ?? selectedPl?.description}</p>
                     </div>
                     <Badge variant="success">Matched</Badge>
                   </div>
                   <div className="grid grid-cols-2 gap-3 text-xs">
                     <div>
-                      <p className="text-slate-500">PL Number</p>
-                      <p className="font-mono text-teal-400">{matchedPL?.plNumber ?? selectedPl?.plNumber}</p>
+                      <p className="text-muted-foreground">PL Number</p>
+                      <p className="font-mono text-primary">{matchedPL?.plNumber ?? selectedPl?.plNumber}</p>
                     </div>
                     <div>
-                      <p className="text-slate-500">Revision</p>
-                      <p className="font-mono text-slate-200">{matchedPL?.revision ?? 'A'}</p>
+                      <p className="text-muted-foreground">Revision</p>
+                      <p className="font-mono text-foreground">{matchedPL?.revision ?? 'A'}</p>
                     </div>
                     <div>
-                      <p className="text-slate-500">Type</p>
-                      <p className="capitalize text-slate-200">{matchedPL?.type ?? 'assembly'}</p>
+                      <p className="text-muted-foreground">Type</p>
+                      <p className="capitalize text-foreground">{matchedPL?.type ?? 'assembly'}</p>
                     </div>
                     <div>
-                      <p className="text-slate-500">{matchedPL ? 'Department' : 'Agency'}</p>
-                      <p className="text-slate-200">{matchedPL?.department ?? selectedPl?.controllingAgency ?? '—'}</p>
+                      <p className="text-muted-foreground">{matchedPL ? 'Department' : 'Agency'}</p>
+                      <p className="text-foreground">{matchedPL?.department ?? selectedPl?.controllingAgency ?? '—'}</p>
                     </div>
                   </div>
                   {(matchedPL?.safetyVital || selectedPl?.safetyCritical) && (
@@ -229,10 +229,10 @@ export default function BOMCreate() {
                 </div>
               ) : (
                 <div className="flex items-start gap-3 rounded-xl border border-white/6 bg-slate-950/35 px-4 py-4">
-                  <Layers className="mt-0.5 w-4 h-4 shrink-0 text-teal-400" />
+                  <Layers className="mt-0.5 w-4 h-4 shrink-0 text-primary" />
                   <div>
-                    <p className="text-sm font-medium text-slate-200">Enter the first PL to seed the hierarchy</p>
-                    <p className="mt-1 text-xs text-slate-500">The workspace will start with one top-level node, and the node editor will handle the rest of the assembly structure.</p>
+                    <p className="text-sm font-medium text-foreground">Enter the first PL to seed the hierarchy</p>
+                    <p className="mt-1 text-xs text-muted-foreground">The workspace will start with one top-level node, and the node editor will handle the rest of the assembly structure.</p>
                   </div>
                 </div>
               )}
@@ -240,15 +240,15 @@ export default function BOMCreate() {
           </GlassCard>
 
           <GlassCard className="p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">What happens next</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">What happens next</p>
             <div className="mt-4 space-y-3">
               {[
                 'The BOM opens with the chosen root PL already placed at the top level.',
                 'Engineers can add more PLs from the node editor and drag them up or down the hierarchy.',
                 'This stays frontend-local for now so the backend contract can be finalized after the interaction model settles.',
               ].map((item) => (
-                <div key={item} className="flex items-start gap-3 text-sm text-slate-300">
-                  <CheckCircle2 className="mt-0.5 w-4 h-4 shrink-0 text-teal-400" />
+                <div key={item} className="flex items-start gap-3 text-sm text-foreground/90">
+                  <CheckCircle2 className="mt-0.5 w-4 h-4 shrink-0 text-primary" />
                   <span>{item}</span>
                 </div>
               ))}

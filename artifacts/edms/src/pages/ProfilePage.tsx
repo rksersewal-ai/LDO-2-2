@@ -82,35 +82,35 @@ export default function ProfilePage() {
               </div>
               <div>
                 <p className="text-lg font-semibold text-white">{user?.name ?? 'User'}</p>
-                <p className="text-sm text-slate-400">{user?.designation ?? 'Workspace User'}</p>
+                <p className="text-sm text-muted-foreground">{user?.designation ?? 'Workspace User'}</p>
                 <Badge variant="info" className="mt-2 capitalize">{roleLabel}</Badge>
               </div>
             </div>
-            <div className="mt-5 space-y-3 text-sm text-slate-300">
-              <div className="flex items-center gap-2"><Mail className="w-4 h-4 text-slate-500" /> {user?.email ?? 'No email set'}</div>
-              <div className="flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-slate-500" /> Department: {user?.department ?? 'Not set'}</div>
-              <div className="flex items-center gap-2"><Clock3 className="w-4 h-4 text-slate-500" /> Last synced session: {formatLastLogin(new Date().toISOString())}</div>
+            <div className="mt-5 space-y-3 text-sm text-foreground/90">
+              <div className="flex items-center gap-2"><Mail className="w-4 h-4 text-muted-foreground" /> {user?.email ?? 'No email set'}</div>
+              <div className="flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-muted-foreground" /> Department: {user?.department ?? 'Not set'}</div>
+              <div className="flex items-center gap-2"><Clock3 className="w-4 h-4 text-muted-foreground" /> Last synced session: {formatLastLogin(new Date().toISOString())}</div>
             </div>
           </GlassCard>
 
           <GlassCard className="p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Current Workspace Behavior</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Current Workspace Behavior</p>
             <div className="mt-4 space-y-3 text-sm">
-              <div className="flex items-center justify-between text-slate-300">
+              <div className="flex items-center justify-between text-foreground/90">
                 <span>Theme</span>
-                <span className="capitalize text-teal-300">{theme}</span>
+                <span className="capitalize text-primary/90">{theme}</span>
               </div>
-              <div className="flex items-center justify-between text-slate-300">
+              <div className="flex items-center justify-between text-foreground/90">
                 <span>Font Size</span>
-                <span className="text-teal-300">{prefs.fontSize}px</span>
+                <span className="text-primary/90">{prefs.fontSize}px</span>
               </div>
-              <div className="flex items-center justify-between text-slate-300">
+              <div className="flex items-center justify-between text-foreground/90">
                 <span>Clock Format</span>
-                <span className="text-teal-300">{prefs.timeFormat}</span>
+                <span className="text-primary/90">{prefs.timeFormat}</span>
               </div>
-              <div className="flex items-center justify-between text-slate-300">
+              <div className="flex items-center justify-between text-foreground/90">
                 <span>Default Landing</span>
-                <span className="text-teal-300">{prefs.defaultView}</span>
+                <span className="text-primary/90">{prefs.defaultView}</span>
               </div>
             </div>
           </GlassCard>
@@ -119,24 +119,24 @@ export default function ProfilePage() {
         <div className="space-y-6">
           <GlassCard className="p-6">
             <div className="mb-5 flex items-center gap-2">
-              <UserRound className="w-5 h-5 text-teal-400" />
+              <UserRound className="w-5 h-5 text-primary" />
               <h2 className="text-lg font-semibold text-white">Identity</h2>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Full Name</label>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Full Name</label>
                 <Input value={profile.name} onChange={(event) => setProfile((current) => ({ ...current, name: event.target.value }))} />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Email</label>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Email</label>
                 <Input value={profile.email} onChange={(event) => setProfile((current) => ({ ...current, email: event.target.value }))} />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Designation</label>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Designation</label>
                 <Input value={profile.designation} onChange={(event) => setProfile((current) => ({ ...current, designation: event.target.value }))} />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Department</label>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Department</label>
                 <Input value={profile.department} onChange={(event) => setProfile((current) => ({ ...current, department: event.target.value }))} />
               </div>
             </div>
@@ -149,12 +149,12 @@ export default function ProfilePage() {
 
           <GlassCard className="p-6">
             <div className="mb-5 flex items-center gap-2">
-              <Palette className="w-5 h-5 text-teal-400" />
+              <Palette className="w-5 h-5 text-primary" />
               <h2 className="text-lg font-semibold text-white">Personalized Settings</h2>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Theme</label>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Theme</label>
                 <Select
                   value={theme}
                   onChange={(event) => {
@@ -169,7 +169,7 @@ export default function ProfilePage() {
                 </Select>
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Font Size</label>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Font Size</label>
                 <Select value={String(prefs.fontSize)} onChange={(event) => savePreference({ fontSize: Number(event.target.value) })}>
                   {[12, 13, 14, 15, 16, 17, 18].map((size) => (
                     <option key={size} value={size}>{size}px</option>
@@ -177,7 +177,7 @@ export default function ProfilePage() {
                 </Select>
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Default Landing Page</label>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Default Landing Page</label>
                 <Select value={prefs.defaultView} onChange={(event) => savePreference({ defaultView: event.target.value })}>
                   <option value="/">Dashboard</option>
                   <option value="/documents">Document Hub</option>
@@ -187,7 +187,7 @@ export default function ProfilePage() {
                 </Select>
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Time Format</label>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Time Format</label>
                 <Select value={prefs.timeFormat} onChange={(event) => savePreference({ timeFormat: event.target.value as UserPreferences['timeFormat'] })}>
                   <option value="24h">24-hour</option>
                   <option value="12h">12-hour</option>
@@ -226,14 +226,14 @@ export default function ProfilePage() {
                   onChange: (checked: boolean) => savePreference({ sidebarExpanded: checked }),
                 },
               ].map((setting) => (
-                <div key={setting.title} className="flex items-center justify-between rounded-xl border border-white/6 bg-slate-900/35 px-4 py-3">
+                <div key={setting.title} className="flex items-center justify-between rounded-xl border border-white/6 bg-card/35 px-4 py-3">
                   <div className="flex items-start gap-3">
-                    <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl bg-teal-500/12 text-teal-300">
+                    <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl bg-teal-500/12 text-primary/90">
                       <setting.icon className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-slate-100">{setting.title}</p>
-                      <p className="text-xs text-slate-500">{setting.description}</p>
+                      <p className="text-sm font-medium text-foreground">{setting.title}</p>
+                      <p className="text-xs text-muted-foreground">{setting.description}</p>
                     </div>
                   </div>
                   <Switch checked={setting.checked} onCheckedChange={setting.onChange} />
@@ -244,18 +244,18 @@ export default function ProfilePage() {
 
           <GlassCard className="p-6">
             <div className="mb-4 flex items-center gap-2">
-              <LayoutDashboard className="w-5 h-5 text-teal-400" />
+              <LayoutDashboard className="w-5 h-5 text-primary" />
               <h2 className="text-lg font-semibold text-white">Workspace Defaults</h2>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Document Page Size</label>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Document Page Size</label>
                 <Select value={String(prefs.documentHubPageSize)} onChange={(event) => savePreference({ documentHubPageSize: Number(event.target.value) })}>
                   {[10, 20, 30, 50].map((size) => <option key={size} value={size}>{size} rows</option>)}
                 </Select>
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Work Ledger Page Size</label>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Work Ledger Page Size</label>
                 <Select value={String(prefs.workLedgerPageSize)} onChange={(event) => savePreference({ workLedgerPageSize: Number(event.target.value) })}>
                   {[10, 20, 30, 50].map((size) => <option key={size} value={size}>{size} rows</option>)}
                 </Select>

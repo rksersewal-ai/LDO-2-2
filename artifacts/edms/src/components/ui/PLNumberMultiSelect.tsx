@@ -73,10 +73,10 @@ export function PLNumberMultiSelect({
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="h-10 w-full justify-between rounded-xl border border-slate-700/55 bg-slate-950/60 px-3 text-left font-normal text-slate-200 shadow-sm hover:bg-slate-900/70"
+            className="h-10 w-full justify-between rounded-xl border border-border/55 bg-slate-950/60 px-3 text-left font-normal text-foreground shadow-sm hover:bg-card/70"
           >
             <span className="flex min-w-0 items-center gap-2">
-              <Hash className="h-4 w-4 shrink-0 text-teal-400" />
+              <Hash className="h-4 w-4 shrink-0 text-primary" />
               <span className="truncate">
                 {selectedItems.length > 0
                   ? `${selectedItems.length} PL ${selectedItems.length === 1 ? 'selected' : 'records selected'}`
@@ -88,18 +88,18 @@ export function PLNumberMultiSelect({
         </PopoverTrigger>
         <PopoverContent
           align="start"
-          className="w-[var(--radix-popover-trigger-width)] max-w-[460px] rounded-2xl border border-slate-700/60 bg-slate-950/98 p-0 shadow-2xl backdrop-blur-xl"
+          className="w-[var(--radix-popover-trigger-width)] max-w-[460px] rounded-2xl border border-border/60 bg-slate-950/98 p-0 shadow-2xl backdrop-blur-xl"
         >
-          <Command className="bg-transparent text-slate-100">
+          <Command className="bg-transparent text-foreground">
             <CommandInput
               placeholder="Search PL number, name, description, category..."
-              className="text-slate-100 placeholder:text-slate-500"
+              className="text-foreground placeholder:text-muted-foreground"
             />
             <CommandList className="max-h-[320px]">
-              {loading && <div className="px-4 py-4 text-sm text-slate-400">Loading PL records...</div>}
+              {loading && <div className="px-4 py-4 text-sm text-muted-foreground">Loading PL records...</div>}
               {!loading && (
                 <>
-                  <CommandEmpty className="text-slate-500">No PL records match this search.</CommandEmpty>
+                  <CommandEmpty className="text-muted-foreground">No PL records match this search.</CommandEmpty>
                   <CommandGroup>
                     {sortedItems.map((pl) => {
                       const isSelected = normalizedValues.includes(pl.plNumber);
@@ -111,20 +111,20 @@ export function PLNumberMultiSelect({
                           className="items-start rounded-xl px-3 py-3 data-[selected=true]:bg-teal-500/10 data-[selected=true]:text-white"
                         >
                           <div className={cn(
-                            'mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border text-teal-300',
+                            'mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border text-primary/90',
                             isSelected ? 'border-teal-300/35 bg-teal-500/18' : 'border-teal-400/20 bg-teal-500/10'
                           )}>
                             {isSelected ? <Check className="h-4 w-4" /> : <Hash className="h-4 w-4" />}
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="font-mono text-xs text-teal-300">{pl.plNumber}</span>
+                              <span className="font-mono text-xs text-primary/90">{pl.plNumber}</span>
                               <Badge size="sm" variant={getStatusVariant(pl.status)}>
                                 {pl.status}
                               </Badge>
                             </div>
-                            <p className="truncate text-sm text-slate-100">{pl.name}</p>
-                            <p className="truncate text-[11px] text-slate-500">
+                            <p className="truncate text-sm text-foreground">{pl.name}</p>
+                            <p className="truncate text-[11px] text-muted-foreground">
                               {pl.category} · {pl.controllingAgency} · {pl.description}
                             </p>
                           </div>
@@ -139,21 +139,21 @@ export function PLNumberMultiSelect({
         </PopoverContent>
       </Popover>
 
-      {helperText && <p className="text-[11px] text-slate-500">{helperText}</p>}
+      {helperText && <p className="text-[11px] text-muted-foreground">{helperText}</p>}
 
       {selectedItems.length > 0 && (
         <div className="flex flex-wrap gap-2 rounded-2xl border border-teal-400/14 bg-teal-500/[0.05] px-3 py-3">
           {selectedItems.map((pl) => (
             <span
               key={pl.id}
-              className="inline-flex items-center gap-1.5 rounded-full border border-teal-400/24 bg-slate-900/70 px-2.5 py-1 text-[11px] text-slate-200"
+              className="inline-flex items-center gap-1.5 rounded-full border border-teal-400/24 bg-card/70 px-2.5 py-1 text-[11px] text-foreground"
             >
-              <span className="font-mono text-teal-300">{pl.plNumber}</span>
+              <span className="font-mono text-primary/90">{pl.plNumber}</span>
               <span className="max-w-[180px] truncate">{pl.name}</span>
               <button
                 type="button"
                 onClick={() => toggleValue(pl.plNumber)}
-                className="text-slate-500 transition-colors hover:text-rose-300"
+                className="text-muted-foreground transition-colors hover:text-rose-300"
                 aria-label={`Remove ${pl.plNumber}`}
               >
                 <X className="h-3 w-3" />

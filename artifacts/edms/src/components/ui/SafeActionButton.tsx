@@ -63,7 +63,7 @@ const ACTION_CONFIG = {
     description: 'This item will be disabled but remain in the system.',
     actionLabel: 'Disable',
     cancelLabel: 'Cancel',
-    color: 'text-slate-400',
+    color: 'text-muted-foreground',
   },
   custom: {
     icon: AlertTriangle,
@@ -117,7 +117,7 @@ export function SafeActionButton({
   const variantStyles = {
     danger: 'hover:bg-rose-500/10 hover:border-rose-500/30 text-rose-400 hover:text-rose-300',
     warning: 'hover:bg-amber-500/10 hover:border-amber-500/30 text-amber-400 hover:text-amber-300',
-    default: 'hover:bg-slate-500/10 hover:border-slate-500/30 text-slate-400 hover:text-slate-300',
+    default: 'hover:bg-slate-500/10 hover:border-slate-500/30 text-muted-foreground hover:text-foreground/90',
   };
 
   return (
@@ -144,7 +144,7 @@ export function SafeActionButton({
 
           <AlertDialogDescription className="space-y-3">
             <p>{message || config.description}</p>
-            {itemName && <p className="text-sm font-mono text-slate-300">{itemName}</p>}
+            {itemName && <p className="text-sm font-mono text-foreground/90">{itemName}</p>}
             <p className="text-xs text-slate-600 italic">
               💡 No data is permanently deleted. Items can be restored from archive.
             </p>
@@ -228,7 +228,7 @@ export function CommandButton({
   };
 
   const variantClasses = {
-    default: 'bg-teal-500/20 text-teal-400 border-teal-500/30 hover:bg-teal-500/30',
+    default: 'bg-teal-500/20 text-primary border-teal-500/30 hover:bg-teal-500/30',
     danger: 'bg-rose-500/20 text-rose-400 border-rose-500/30 hover:bg-rose-500/30',
     warning: 'bg-amber-500/20 text-amber-400 border-amber-500/30 hover:bg-amber-500/30',
   };

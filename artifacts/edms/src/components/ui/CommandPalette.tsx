@@ -97,11 +97,11 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
     <div className="fixed inset-0 z-[99999] flex items-start justify-center pt-24" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
-        className="relative w-full max-w-xl bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+        className="relative w-full max-w-xl bg-card/95 backdrop-blur-xl border border-border rounded-2xl shadow-2xl overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 px-4 py-3 border-b border-white/8">
-          <Search className="w-4 h-4 text-slate-400 shrink-0" />
+          <Search className="w-4 h-4 text-muted-foreground shrink-0" />
           <input
             autoFocus
             value={query}
@@ -111,24 +111,24 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
             className="flex-1 bg-transparent text-white placeholder-slate-500 text-sm outline-none"
           />
           {query && (
-            <button onClick={() => setQuery('')} className="text-slate-500 hover:text-white">
+            <button onClick={() => setQuery('')} className="text-muted-foreground hover:text-white">
               <X className="w-4 h-4" />
             </button>
           )}
-          <kbd className="text-xs px-1.5 py-0.5 bg-slate-700 text-slate-400 rounded border border-white/10">Esc</kbd>
+          <kbd className="text-xs px-1.5 py-0.5 bg-slate-700 text-muted-foreground rounded border border-border">Esc</kbd>
         </div>
 
         <div className="max-h-80 overflow-y-auto">
           {recentSearches.length > 0 && !query && (
             <div className="px-3 py-2">
-              <div className="text-xs text-slate-500 px-2 py-1 font-medium uppercase tracking-wider">Recent Searches</div>
+              <div className="text-xs text-muted-foreground px-2 py-1 font-medium uppercase tracking-wider">Recent Searches</div>
               {recentSearches.map((item) => (
                 <button
                   key={`${item.query}-${item.scope}`}
                   onClick={() => { navigate(`/search?q=${encodeURIComponent(item.query)}`); onClose(); }}
-                  className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-white/5 transition-colors"
+                  className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm text-foreground/90 hover:bg-white/5 transition-colors"
                 >
-                  <Search className="w-3.5 h-3.5 text-slate-500" />
+                  <Search className="w-3.5 h-3.5 text-muted-foreground" />
                   <span>{item.query}</span>
                   <span className="ml-auto text-xs text-slate-600">{item.scope}</span>
                 </button>
@@ -138,7 +138,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
 
           {Object.entries(grouped).map(([category, cmds]) => (
             <div key={category} className="px-3 py-2">
-              <div className="text-xs text-slate-500 px-2 py-1 font-medium uppercase tracking-wider">{category}</div>
+              <div className="text-xs text-muted-foreground px-2 py-1 font-medium uppercase tracking-wider">{category}</div>
               {cmds.map((cmd) => {
                 const idx = flatIdx++;
                 const Icon = cmd.icon;
@@ -147,13 +147,13 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                     key={cmd.id}
                     onClick={cmd.action}
                     className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                      idx === selected ? 'bg-teal-500/15 text-white' : 'text-slate-300 hover:bg-white/5'
+                      idx === selected ? 'bg-teal-500/15 text-white' : 'text-foreground/90 hover:bg-white/5'
                     }`}
                   >
-                    <Icon className={`w-4 h-4 ${idx === selected ? 'text-teal-400' : 'text-slate-500'}`} />
+                    <Icon className={`w-4 h-4 ${idx === selected ? 'text-primary' : 'text-muted-foreground'}`} />
                     <div className="flex-1 text-left">
                       <div className="font-medium">{cmd.label}</div>
-                      {cmd.description && <div className="text-xs text-slate-500">{cmd.description}</div>}
+                      {cmd.description && <div className="text-xs text-muted-foreground">{cmd.description}</div>}
                     </div>
                     <ArrowRight className="w-3.5 h-3.5 text-slate-600" />
                   </button>
@@ -163,7 +163,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
           ))}
 
           {commands.length === 0 && (
-            <div className="py-10 text-center text-slate-500 text-sm">
+            <div className="py-10 text-center text-muted-foreground text-sm">
               No results for "{query}"
             </div>
           )}

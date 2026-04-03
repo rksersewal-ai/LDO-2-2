@@ -91,17 +91,17 @@ export function Sidebar() {
       transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="relative h-[calc(100vh-2rem)] ml-4 my-4 flex flex-col bg-slate-900/60 backdrop-blur-2xl border border-teal-500/20 shadow-2xl shadow-teal-950/50 rounded-2xl overflow-hidden z-40 shrink-0 group"
+      className="relative h-[calc(100vh-2rem)] ml-4 my-4 flex flex-col bg-sidebar border border-sidebar-border shadow-lg rounded-2xl overflow-hidden z-40 shrink-0 group"
     >
       {!isExpanded && (
-        <div className="absolute right-1.5 top-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1.5 rounded-lg text-teal-400 bg-teal-500/10">
+        <div className="absolute right-1.5 top-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1.5 rounded-lg text-primary bg-primary/10">
           <ChevronRight className="w-4 h-4" />
         </div>
       )}
       
-      <div className="flex items-center p-4 gap-3 border-b border-white/5 min-h-[52px] hover:bg-slate-800/30 transition-colors">
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-400 to-emerald-600 flex items-center justify-center shrink-0 shadow-lg shadow-teal-500/20">
-          <span className="text-white font-bold text-sm">L2</span>
+      <div className="flex items-center p-4 gap-3 border-b border-sidebar-border min-h-[52px] hover:bg-sidebar-accent transition-colors">
+        <div className="w-8 h-8 rounded-full bg-sidebar-primary flex items-center justify-center shrink-0 shadow-sm">
+          <span className="text-sidebar-primary-foreground font-bold text-sm">L2</span>
         </div>
         <AnimatePresence>
           {isExpanded && (
@@ -111,14 +111,14 @@ export function Sidebar() {
               exit={{ opacity: 0, x: -10 }}
               className="flex-1 whitespace-nowrap overflow-hidden"
             >
-              <h1 className="text-slate-100 font-semibold tracking-wide text-sm">LDO-2 EDMS</h1>
-              <p className="text-teal-400/80 text-[10px] uppercase tracking-wider">Enterprise</p>
+              <h1 className="text-sidebar-foreground font-semibold tracking-wide text-sm">LDO-2 EDMS</h1>
+              <p className="text-sidebar-foreground/60 text-[10px] uppercase tracking-wider">Enterprise</p>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      <div className="flex-1 overflow-y-auto py-2 px-3 space-y-1 scrollbar-thin scrollbar-thumb-teal-500/20 scrollbar-track-transparent">
+      <div className="flex-1 overflow-y-auto py-2 px-3 space-y-1 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
         {navGroups.map((group) => {
           const visibleItems = group.items.filter(item => !item.roles || hasPermission(item.roles));
           if (visibleItems.length === 0) return null;
@@ -132,11 +132,11 @@ export function Sidebar() {
                     exit={{ opacity: 0 }}
                     className="px-2 py-1 mb-1"
                   >
-                    <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">{group.label}</span>
+                    <span className="text-[10px] font-bold text-sidebar-foreground/60 uppercase tracking-widest">{group.label}</span>
                   </motion.div>
                 )}
               </AnimatePresence>
-              {!isExpanded && <div className="h-px bg-slate-700/30 mx-2 mb-2" />}
+              {!isExpanded && <div className="h-px bg-sidebar-border mx-2 mb-2" />}
               {visibleItems.map(item => {
                 const Icon = item.icon;
                 const isActive = item.path === '/'
@@ -151,14 +151,14 @@ export function Sidebar() {
                     title={!isExpanded ? item.label : undefined}
                     className={`relative flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 group ${
                       isActive
-                        ? 'bg-teal-500/15 text-teal-300 border border-teal-500/25'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                        ? 'bg-sidebar-accent text-sidebar-foreground border border-sidebar-border'
+                        : 'text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent'
                     }`}
                   >
                     {isActive && !isExpanded && (
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full bg-teal-500" />
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full bg-primary" />
                     )}
-                    <Icon className={`w-[18px] h-[18px] shrink-0 ${isActive ? 'text-teal-400' : ''}`} />
+                    <Icon className={`w-[18px] h-[18px] shrink-0 ${isActive ? 'text-primary' : ''}`} />
                     <AnimatePresence>
                       {isExpanded && (
                         <motion.span
@@ -174,7 +174,7 @@ export function Sidebar() {
                     {isActive && isExpanded && (
                       <motion.div
                         layoutId="activeIndicator"
-                        className="w-1 h-4 rounded-full bg-teal-500 shrink-0"
+                        className="w-1 h-4 rounded-full bg-primary shrink-0"
                       />
                     )}
                   </NavLink>

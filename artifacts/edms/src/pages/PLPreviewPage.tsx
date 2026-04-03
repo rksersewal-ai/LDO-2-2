@@ -118,7 +118,7 @@ export default function PLPreviewPage() {
         />
         <GlassCard className="p-8 text-center">
           <XCircle className="mx-auto h-10 w-10 text-rose-400" />
-          <p className="mt-4 text-sm text-slate-300">No PL draft is available for review.</p>
+          <p className="mt-4 text-sm text-foreground/90">No PL draft is available for review.</p>
         </GlassCard>
       </div>
     );
@@ -191,7 +191,7 @@ export default function PLPreviewPage() {
           <button
             type="button"
             onClick={() => navigate(draft.originPath)}
-            className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-teal-300 transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary/90 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to source page
@@ -218,14 +218,14 @@ export default function PLPreviewPage() {
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.3fr)_420px]">
         <div className="space-y-6">
           <GlassCard className="p-6">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/70 pb-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 pb-4">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Preview summary</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Preview summary</p>
                 <h2 className="mt-1 text-xl font-bold text-white">
                   PL-{effectivePayload.plNumber} · {effectivePayload.name}
                 </h2>
-                <p className="mt-1 text-sm text-slate-400">
-                  Prepared by <span className="text-teal-300">{user?.name ?? user?.username ?? 'Current user'}</span> on {formatDateTime(draft.updatedAt)}
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Prepared by <span className="text-primary/90">{user?.name ?? user?.username ?? 'Current user'}</span> on {formatDateTime(draft.updatedAt)}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -238,9 +238,9 @@ export default function PLPreviewPage() {
 
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               {previewFields(effectivePayload).map((field) => (
-                <div key={field.label} className="rounded-2xl border border-slate-800/70 bg-slate-950/35 px-4 py-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{field.label}</p>
-                  <p className="mt-2 text-sm text-slate-100 break-words">{stringifyValue(field.value)}</p>
+                <div key={field.label} className="rounded-2xl border border-border/70 bg-slate-950/35 px-4 py-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">{field.label}</p>
+                  <p className="mt-2 text-sm text-foreground break-words">{stringifyValue(field.value)}</p>
                 </div>
               ))}
             </div>
@@ -248,36 +248,36 @@ export default function PLPreviewPage() {
 
           <GlassCard className="p-6">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-teal-300" />
+              <CheckCircle2 className="h-4 w-4 text-primary/90" />
               <h2 className="text-sm font-bold text-white">User change log</h2>
             </div>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               This log shows the exact field-level changes the user is about to save.
             </p>
             <div className="mt-4 space-y-3">
               {effectiveChangeLog.length > 0 ? (
                 effectiveChangeLog.map((entry) => (
-                  <div key={entry.id} className="rounded-2xl border border-slate-800/70 bg-slate-950/35 px-4 py-3">
+                  <div key={entry.id} className="rounded-2xl border border-border/70 bg-slate-950/35 px-4 py-3">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <p className="text-sm font-semibold text-slate-100">{entry.label}</p>
-                      <p className="text-[11px] text-slate-500">
+                      <p className="text-sm font-semibold text-foreground">{entry.label}</p>
+                      <p className="text-[11px] text-muted-foreground">
                         {entry.changedBy} · {formatDateTime(entry.changedAt)}
                       </p>
                     </div>
                     <div className="mt-3 grid gap-3 md:grid-cols-2">
-                      <div className="rounded-xl border border-slate-800/70 bg-slate-900/40 px-3 py-2">
-                        <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500">Previous</p>
-                        <p className="mt-1 text-sm text-slate-300 break-words">{entry.before}</p>
+                      <div className="rounded-xl border border-border/70 bg-card/40 px-3 py-2">
+                        <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Previous</p>
+                        <p className="mt-1 text-sm text-foreground/90 break-words">{entry.before}</p>
                       </div>
                       <div className="rounded-xl border border-teal-500/20 bg-teal-500/8 px-3 py-2">
-                        <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500">Proposed</p>
+                        <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Proposed</p>
                         <p className="mt-1 text-sm text-teal-100 break-words">{entry.after}</p>
                       </div>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="rounded-2xl border border-slate-800/70 bg-slate-950/35 px-4 py-5 text-sm text-slate-500">
+                <div className="rounded-2xl border border-border/70 bg-slate-950/35 px-4 py-5 text-sm text-muted-foreground">
                   No pending field changes detected.
                 </div>
               )}
@@ -291,7 +291,7 @@ export default function PLPreviewPage() {
               <History className="h-4 w-4 text-amber-300" />
               <h2 className="text-sm font-bold text-white">Rollback history</h2>
             </div>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               Restore a previously saved PL snapshot, then save from this page to complete the rollback.
             </p>
 
@@ -303,13 +303,13 @@ export default function PLPreviewPage() {
                   className={`w-full rounded-2xl border px-4 py-3 text-left transition-all ${
                     !activeRevisionId
                       ? 'border-teal-400/30 bg-teal-500/10'
-                      : 'border-slate-800/70 bg-slate-950/35 hover:border-slate-700/80'
+                      : 'border-border/70 bg-slate-950/35 hover:border-border/80'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-sm font-semibold text-slate-100">Current saved version</p>
-                      <p className="mt-1 text-[11px] text-slate-500">
+                      <p className="text-sm font-semibold text-foreground">Current saved version</p>
+                      <p className="mt-1 text-[11px] text-muted-foreground">
                         Last updated {formatDateTime(draft.baseline.updatedAt || draft.baseline.createdAt)}
                       </p>
                     </div>
@@ -327,25 +327,25 @@ export default function PLPreviewPage() {
                     className={`w-full rounded-2xl border px-4 py-3 text-left transition-all ${
                       activeRevisionId === entry.id
                         ? 'border-amber-400/30 bg-amber-500/10'
-                        : 'border-slate-800/70 bg-slate-950/35 hover:border-slate-700/80'
+                        : 'border-border/70 bg-slate-950/35 hover:border-border/80'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-sm font-semibold text-slate-100">
+                        <p className="text-sm font-semibold text-foreground">
                           {entry.action === 'rollback' ? 'Rollback snapshot' : entry.action === 'create' ? 'Created record' : 'Saved revision'}
                         </p>
-                        <p className="mt-1 text-[11px] text-slate-500">
+                        <p className="mt-1 text-[11px] text-muted-foreground">
                           {entry.savedBy} · {formatDateTime(entry.savedAt)}
                         </p>
                       </div>
                       {activeRevisionId === entry.id && <Badge variant="warning">Rollback source</Badge>}
                     </div>
-                    {entry.note && <p className="mt-2 text-xs text-slate-400">{entry.note}</p>}
+                    {entry.note && <p className="mt-2 text-xs text-muted-foreground">{entry.note}</p>}
                   </button>
                 ))
               ) : (
-                <div className="rounded-2xl border border-slate-800/70 bg-slate-950/35 px-4 py-5 text-sm text-slate-500">
+                <div className="rounded-2xl border border-border/70 bg-slate-950/35 px-4 py-5 text-sm text-muted-foreground">
                   No saved PL revisions are available yet.
                 </div>
               )}

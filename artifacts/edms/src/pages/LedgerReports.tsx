@@ -91,9 +91,9 @@ export default function LedgerReports() {
     .sort((a, b) => b.avg - a.avg);
 
   const stats = [
-    { label: 'Total Records', value: analytics.totalRecords, icon: <FileBarChart className="w-4 h-4 text-teal-400" />, color: 'text-white' },
+    { label: 'Total Records', value: analytics.totalRecords, icon: <FileBarChart className="w-4 h-4 text-primary" />, color: 'text-white' },
     { label: 'On-Time Rate', value: `${analytics.onTimeRate}%`, icon: <TrendingUp className="w-4 h-4 text-emerald-400" />, color: analytics.onTimeRate >= 80 ? 'text-emerald-400' : 'text-amber-400' },
-    { label: 'Overdue', value: analytics.overdueCount, icon: <AlertCircle className="w-4 h-4 text-rose-400" />, color: analytics.overdueCount > 0 ? 'text-rose-400' : 'text-slate-300' },
+    { label: 'Overdue', value: analytics.overdueCount, icon: <AlertCircle className="w-4 h-4 text-rose-400" />, color: analytics.overdueCount > 0 ? 'text-rose-400' : 'text-foreground/90' },
     { label: 'Avg Completion', value: avgDays ? `${avgDays}d` : '—', icon: <Clock className="w-4 h-4 text-blue-400" />, color: 'text-blue-300' },
   ];
 
@@ -120,7 +120,7 @@ export default function LedgerReports() {
       <div className="flex items-end justify-between">
         <div>
           <h1 className="text-3xl font-bold text-white mb-2">Work Ledger Reports</h1>
-          <p className="text-slate-400 text-sm">Analytics and operational reporting for work records.</p>
+          <p className="text-muted-foreground text-sm">Analytics and operational reporting for work records.</p>
         </div>
         <Button variant="secondary" onClick={handleExport}><Download className="w-4 h-4" /> Export</Button>
       </div>
@@ -129,11 +129,11 @@ export default function LedgerReports() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {stats.map(s => (
           <GlassCard key={s.label} className="px-5 py-4 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-slate-800/60 flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-secondary/60 flex items-center justify-center shrink-0">
               {s.icon}
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">{s.label}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{s.label}</p>
               <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
             </div>
           </GlassCard>
@@ -146,7 +146,7 @@ export default function LedgerReports() {
         <SafeSection name="Work Volume Chart" minHeight="min-h-[300px]">
           <GlassCard className="p-6 h-full">
             <h2 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-              <FileBarChart className="w-4 h-4 text-teal-400" /> Work Volume by Category (Last 12 Months)
+              <FileBarChart className="w-4 h-4 text-primary" /> Work Volume by Category (Last 12 Months)
             </h2>
             {categoryData.length > 0 ? (
               <ResponsiveContainer width="100%" height={240}>
@@ -163,7 +163,7 @@ export default function LedgerReports() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <p className="text-sm text-slate-500 text-center py-12">No category data yet</p>
+              <p className="text-sm text-muted-foreground text-center py-12">No category data yet</p>
             )}
           </GlassCard>
         </SafeSection>
@@ -172,7 +172,7 @@ export default function LedgerReports() {
         <SafeSection name="Status Distribution Chart" minHeight="min-h-[300px]">
           <GlassCard className="p-6 h-full">
           <h2 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-            <CheckCircle className="w-4 h-4 text-teal-400" /> Records by Status
+            <CheckCircle className="w-4 h-4 text-primary" /> Records by Status
           </h2>
           {statusData.length > 0 ? (
             <ResponsiveContainer width="100%" height={240}>
@@ -200,7 +200,7 @@ export default function LedgerReports() {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <p className="text-sm text-slate-500 text-center py-12">No status data yet</p>
+            <p className="text-sm text-muted-foreground text-center py-12">No status data yet</p>
             )}
           </GlassCard>
         </SafeSection>
@@ -210,7 +210,7 @@ export default function LedgerReports() {
       <SafeSection name="Completion Time Chart" minHeight="min-h-[300px]">
         <GlassCard className="p-6 h-full">
         <h2 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-          <Clock className="w-4 h-4 text-teal-400" /> Avg Days to Completion vs Target (by Work Type)
+          <Clock className="w-4 h-4 text-primary" /> Avg Days to Completion vs Target (by Work Type)
         </h2>
         {avgDaysData.length > 0 ? (
           <ResponsiveContainer width="100%" height={Math.max(200, avgDaysData.length * 40)}>
@@ -232,7 +232,7 @@ export default function LedgerReports() {
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <p className="text-sm text-slate-500 text-center py-12">No completed records with day data yet</p>
+          <p className="text-sm text-muted-foreground text-center py-12">No completed records with day data yet</p>
         )}
         </GlassCard>
       </SafeSection>

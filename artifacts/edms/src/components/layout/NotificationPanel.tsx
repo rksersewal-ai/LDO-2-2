@@ -11,13 +11,13 @@ const typeIcon = (type: string) => {
   if (type === 'approval') return <CheckSquare className="w-4 h-4 text-amber-400" />;
   if (type === 'ocr') return <ServerCog className="w-4 h-4 text-blue-400" />;
   if (type === 'case') return <AlertCircle className="w-4 h-4 text-rose-400" />;
-  if (type === 'work') return <Briefcase className="w-4 h-4 text-teal-400" />;
+  if (type === 'work') return <Briefcase className="w-4 h-4 text-primary" />;
   if (type === 'design-change') return <AlertTriangle className="w-4 h-4 text-amber-300" />;
   if (type === 'dedup_review') return <AlertTriangle className="w-4 h-4 text-violet-300" />;
   if (type === 'indexing_failure') return <ServerCog className="w-4 h-4 text-rose-300" />;
   if (type === 'change_request') return <GitBranch className="w-4 h-4 text-cyan-300" />;
   if (type === 'change_notice') return <GitCommitHorizontal className="w-4 h-4 text-indigo-300" />;
-  return <Bell className="w-4 h-4 text-slate-400" />;
+  return <Bell className="w-4 h-4 text-muted-foreground" />;
 };
 
 export function NotificationPanel({
@@ -58,41 +58,41 @@ export function NotificationPanel({
   };
 
   return (
-    <div className="absolute right-0 top-full mt-2 w-96 bg-slate-900/95 backdrop-blur-xl border border-teal-500/20 rounded-2xl shadow-2xl shadow-teal-950/50 z-50 overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50">
+    <div className="absolute right-0 top-full mt-2 w-96 bg-card/95 backdrop-blur-xl border border-teal-500/20 rounded-2xl shadow-2xl shadow-teal-950/50 z-50 overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-border">
         <div className="flex items-center gap-2">
-          <Bell className="w-4 h-4 text-teal-400" />
-          <span className="text-sm font-semibold text-slate-200">Notifications</span>
+          <Bell className="w-4 h-4 text-primary" />
+          <span className="text-sm font-semibold text-foreground">Notifications</span>
           {unread > 0 && (
             <span className="bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{unread}</span>
           )}
         </div>
-        <button onClick={onClose} className="text-slate-500 hover:text-slate-300 transition-colors">
+        <button onClick={onClose} className="text-muted-foreground hover:text-foreground/90 transition-colors">
           <X className="w-4 h-4" />
         </button>
       </div>
       <div className="max-h-80 overflow-y-auto">
         {documentChangeAlerts.length > 0 && (
-          <div className="border-b border-slate-800/50">
+          <div className="border-b border-border/50">
             <div className="px-5 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-300/80 bg-amber-500/8">
               Linked document change alerts
             </div>
             {documentChangeAlerts.map((alert) => (
               <div
                 key={alert.id}
-                className="px-5 py-4 border-b border-slate-800/40 hover:bg-amber-500/6 transition-colors cursor-pointer"
+                className="px-5 py-4 border-b border-border/40 hover:bg-amber-500/6 transition-colors cursor-pointer"
                 onClick={() => openDocumentAlert(alert)}
               >
                 <div className="flex items-start gap-3">
                   <div className="mt-0.5 shrink-0">{typeIcon('design-change')}</div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-xs font-semibold text-slate-100">PL {alert.plNumber} change review</span>
+                      <span className="text-xs font-semibold text-foreground">PL {alert.plNumber} change review</span>
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
                     </div>
-                    <p className="text-xs text-slate-300 leading-relaxed">{alert.documentName}</p>
+                    <p className="text-xs text-foreground/90 leading-relaxed">{alert.documentName}</p>
                     <p className="text-[11px] text-amber-200 mt-1">{alert.message}</p>
-                    <p className="text-[10px] text-slate-500 mt-1">
+                    <p className="text-[10px] text-muted-foreground mt-1">
                       {alert.designSupervisor ? `Design Supervisor: ${alert.designSupervisor}` : 'Supervisor review pending'}
                     </p>
                   </div>
@@ -130,15 +130,15 @@ export function NotificationPanel({
                         Review
                       </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48 border border-slate-700/60 bg-slate-950 text-slate-200">
+                    <DropdownMenuContent align="end" className="w-48 border border-border/60 bg-slate-950 text-foreground">
                       <DropdownMenuItem
-                        className="focus:bg-slate-800"
+                        className="focus:bg-secondary"
                         onSelect={() => void onApproveAlert?.(alert.id, 'Approved from header notification')}
                       >
                         Approve update
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        className="focus:bg-slate-800 text-rose-200 focus:text-rose-100"
+                        className="focus:bg-secondary text-rose-200 focus:text-rose-100"
                         onSelect={() => void onBypassAlert?.(alert.id, { bypassReason: 'Bypassed from header notification' })}
                       >
                         Bypass update
@@ -158,15 +158,15 @@ export function NotificationPanel({
           <div
             key={n.id}
             onClick={() => openNotification(n)}
-            className="flex items-start gap-3 px-5 py-4 border-b border-slate-800/50 hover:bg-slate-800/30 cursor-pointer transition-colors"
+            className="flex items-start gap-3 px-5 py-4 border-b border-border/50 hover:bg-secondary/30 cursor-pointer transition-colors"
           >
             <div className="mt-0.5 shrink-0">{typeIcon(n.type)}</div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
-                <span className="text-xs font-semibold text-slate-200">{n.title}</span>
+                <span className="text-xs font-semibold text-foreground">{n.title}</span>
                 <span className="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0" />
               </div>
-              <p className="text-xs text-slate-400 leading-relaxed">{n.subtitle || 'Actionable workflow item waiting in the queue.'}</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">{n.subtitle || 'Actionable workflow item waiting in the queue.'}</p>
               <span className="text-[10px] text-slate-600 mt-1 block">{n.created_at || 'Now'}</span>
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 {previewDocumentId && (
@@ -206,12 +206,12 @@ export function NotificationPanel({
                         Actions
                       </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48 border border-slate-700/60 bg-slate-950 text-slate-200">
+                    <DropdownMenuContent align="end" className="w-48 border border-border/60 bg-slate-950 text-foreground">
                       {actions.map((action) => (
                         <DropdownMenuItem
                           key={action.key}
                           disabled={busyItemId === `${n.id}:${action.key}`}
-                          className={`focus:bg-slate-800 ${action.variant === 'danger' ? 'text-rose-200 focus:text-rose-100' : ''}`}
+                          className={`focus:bg-secondary ${action.variant === 'danger' ? 'text-rose-200 focus:text-rose-100' : ''}`}
                           onSelect={() => void onWorkflowAction?.(n, action)}
                         >
                           {busyItemId === `${n.id}:${action.key}` ? 'Working...' : action.label}
@@ -228,13 +228,13 @@ export function NotificationPanel({
           </div>
         )})}
       </div>
-      <div className="px-5 py-3 border-t border-slate-700/50">
+      <div className="px-5 py-3 border-t border-border">
         <button
           onClick={() => {
             navigate('/notifications');
             onClose();
           }}
-          className="text-xs text-teal-400 hover:text-teal-300 transition-colors flex items-center gap-1"
+          className="text-xs text-primary hover:text-primary/90 transition-colors flex items-center gap-1"
         >
           <ExternalLink className="w-3 h-3" /> View all notifications
         </button>

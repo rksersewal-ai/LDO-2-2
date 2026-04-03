@@ -363,7 +363,7 @@ export default function Cases() {
                 <Badge variant={statusVariant(displayStatus)}>{displayStatus}</Badge>
                 <Badge variant={severityVariant(displaySeverity)}>{displaySeverity}</Badge>
               </div>
-              <p className="text-sm text-slate-400 mt-1 font-mono pl-8">
+              <p className="text-sm text-muted-foreground mt-1 font-mono pl-8">
                 {selectedCase.caseNumber} · Updated {formatDate(selectedCase.updatedAt)}
               </p>
             </div>
@@ -373,7 +373,7 @@ export default function Cases() {
             <div className="lg:col-span-2 space-y-6">
               <GlassCard className="p-6">
                 <h2 className="text-lg font-bold text-white mb-4">Case Description</h2>
-                <p className="text-slate-300 leading-relaxed">{selectedCase.description}</p>
+                <p className="text-foreground/90 leading-relaxed">{selectedCase.description}</p>
               </GlassCard>
 
               <GlassCard className="p-6">
@@ -389,23 +389,23 @@ export default function Cases() {
                       <div
                         key={document.id}
                         {...getDocumentContextAttributes(document.id, document.name)}
-                        className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/30 border border-slate-700/50"
+                        className="flex items-center gap-3 p-3 rounded-xl bg-secondary/30 border border-border"
                       >
                         <button
-                          className="flex flex-1 items-center gap-3 text-left hover:text-teal-300 transition-colors"
+                          className="flex flex-1 items-center gap-3 text-left hover:text-primary/90 transition-colors"
                           onClick={() => navigate(`/documents/${document.id}`)}
                         >
-                          <FileText className="w-4 h-4 text-teal-500" />
+                          <FileText className="w-4 h-4 text-primary" />
                           <div className="min-w-0">
-                            <p className="text-sm text-teal-400 font-mono">{document.id}</p>
-                            <p className="text-xs text-slate-400 truncate">{document.name}</p>
+                            <p className="text-sm text-primary font-mono">{document.id}</p>
+                            <p className="text-xs text-muted-foreground truncate">{document.name}</p>
                           </div>
                         </button>
                         <DocumentPreviewButton
                           documentId={document.id}
                           title={document.name}
                           iconOnly
-                          className="h-8 min-h-0 px-2 text-slate-300 hover:text-teal-200"
+                          className="h-8 min-h-0 px-2 text-foreground/90 hover:text-teal-200"
                         />
                         <Button variant="ghost" size="sm" onClick={() => handleUnlinkDocument(document.id)}>
                           <X className="w-3.5 h-3.5" />
@@ -414,7 +414,7 @@ export default function Cases() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-slate-500">No documents linked to this case yet.</p>
+                  <p className="text-sm text-muted-foreground">No documents linked to this case yet.</p>
                 )}
               </GlassCard>
 
@@ -430,15 +430,15 @@ export default function Cases() {
                     {selectedComments.map((comment) => (
                       <div key={comment.id} className="rounded-xl border border-white/6 bg-slate-950/35 px-4 py-3">
                         <div className="flex items-center justify-between gap-3">
-                          <p className="text-sm font-medium text-slate-200">{comment.author}</p>
-                          <p className="text-[11px] text-slate-500">{formatDate(comment.createdAt)}</p>
+                          <p className="text-sm font-medium text-foreground">{comment.author}</p>
+                          <p className="text-[11px] text-muted-foreground">{formatDate(comment.createdAt)}</p>
                         </div>
-                        <p className="mt-2 text-sm text-slate-400">{comment.text}</p>
+                        <p className="mt-2 text-sm text-muted-foreground">{comment.text}</p>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-slate-500">No comments recorded for this case yet.</p>
+                  <p className="text-sm text-muted-foreground">No comments recorded for this case yet.</p>
                 )}
               </GlassCard>
             </div>
@@ -453,27 +453,27 @@ export default function Cases() {
                     { icon: Clock, label: 'Updated', value: formatDate(selectedCase.updatedAt) },
                   ].map((field) => (
                     <div key={field.label} className="flex items-center gap-3">
-                      <field.icon className="w-4 h-4 text-slate-500 shrink-0" />
+                      <field.icon className="w-4 h-4 text-muted-foreground shrink-0" />
                       <div>
-                        <p className="text-xs text-slate-500">{field.label}</p>
-                        <p className="text-sm text-slate-200">{field.value}</p>
+                        <p className="text-xs text-muted-foreground">{field.label}</p>
+                        <p className="text-sm text-foreground">{field.value}</p>
                       </div>
                     </div>
                   ))}
 
                   <div className="flex items-center gap-3">
-                    <LinkIcon className="w-4 h-4 text-slate-500 shrink-0" />
+                    <LinkIcon className="w-4 h-4 text-muted-foreground shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-xs text-slate-500">Linked PL</p>
+                      <p className="text-xs text-muted-foreground">Linked PL</p>
                       {selectedCase.plNumber ? (
                         <button
                           onClick={() => navigate(`/pl/${selectedCase.plNumber}`)}
-                          className="text-sm text-teal-300 hover:text-teal-200 transition-colors"
+                          className="text-sm text-primary/90 hover:text-teal-200 transition-colors"
                         >
                           {selectedCase.plNumber} {selectedPl ? `· ${selectedPl.name}` : ''}
                         </button>
                       ) : (
-                        <p className="text-sm text-slate-400">No PL linked</p>
+                        <p className="text-sm text-muted-foreground">No PL linked</p>
                       )}
                     </div>
                   </div>
@@ -514,16 +514,16 @@ export default function Cases() {
         </div>
 
         <Dialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen}>
-          <DialogContent className="border border-slate-700/60 bg-slate-950 text-slate-100 sm:max-w-[460px]">
+          <DialogContent className="border border-border/60 bg-slate-950 text-foreground sm:max-w-[460px]">
             <DialogHeader>
               <DialogTitle>Update Case Status</DialogTitle>
-              <DialogDescription className="text-slate-400">
+              <DialogDescription className="text-muted-foreground">
                 Apply a workflow status to {selectedCase.caseNumber} without leaving the current review context.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Status</label>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Status</label>
                 <Select value={statusDraft} onChange={(event) => setStatusDraft(event.target.value as DisplayStatus)}>
                   <option value="Open">Open</option>
                   <option value="In Progress">In Progress</option>
@@ -531,7 +531,7 @@ export default function Cases() {
                 </Select>
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Operator Note</label>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Operator Note</label>
                 <Textarea value={statusNote} onChange={(event) => setStatusNote(event.target.value)} placeholder="Optional status rationale for the case log." />
               </div>
             </div>
@@ -543,10 +543,10 @@ export default function Cases() {
         </Dialog>
 
         <Dialog open={commentDialogOpen} onOpenChange={setCommentDialogOpen}>
-          <DialogContent className="border border-slate-700/60 bg-slate-950 text-slate-100 sm:max-w-[520px]">
+          <DialogContent className="border border-border/60 bg-slate-950 text-foreground sm:max-w-[520px]">
             <DialogHeader>
               <DialogTitle>Add Case Comment</DialogTitle>
-              <DialogDescription className="text-slate-400">
+              <DialogDescription className="text-muted-foreground">
                 Add a review note, engineering observation, or follow-up instruction.
               </DialogDescription>
             </DialogHeader>
@@ -559,10 +559,10 @@ export default function Cases() {
         </Dialog>
 
         <Dialog open={linkDialogOpen} onOpenChange={setLinkDialogOpen}>
-          <DialogContent className="border border-slate-700/60 bg-slate-950 text-slate-100 sm:max-w-[700px]">
+          <DialogContent className="border border-border/60 bg-slate-950 text-foreground sm:max-w-[700px]">
             <DialogHeader>
               <DialogTitle>Link Document</DialogTitle>
-              <DialogDescription className="text-slate-400">
+              <DialogDescription className="text-muted-foreground">
                 Search the repository and link one of the accessible documents to this case.
               </DialogDescription>
             </DialogHeader>
@@ -586,29 +586,29 @@ export default function Cases() {
                         handleLinkDocument(document.id);
                       }
                     }}
-                    className="w-full rounded-xl border border-slate-700/50 bg-slate-900/50 px-4 py-3 text-left transition-colors hover:border-teal-500/40 hover:bg-slate-900"
+                    className="w-full rounded-xl border border-border bg-secondary/50 px-4 py-3 text-left transition-colors hover:border-teal-500/40 hover:bg-card"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div>
                         <p className="text-sm font-medium text-white">{document.name}</p>
-                        <p className="mt-1 text-[11px] font-mono text-teal-400">{document.id}</p>
+                        <p className="mt-1 text-[11px] font-mono text-primary">{document.id}</p>
                       </div>
                       <div className="flex items-center gap-2">
                         <DocumentPreviewButton
                           documentId={document.id}
                           title={document.name}
                           iconOnly
-                          className="h-7 min-h-0 px-2 text-slate-300 hover:text-teal-200"
+                          className="h-7 min-h-0 px-2 text-foreground/90 hover:text-teal-200"
                         />
                         <Badge variant="info">{document.type}</Badge>
                       </div>
                     </div>
-                    <p className="mt-2 text-xs text-slate-500">
+                    <p className="mt-2 text-xs text-muted-foreground">
                       Linked PL: {document.linkedPL} · Revision {document.revision}
                     </p>
                   </div>
                 )) : (
-                  <p className="rounded-xl border border-white/6 bg-slate-950/35 px-4 py-5 text-sm text-slate-500">
+                  <p className="rounded-xl border border-white/6 bg-slate-950/35 px-4 py-5 text-sm text-muted-foreground">
                     No matching documents available to link.
                   </p>
                 )}
@@ -618,15 +618,15 @@ export default function Cases() {
         </Dialog>
 
         <Dialog open={closeDialogOpen} onOpenChange={setCloseDialogOpen}>
-          <DialogContent className="border border-rose-500/25 bg-slate-950 text-slate-100 sm:max-w-[460px]">
+          <DialogContent className="border border-rose-500/25 bg-slate-950 text-foreground sm:max-w-[460px]">
             <DialogHeader>
               <DialogTitle>Close Case</DialogTitle>
-              <DialogDescription className="text-slate-400">
+              <DialogDescription className="text-muted-foreground">
                 This updates the case lifecycle and keeps the current filters and list position intact when you return.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-3">
-              <p className="text-sm text-slate-300">
+              <p className="text-sm text-foreground/90">
                 {selectedCase.caseNumber} will be marked as closed. Add an optional resolution note below.
               </p>
               <Textarea value={statusNote} onChange={(event) => setStatusNote(event.target.value)} placeholder="Optional close-out note or resolution summary." />
@@ -647,7 +647,7 @@ export default function Cases() {
         <div className="flex items-end justify-between">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Cases</h1>
-            <p className="text-slate-400 text-sm">Engineering discrepancy and compliance case management.</p>
+            <p className="text-muted-foreground text-sm">Engineering discrepancy and compliance case management.</p>
           </div>
           <Button onClick={() => setNewCaseOpen(true)}>
             <ShieldAlert className="w-4 h-4" /> New Case
@@ -656,7 +656,7 @@ export default function Cases() {
 
         <div className="flex flex-wrap gap-2 items-center">
           <div className="relative flex-1 min-w-48">
-            <FileSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <FileSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search cases by ID, title..."
               className="pl-9 w-full"
@@ -670,7 +670,7 @@ export default function Cases() {
                 key={status}
                 onClick={() => setStatusFilter(status)}
                 className={`px-3 py-2 rounded-xl text-xs font-medium border transition-colors ${
-                  statusFilter === status ? 'bg-teal-500/20 border-teal-500/40 text-teal-300' : 'bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-slate-200'
+                  statusFilter === status ? 'bg-teal-500/20 border-teal-500/40 text-primary/90' : 'bg-secondary/50 border-border text-muted-foreground hover:text-foreground'
                 }`}
               >
                 {status}
@@ -692,14 +692,14 @@ export default function Cases() {
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2 flex-wrap">
                     <ShieldAlert className="w-4 h-4 text-rose-400" />
-                    <span className="font-mono text-xs text-teal-400">{record.caseNumber}</span>
+                    <span className="font-mono text-xs text-primary">{record.caseNumber}</span>
                     <Badge variant={statusVariant(displayStatus)}>{displayStatus}</Badge>
                     <Badge variant={severityVariant(displaySeverity)}>{displaySeverity}</Badge>
                   </div>
                 </div>
-                <h3 className="text-sm font-semibold text-slate-200 mb-2">{record.title}</h3>
-                <p className="text-xs text-slate-400 line-clamp-2 mb-3">{record.description}</p>
-                <div className="flex items-center justify-between text-xs text-slate-500">
+                <h3 className="text-sm font-semibold text-foreground mb-2">{record.title}</h3>
+                <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{record.description}</p>
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span className="flex items-center gap-1"><User className="w-3 h-3" />{record.assignee}</span>
                   <span className="flex items-center gap-1"><Clock className="w-3 h-3" />Updated {formatDate(record.updatedAt)}</span>
                 </div>
@@ -710,8 +710,8 @@ export default function Cases() {
 
         {filtered.length === 0 && (
           <GlassCard className="p-12 text-center">
-            <ShieldAlert className="w-10 h-10 mx-auto mb-2 opacity-30 text-slate-400" />
-            <p className="text-slate-500">No cases match the current filters</p>
+            <ShieldAlert className="w-10 h-10 mx-auto mb-2 opacity-30 text-muted-foreground" />
+            <p className="text-muted-foreground">No cases match the current filters</p>
           </GlassCard>
         )}
       </div>
@@ -722,29 +722,29 @@ export default function Cases() {
           setNewCaseForm(DEFAULT_NEW_CASE_FORM);
         }
       }}>
-        <DialogContent className="border border-slate-700/60 bg-slate-950 text-slate-100 sm:max-w-[620px]">
+        <DialogContent className="border border-border/60 bg-slate-950 text-foreground sm:max-w-[620px]">
           <DialogHeader>
             <DialogTitle>Create New Case</DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogDescription className="text-muted-foreground">
               Start a new EDMS discrepancy or compliance case and link it to the relevant PL at creation time.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Title</label>
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Title</label>
               <Input value={newCaseForm.title} onChange={(event) => setNewCaseForm((current) => ({ ...current, title: event.target.value }))} placeholder="Brief case title" />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Description</label>
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Description</label>
               <Textarea value={newCaseForm.description} onChange={(event) => setNewCaseForm((current) => ({ ...current, description: event.target.value }))} placeholder="Describe the discrepancy, compliance issue, or investigation." />
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Assignee</label>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Assignee</label>
                 <Input value={newCaseForm.assignee} onChange={(event) => setNewCaseForm((current) => ({ ...current, assignee: event.target.value }))} placeholder="Responsible engineer or records owner" />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Severity</label>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Severity</label>
                 <Select value={newCaseForm.severity} onChange={(event) => setNewCaseForm((current) => ({ ...current, severity: event.target.value as DisplaySeverity }))}>
                   <option value="Low">Low</option>
                   <option value="Medium">Medium</option>
@@ -754,7 +754,7 @@ export default function Cases() {
               </div>
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Linked PL</label>
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Linked PL</label>
               <PLNumberSelect
                 value={newCaseForm.plNumber}
                 onChange={(plNumber) => setNewCaseForm((current) => ({ ...current, plNumber }))}

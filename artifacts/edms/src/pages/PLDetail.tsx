@@ -34,7 +34,7 @@ import {
 function NodeIcon({ type, className = "w-5 h-5" }: { type: string; className?: string }) {
   if (type === 'assembly') return <Box className={`${className} text-blue-400`} />;
   if (type === 'sub-assembly') return <Layers className={`${className} text-indigo-400`} />;
-  return <Cpu className={`${className} text-slate-400`} />;
+  return <Cpu className={`${className} text-muted-foreground`} />;
 }
 
 function tagColor(tag: string) {
@@ -43,7 +43,7 @@ function tagColor(tag: string) {
   if (t.includes('high voltage')) return 'bg-amber-900/50 text-amber-300 border-amber-500/30';
   if (t.includes('electrical') || t.includes('electronics')) return 'bg-blue-900/50 text-blue-300 border-blue-500/30';
   if (t.includes('rotating') || t.includes('precision')) return 'bg-purple-900/50 text-purple-300 border-purple-500/30';
-  return 'bg-slate-800 text-slate-400 border-slate-700';
+  return 'bg-secondary text-muted-foreground border-border';
 }
 
 function statusBadgeVariant(status: string): "default" | "success" | "warning" | "danger" | "processing" {
@@ -57,13 +57,13 @@ const CATEGORY_COLORS: Record<string, string> = {
   'CAT-A': 'bg-rose-500/10 text-rose-300 border-rose-500/30',
   'CAT-B': 'bg-amber-500/10 text-amber-300 border-amber-500/30',
   'CAT-C': 'bg-blue-500/10 text-blue-300 border-blue-500/30',
-  'CAT-D': 'bg-slate-700/50 text-slate-400 border-slate-600/40',
+  'CAT-D': 'bg-slate-700/50 text-muted-foreground border-slate-600/40',
 };
 
 const EC_STATUS_VARIANT: Record<string, string> = {
   OPEN: 'bg-blue-500/10 text-blue-300 border-blue-500/30',
   IN_REVIEW: 'bg-amber-500/10 text-amber-300 border-amber-500/30',
-  IMPLEMENTED: 'bg-teal-500/10 text-teal-300 border-teal-500/30',
+  IMPLEMENTED: 'bg-teal-500/10 text-primary/90 border-teal-500/30',
   RELEASED: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30',
 };
 
@@ -77,7 +77,7 @@ const EC_STATUS_DOT: Record<string, string> = {
 function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-slate-400 mb-1.5">{label}</label>
+      <label className="block text-xs font-medium text-muted-foreground mb-1.5">{label}</label>
       {children}
       {error && <p className="text-[10px] text-rose-400 mt-1">{error}</p>}
     </div>
@@ -88,8 +88,8 @@ function InfoRow({ label, value, mono }: { label: string; value?: string | null;
   if (!value) return null;
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-500">{label}</span>
-      <span className={`text-sm text-slate-200 ${mono ? 'font-mono text-teal-300' : ''}`}>{value}</span>
+      <span className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground">{label}</span>
+      <span className={`text-sm text-foreground ${mono ? 'font-mono text-primary/90' : ''}`}>{value}</span>
     </div>
   );
 }
@@ -159,7 +159,7 @@ function DocumentLinkingSection({
       {/* Left Column: Search & Available Documents */}
       <GlassCard className="p-6 flex flex-col">
         <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-          <FileSearch className="w-4 h-4 text-teal-400" />
+          <FileSearch className="w-4 h-4 text-primary" />
           Search & Link Documents
         </h3>
         
@@ -174,7 +174,7 @@ function DocumentLinkingSection({
 
         <div className="flex-1 overflow-y-auto space-y-2 custom-scrollbar">
           {documentsLoading && (
-            <div className="text-center py-8 text-slate-500">
+            <div className="text-center py-8 text-muted-foreground">
               <p className="text-xs">Loading documents...</p>
             </div>
           )}
@@ -182,13 +182,13 @@ function DocumentLinkingSection({
             availableDocs.map(doc => (
               <div
                 key={doc.id}
-                className="p-3 rounded-lg bg-slate-800/40 border border-slate-700/50 hover:border-teal-500/30 transition-all group"
+                className="p-3 rounded-lg bg-secondary/40 border border-border hover:border-teal-500/30 transition-all group"
               >
                 <div className="flex items-start gap-2 mb-2">
-                  <FileText className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
+                  <FileText className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-slate-200 group-hover:text-teal-200 truncate">{doc.name}</p>
-                    <p className="text-[10px] text-slate-500 font-mono mt-0.5">{doc.id}</p>
+                    <p className="text-xs font-semibold text-foreground group-hover:text-teal-200 truncate">{doc.name}</p>
+                    <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{doc.id}</p>
                   </div>
                 </div>
                 <Button
@@ -202,7 +202,7 @@ function DocumentLinkingSection({
               </div>
             ))
           ) : (
-            <div className="text-center py-8 text-slate-500">
+            <div className="text-center py-8 text-muted-foreground">
               <FileSearch className="w-8 h-8 mx-auto mb-2 opacity-30" />
               <p className="text-xs">
                 {searchQuery ? 'No matching documents' : 'All documents linked'}
@@ -215,9 +215,9 @@ function DocumentLinkingSection({
       {/* Right Column: Linked Documents */}
       <GlassCard className="p-6 flex flex-col">
         <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-          <FileText className="w-4 h-4 text-teal-400" />
+          <FileText className="w-4 h-4 text-primary" />
           Linked Documents
-          <span className="ml-auto text-xs text-slate-500 bg-slate-800/50 px-2 py-0.5 rounded-full">
+          <span className="ml-auto text-xs text-muted-foreground bg-secondary/50 px-2 py-0.5 rounded-full">
             {linkedDocs.length}
           </span>
         </h3>
@@ -232,7 +232,7 @@ function DocumentLinkingSection({
               <div
                 key={doc.id}
                 {...getDocumentContextAttributes(doc.id, doc.name)}
-                className={`p-3 rounded-lg bg-slate-800/40 border transition-all ${alert ? 'border-amber-500/30 hover:border-amber-400/50' : 'border-teal-500/20 hover:border-teal-500/40'} ${isFocused ? 'ring-2 ring-amber-400/60 shadow-[0_0_0_1px_rgba(251,191,36,0.18)]' : ''}`}
+                className={`p-3 rounded-lg bg-secondary/40 border transition-all ${alert ? 'border-amber-500/30 hover:border-amber-400/50' : 'border-teal-500/20 hover:border-teal-500/40'} ${isFocused ? 'ring-2 ring-amber-400/60 shadow-[0_0_0_1px_rgba(251,191,36,0.18)]' : ''}`}
               >
                 {alert && (
                   <div className="mb-2 flex items-center justify-between gap-2 rounded-lg border border-amber-500/25 bg-amber-500/10 px-2.5 py-1.5">
@@ -253,10 +253,10 @@ function DocumentLinkingSection({
                   </div>
                 )}
                 <div className="flex items-start gap-2 mb-2">
-                  <FileText className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" />
+                  <FileText className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-slate-200 truncate">{doc.name}</p>
-                    <p className="text-[10px] text-slate-500 font-mono mt-0.5">{doc.id}</p>
+                    <p className="text-xs font-semibold text-foreground truncate">{doc.name}</p>
+                    <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{doc.id}</p>
                   </div>
                 </div>
                 <div className="flex gap-2 text-[10px]">
@@ -292,7 +292,7 @@ function DocumentLinkingSection({
               })()
             ))
           ) : (
-            <div className="text-center py-8 text-slate-500">
+            <div className="text-center py-8 text-muted-foreground">
               <FileText className="w-8 h-8 mx-auto mb-2 opacity-30" />
               <p className="text-xs">No documents linked yet</p>
               <p className="text-[10px] text-slate-600 mt-1">Search and link documents from the left panel</p>
@@ -379,7 +379,7 @@ function EditPLSlideOver({ pl, onClose, onSave }: EditPLSlideOverProps) {
 
   const F = ({ label, children }: { label: string; children: React.ReactNode }) => (
     <div>
-      <label className="block text-[10px] uppercase tracking-widest font-semibold text-slate-500 mb-1">{label}</label>
+      <label className="block text-[10px] uppercase tracking-widest font-semibold text-muted-foreground mb-1">{label}</label>
       {children}
     </div>
   );
@@ -397,13 +397,13 @@ function EditPLSlideOver({ pl, onClose, onSave }: EditPLSlideOverProps) {
     <>
       <div className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm" onClick={onClose} />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="w-full max-w-2xl bg-slate-900 border border-slate-700/60 rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700/50 shrink-0">
+        <div className="w-full max-w-2xl bg-card border border-border/60 rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
           <div>
             <h2 className="text-base font-bold text-white">Edit PL Record</h2>
-            <p className="text-xs text-slate-500 font-mono mt-0.5">{pl.plNumber} — {pl.name}</p>
+            <p className="text-xs text-muted-foreground font-mono mt-0.5">{pl.plNumber} — {pl.name}</p>
           </div>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-300 hover:bg-slate-700/50 transition-colors">
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground/90 hover:bg-slate-700/50 transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -411,10 +411,10 @@ function EditPLSlideOver({ pl, onClose, onSave }: EditPLSlideOverProps) {
         <div className="flex-1 overflow-y-auto custom-scrollbar px-6 py-5 space-y-5">
           {/* Identity */}
           <section>
-            <h3 className="text-[10px] uppercase tracking-widest font-bold text-teal-500 mb-3">Identity</h3>
+            <h3 className="text-[10px] uppercase tracking-widest font-bold text-primary mb-3">Identity</h3>
             <div className="space-y-3">
               <F label="PL Number (read-only)">
-                <div className="bg-slate-800/40 border border-slate-700/30 rounded-xl px-4 py-2.5 text-sm font-mono text-slate-400">{pl.plNumber}</div>
+                <div className="bg-secondary/40 border border-border/30 rounded-xl px-4 py-2.5 text-sm font-mono text-muted-foreground">{pl.plNumber}</div>
               </F>
               <F label="Name *">
                 <TextInput field="name" placeholder="Component name" />
@@ -424,7 +424,7 @@ function EditPLSlideOver({ pl, onClose, onSave }: EditPLSlideOverProps) {
                   value={form.description}
                   onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                   rows={3}
-                  className="w-full bg-slate-950/60 border border-slate-700/50 text-slate-200 text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/30 transition-all placeholder:text-slate-600 resize-none"
+                  className="w-full bg-slate-950/60 border border-border text-foreground text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/30 transition-all placeholder:text-slate-600 resize-none"
                 />
               </F>
             </div>
@@ -432,7 +432,7 @@ function EditPLSlideOver({ pl, onClose, onSave }: EditPLSlideOverProps) {
 
           {/* Classification */}
           <section>
-            <h3 className="text-[10px] uppercase tracking-widest font-bold text-teal-500 mb-3">Classification</h3>
+            <h3 className="text-[10px] uppercase tracking-widest font-bold text-primary mb-3">Classification</h3>
             <div className="grid grid-cols-2 gap-3">
               <F label="Inspection Category">
                 <Select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value as InspectionCategory }))} className="w-full">
@@ -494,7 +494,7 @@ function EditPLSlideOver({ pl, onClose, onSave }: EditPLSlideOverProps) {
                       onChange={e => setForm(f => ({ ...f, eligibilityCriteria: e.target.value }))}
                       rows={3}
                       placeholder="Document the eligibility criteria for this NVD item (e.g., design standards, performance requirements, compliance measures)..."
-                      className="w-full bg-slate-950/60 border border-slate-700/50 text-slate-200 text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 transition-all placeholder:text-slate-600 resize-none"
+                      className="w-full bg-slate-950/60 border border-border text-foreground text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 transition-all placeholder:text-slate-600 resize-none"
                     />
                   </F>
                   <F label="Procurement Conditions">
@@ -503,7 +503,7 @@ function EditPLSlideOver({ pl, onClose, onSave }: EditPLSlideOverProps) {
                       onChange={e => setForm(f => ({ ...f, procurementConditions: e.target.value }))}
                       rows={3}
                       placeholder="Optional procurement conditions, restrictions, or sourcing notes..."
-                      className="w-full bg-slate-950/60 border border-slate-700/50 text-slate-200 text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 transition-all placeholder:text-slate-600 resize-none"
+                      className="w-full bg-slate-950/60 border border-border text-foreground text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 transition-all placeholder:text-slate-600 resize-none"
                     />
                   </F>
                 </div>
@@ -515,10 +515,10 @@ function EditPLSlideOver({ pl, onClose, onSave }: EditPLSlideOverProps) {
           <section>
             <h3 className="text-[10px] uppercase tracking-widest font-bold text-rose-400 mb-3">Safety</h3>
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 rounded-xl bg-slate-800/40 border border-slate-700/30">
+              <div className="flex items-center justify-between p-3 rounded-xl bg-secondary/40 border border-border/30">
                 <div>
-                  <p className="text-sm font-medium text-slate-200">Safety Vital Component</p>
-                  <p className="text-xs text-slate-500">Triggers additional oversight requirements</p>
+                  <p className="text-sm font-medium text-foreground">Safety Vital Component</p>
+                  <p className="text-xs text-muted-foreground">Triggers additional oversight requirements</p>
                 </div>
                 <Switch
                   checked={form.safetyCritical}
@@ -546,7 +546,7 @@ function EditPLSlideOver({ pl, onClose, onSave }: EditPLSlideOverProps) {
                   onChange={e => setForm(f => ({ ...f, consequences: e.target.value }))}
                   rows={2}
                   placeholder="Describe consequences..."
-                  className="w-full bg-slate-950/60 border border-slate-700/50 text-slate-200 text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/30 transition-all placeholder:text-slate-600 resize-none"
+                  className="w-full bg-slate-950/60 border border-border text-foreground text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/30 transition-all placeholder:text-slate-600 resize-none"
                 />
               </F>
               <F label="Functionality">
@@ -557,7 +557,7 @@ function EditPLSlideOver({ pl, onClose, onSave }: EditPLSlideOverProps) {
 
           {/* Engineering References */}
           <section>
-            <h3 className="text-[10px] uppercase tracking-widest font-bold text-teal-500 mb-3">Engineering References</h3>
+            <h3 className="text-[10px] uppercase tracking-widest font-bold text-primary mb-3">Engineering References</h3>
             <div className="space-y-3">
               <F label="Drawing Numbers (comma-separated)">
                 <TextInput field="drawingNumbers" placeholder="e.g. DWG-001, DWG-002" />
@@ -588,7 +588,7 @@ function EditPLSlideOver({ pl, onClose, onSave }: EditPLSlideOverProps) {
 
           {/* Application */}
           <section>
-            <h3 className="text-[10px] uppercase tracking-widest font-bold text-teal-500 mb-3">Application</h3>
+            <h3 className="text-[10px] uppercase tracking-widest font-bold text-primary mb-3">Application</h3>
             <div className="space-y-3">
               <F label="Application Area">
                 <TextInput field="applicationArea" placeholder="e.g. WAP7, WAG9HC" />
@@ -608,7 +608,7 @@ function EditPLSlideOver({ pl, onClose, onSave }: EditPLSlideOverProps) {
                   onChange={e => setForm(f => ({ ...f, eligibilityCriteria: e.target.value }))}
                   rows={2}
                   placeholder="Eligibility requirements..."
-                  className="w-full bg-slate-950/60 border border-slate-700/50 text-slate-200 text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/30 transition-all placeholder:text-slate-600 resize-none"
+                  className="w-full bg-slate-950/60 border border-border text-foreground text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/30 transition-all placeholder:text-slate-600 resize-none"
                 />
               </F>
             </div>
@@ -616,7 +616,7 @@ function EditPLSlideOver({ pl, onClose, onSave }: EditPLSlideOverProps) {
 
           {/* Personnel */}
           <section>
-            <h3 className="text-[10px] uppercase tracking-widest font-bold text-teal-500 mb-3">Personnel & Admin</h3>
+            <h3 className="text-[10px] uppercase tracking-widest font-bold text-primary mb-3">Personnel & Admin</h3>
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <F label="Design Supervisor">
@@ -633,7 +633,7 @@ function EditPLSlideOver({ pl, onClose, onSave }: EditPLSlideOverProps) {
           </section>
         </div>
 
-        <div className="px-6 py-4 border-t border-slate-700/50 flex gap-3 shrink-0">
+        <div className="px-6 py-4 border-t border-border flex gap-3 shrink-0">
           <Button variant="secondary" onClick={onClose} className="flex-1">Cancel</Button>
           <Button onClick={handleSave} disabled={saving} className="flex-1">
             {saving
@@ -677,14 +677,14 @@ function AddECForm({ onAdd, onCancel }: AddECFormProps) {
 
   return (
     <div className="p-4 rounded-xl bg-teal-500/5 border border-teal-500/20 space-y-3 mb-4">
-      <p className="text-xs font-semibold text-teal-400 uppercase tracking-widest">New Engineering Change</p>
+      <p className="text-xs font-semibold text-primary uppercase tracking-widest">New Engineering Change</p>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-[10px] font-medium text-slate-500 mb-1">EC Number *</label>
+          <label className="block text-[10px] font-medium text-muted-foreground mb-1">EC Number *</label>
           <Input value={form.ecNumber} onChange={e => setForm(f => ({ ...f, ecNumber: e.target.value }))} placeholder="EC-2026-XXXX" className="w-full font-mono" />
         </div>
         <div>
-          <label className="block text-[10px] font-medium text-slate-500 mb-1">Status</label>
+          <label className="block text-[10px] font-medium text-muted-foreground mb-1">Status</label>
           <Select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value as EngineeringChange['status'] }))} className="w-full">
             <option value="OPEN">Open</option>
             <option value="IN_REVIEW">In Review</option>
@@ -693,22 +693,22 @@ function AddECForm({ onAdd, onCancel }: AddECFormProps) {
           </Select>
         </div>
         <div>
-          <label className="block text-[10px] font-medium text-slate-500 mb-1">Date</label>
+          <label className="block text-[10px] font-medium text-muted-foreground mb-1">Date</label>
           <DatePicker value={form.date} onChange={v => setForm(f => ({ ...f, date: v }))} />
         </div>
         <div>
-          <label className="block text-[10px] font-medium text-slate-500 mb-1">Author</label>
+          <label className="block text-[10px] font-medium text-muted-foreground mb-1">Author</label>
           <Input value={form.author} onChange={e => setForm(f => ({ ...f, author: e.target.value }))} placeholder="e.g. A. Sharma" className="w-full" />
         </div>
       </div>
       <div>
-        <label className="block text-[10px] font-medium text-slate-500 mb-1">Description *</label>
+        <label className="block text-[10px] font-medium text-muted-foreground mb-1">Description *</label>
         <textarea
           value={form.description}
           onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
           rows={2}
           placeholder="Describe the engineering change..."
-          className="w-full bg-slate-950/60 border border-slate-700/50 text-slate-200 text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/30 transition-all placeholder:text-slate-600 resize-none"
+          className="w-full bg-slate-950/60 border border-border text-foreground text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/30 transition-all placeholder:text-slate-600 resize-none"
         />
       </div>
       <div className="flex gap-2 justify-end">
@@ -822,7 +822,7 @@ function PLNumberDetailView({
     <div className="space-y-6 max-w-[1400px] mx-auto">
       {/* Header */}
       <div>
-        <button onClick={() => navigate('/pl')} className="flex items-center gap-2 text-slate-500 hover:text-teal-300 text-sm mb-4 transition-colors">
+        <button onClick={() => navigate('/pl')} className="flex items-center gap-2 text-muted-foreground hover:text-primary/90 text-sm mb-4 transition-colors">
           <ArrowLeft className="w-4 h-4" /> Back to PL Knowledge Hub
         </button>
         <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
@@ -831,7 +831,7 @@ function PLNumberDetailView({
               {pl.safetyCritical ? (
                 <Shield className="w-6 h-6 text-rose-400" />
               ) : (
-                <DatabaseBackup className="w-6 h-6 text-slate-400" />
+                <DatabaseBackup className="w-6 h-6 text-muted-foreground" />
               )}
               <h1 className="text-2xl font-bold text-white">{pl.name}</h1>
               <Badge variant={statusBadgeVariant(pl.status)}>
@@ -842,13 +842,13 @@ function PLNumberDetailView({
                   <Shield className="w-3 h-3" /> Safety Vital
                 </span>
               )}
-              <span className={`px-2 py-0.5 rounded border text-xs font-semibold ${CATEGORY_COLORS[pl.category] ?? 'bg-slate-700/50 text-slate-400'}`}>
+              <span className={`px-2 py-0.5 rounded border text-xs font-semibold ${CATEGORY_COLORS[pl.category] ?? 'bg-slate-700/50 text-muted-foreground'}`}>
                 {pl.category}
               </span>
             </div>
-            <p className="text-slate-400 text-sm font-mono pl-9 flex items-center gap-2">
+            <p className="text-muted-foreground text-sm font-mono pl-9 flex items-center gap-2">
               <Hash className="w-3.5 h-3.5" />{pl.plNumber}
-              {pl.controllingAgency && <><span className="text-slate-600">·</span><Building2 className="w-3.5 h-3.5 text-slate-500" />{pl.controllingAgency}</>}
+              {pl.controllingAgency && <><span className="text-slate-600">·</span><Building2 className="w-3.5 h-3.5 text-muted-foreground" />{pl.controllingAgency}</>}
             </p>
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -863,18 +863,18 @@ function PLNumberDetailView({
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-slate-700/50 overflow-x-auto">
+      <div className="flex gap-1 border-b border-border overflow-x-auto">
         {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => handleTabChange(tab.id)}
             className={`flex-shrink-0 px-4 py-2.5 text-xs font-medium border-b-2 transition-all -mb-px flex items-center gap-1.5 ${
-              activeTab === tab.id ? 'border-teal-500 text-teal-300' : 'border-transparent text-slate-500 hover:text-slate-300'
+              activeTab === tab.id ? 'border-teal-500 text-primary/90' : 'border-transparent text-muted-foreground hover:text-foreground/90'
             }`}
           >
             {tab.label}
             {tab.count !== undefined && (
-              <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${activeTab === tab.id ? 'bg-teal-500/20 text-teal-300' : 'bg-slate-800 text-slate-500'}`}>
+              <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${activeTab === tab.id ? 'bg-teal-500/20 text-primary/90' : 'bg-secondary text-muted-foreground'}`}>
                 {tab.count}
               </span>
             )}
@@ -888,7 +888,7 @@ function PLNumberDetailView({
           <div className="lg:col-span-2 space-y-4">
             <GlassCard className="p-6">
               <h2 className="text-sm font-bold text-white mb-3">Technical Description</h2>
-              <p className="text-sm text-slate-300 leading-relaxed">{pl.description || '—'}</p>
+              <p className="text-sm text-foreground/90 leading-relaxed">{pl.description || '—'}</p>
             </GlassCard>
 
             <GlassCard className="p-6">
@@ -914,20 +914,20 @@ function PLNumberDetailView({
                 <h2 className="text-sm font-bold text-white mb-4">Engineering References</h2>
                 {pl.drawingNumbers?.length > 0 && (
                   <div className="mb-3">
-                    <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-500 mb-2">Drawing Numbers</p>
+                    <p className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground mb-2">Drawing Numbers</p>
                     <div className="flex flex-wrap gap-1.5">
                       {pl.drawingNumbers.map(d => (
-                        <span key={d} className="px-2.5 py-1 bg-slate-800/60 border border-slate-700/40 rounded-lg text-xs font-mono text-slate-300">{d}</span>
+                        <span key={d} className="px-2.5 py-1 bg-secondary/60 border border-border/40 rounded-lg text-xs font-mono text-foreground/90">{d}</span>
                       ))}
                     </div>
                   </div>
                 )}
                 {pl.specNumbers?.length > 0 && (
                   <div>
-                    <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-500 mb-2">Spec Numbers</p>
+                    <p className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground mb-2">Spec Numbers</p>
                     <div className="flex flex-wrap gap-1.5">
                       {pl.specNumbers.map(s => (
-                        <span key={s} className="px-2.5 py-1 bg-slate-800/60 border border-slate-700/40 rounded-lg text-xs font-mono text-slate-300">{s}</span>
+                        <span key={s} className="px-2.5 py-1 bg-secondary/60 border border-border/40 rounded-lg text-xs font-mono text-foreground/90">{s}</span>
                       ))}
                     </div>
                   </div>
@@ -943,26 +943,26 @@ function PLNumberDetailView({
                   <InfoRow label="Severity of Failure" value={pl.severityOfFailure} />
                   {pl.consequences && (
                     <div>
-                      <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-500 mb-1">Consequences of Failure</p>
-                      <p className="text-sm text-slate-300">{pl.consequences}</p>
+                      <p className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground mb-1">Consequences of Failure</p>
+                      <p className="text-sm text-foreground/90">{pl.consequences}</p>
                     </div>
                   )}
                   {pl.functionality && (
                     <div>
-                      <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-500 mb-1">Functionality</p>
-                      <p className="text-sm text-slate-300">{pl.functionality}</p>
+                      <p className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground mb-1">Functionality</p>
+                      <p className="text-sm text-foreground/90">{pl.functionality}</p>
                     </div>
                   )}
                   {pl.eligibilityCriteria && (
                     <div>
-                      <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-500 mb-1">Eligibility Criteria</p>
-                      <p className="text-sm text-slate-300">{pl.eligibilityCriteria}</p>
+                      <p className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground mb-1">Eligibility Criteria</p>
+                      <p className="text-sm text-foreground/90">{pl.eligibilityCriteria}</p>
                     </div>
                   )}
                   {pl.procurementConditions && (
                     <div>
-                      <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-500 mb-1">Procurement Conditions</p>
-                      <p className="text-sm text-slate-300">{pl.procurementConditions}</p>
+                      <p className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground mb-1">Procurement Conditions</p>
+                      <p className="text-sm text-foreground/90">{pl.procurementConditions}</p>
                     </div>
                   )}
                 </div>
@@ -984,8 +984,8 @@ function PLNumberDetailView({
                   { label: 'Linked Cases', value: (pl.linkedCaseIds ?? []).length },
                 ].map(s => (
                   <div key={s.label} className="flex justify-between text-sm">
-                    <span className="text-slate-500">{s.label}</span>
-                    <span className="text-teal-400 font-semibold">{s.value}</span>
+                    <span className="text-muted-foreground">{s.label}</span>
+                    <span className="text-primary font-semibold">{s.value}</span>
                   </div>
                 ))}
               </div>
@@ -998,7 +998,7 @@ function PLNumberDetailView({
                   {(pl.usedIn ?? []).map(p => (
                     <div key={p} className="flex items-center gap-2 text-sm">
                       <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
-                      <span className="font-mono text-teal-400 text-xs cursor-pointer hover:underline" onClick={() => navigate(`/pl/${p}`)}>{p}</span>
+                      <span className="font-mono text-primary text-xs cursor-pointer hover:underline" onClick={() => navigate(`/pl/${p}`)}>{p}</span>
                     </div>
                   ))}
                 </div>
@@ -1009,7 +1009,7 @@ function PLNumberDetailView({
             {(pl.engineeringChanges ?? []).length > 0 && (
               <GlassCard className="p-5">
                 <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-teal-400" />
+                  <Activity className="w-4 h-4 text-primary" />
                   Recent Activity
                 </h3>
                 <div className="space-y-3">
@@ -1021,12 +1021,12 @@ function PLNumberDetailView({
                         <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${EC_STATUS_DOT[ec.status] ?? 'bg-slate-500'}`} />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="font-mono text-[10px] text-teal-300">{ec.ecNumber}</span>
-                            <span className={`text-[9px] px-1.5 py-0.5 rounded-full border font-semibold ${EC_STATUS_VARIANT[ec.status] ?? 'bg-slate-800 text-slate-400 border-slate-700'}`}>
+                            <span className="font-mono text-[10px] text-primary/90">{ec.ecNumber}</span>
+                            <span className={`text-[9px] px-1.5 py-0.5 rounded-full border font-semibold ${EC_STATUS_VARIANT[ec.status] ?? 'bg-secondary text-muted-foreground border-border'}`}>
                               {ec.status.replace('_', ' ')}
                             </span>
                           </div>
-                          <p className="text-[11px] text-slate-400 truncate">{ec.description}</p>
+                          <p className="text-[11px] text-muted-foreground truncate">{ec.description}</p>
                           <p className="text-[10px] text-slate-600 mt-0.5">{ec.date} · {ec.author}</p>
                         </div>
                       </div>
@@ -1035,7 +1035,7 @@ function PLNumberDetailView({
                 {(pl.engineeringChanges ?? []).length > 5 && (
                   <button
                     onClick={() => setActiveTab('changes')}
-                    className="mt-3 text-xs text-teal-400 hover:text-teal-300 transition-colors"
+                    className="mt-3 text-xs text-primary hover:text-primary/90 transition-colors"
                   >
                     +{(pl.engineeringChanges ?? []).length - 5} more changes →
                   </button>
@@ -1090,16 +1090,16 @@ function PLNumberDetailView({
                   <div className="flex-1 pb-5">
                     <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono text-xs text-teal-400 font-semibold">{ec.ecNumber}</span>
-                        <span className={`px-2 py-0.5 rounded-full border text-[10px] font-medium ${EC_STATUS_VARIANT[ec.status] ?? 'bg-slate-800 text-slate-400 border-slate-700'}`}>
+                        <span className="font-mono text-xs text-primary font-semibold">{ec.ecNumber}</span>
+                        <span className={`px-2 py-0.5 rounded-full border text-[10px] font-medium ${EC_STATUS_VARIANT[ec.status] ?? 'bg-secondary text-muted-foreground border-border'}`}>
                           {ec.status.replace('_', ' ')}
                         </span>
                       </div>
                       <span className="text-[10px] text-slate-600 shrink-0">{ec.date}</span>
                     </div>
-                    <p className="text-sm text-slate-200 leading-snug">{ec.description}</p>
+                    <p className="text-sm text-foreground leading-snug">{ec.description}</p>
                     {ec.author && (
-                      <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
+                      <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
                         <User className="w-3 h-3" />{ec.author}
                       </p>
                     )}
@@ -1111,7 +1111,7 @@ function PLNumberDetailView({
             !showAddEC && (
               <div className="text-center py-10">
                 <GitBranch className="w-10 h-10 mx-auto mb-3 text-slate-600 opacity-50" />
-                <p className="text-slate-400 text-sm">No engineering changes recorded.</p>
+                <p className="text-muted-foreground text-sm">No engineering changes recorded.</p>
                 <p className="text-slate-600 text-xs mt-1">Add the first engineering change using the button above.</p>
               </div>
             )
@@ -1125,9 +1125,9 @@ function PLNumberDetailView({
           {/* Linked Documents summary */}
           <GlassCard className="p-6">
             <div className="flex items-center gap-2 mb-4">
-              <FileText className="w-4 h-4 text-teal-400" />
+              <FileText className="w-4 h-4 text-primary" />
               <h2 className="text-sm font-bold text-white">Documents</h2>
-              <span className="px-1.5 py-0.5 bg-teal-500/10 text-teal-300 border border-teal-500/20 rounded-full text-[10px] font-semibold">{linkedDocs.length}</span>
+              <span className="px-1.5 py-0.5 bg-teal-500/10 text-primary/90 border border-teal-500/20 rounded-full text-[10px] font-semibold">{linkedDocs.length}</span>
               {documentAlerts.length > 0 && (
                 <span className="px-1.5 py-0.5 bg-amber-500/10 text-amber-200 border border-amber-500/25 rounded-full text-[10px] font-semibold">
                   {documentAlerts.length} alert{documentAlerts.length === 1 ? '' : 's'}
@@ -1144,13 +1144,13 @@ function PLNumberDetailView({
                     <div key={doc.id} className="space-y-2">
                       <div
                         {...getDocumentContextAttributes(doc.id, doc.name)}
-                        className={`flex items-center gap-3 p-2.5 rounded-lg bg-slate-800/30 border cursor-pointer transition-all ${alert ? 'border-amber-500/25 hover:border-amber-400/45' : 'border-slate-700/40 hover:border-teal-500/30'} ${isFocused ? 'ring-2 ring-amber-400/50' : ''}`}
+                        className={`flex items-center gap-3 p-2.5 rounded-lg bg-secondary/30 border cursor-pointer transition-all ${alert ? 'border-amber-500/25 hover:border-amber-400/45' : 'border-border/40 hover:border-teal-500/30'} ${isFocused ? 'ring-2 ring-amber-400/50' : ''}`}
                         onClick={() => navigate(`/documents/${doc.id}`)}
                       >
-                        <FileText className="w-4 h-4 text-teal-400 shrink-0" />
+                        <FileText className="w-4 h-4 text-primary shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <span className="text-sm text-slate-200 truncate">{doc.name}</span>
-                          <span className="font-mono text-[10px] text-slate-500 ml-2">{doc.id}</span>
+                          <span className="text-sm text-foreground truncate">{doc.name}</span>
+                          <span className="font-mono text-[10px] text-muted-foreground ml-2">{doc.id}</span>
                           {alert && (
                             <span className="ml-2 inline-flex items-center gap-1 rounded-full border border-amber-500/25 bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-amber-200">
                               <AlertTriangle className="w-2.5 h-2.5" />
@@ -1181,7 +1181,7 @@ function PLNumberDetailView({
                             documentId={doc.id}
                             title={doc.name}
                             iconOnly
-                            className="h-7 min-h-0 px-2 text-slate-300 hover:text-teal-200"
+                            className="h-7 min-h-0 px-2 text-foreground/90 hover:text-teal-200"
                           />
                         </div>
                       </div>
@@ -1200,7 +1200,7 @@ function PLNumberDetailView({
                 })}
               </div>
             ) : (
-              <p className="text-slate-500 text-sm">No documents linked.</p>
+              <p className="text-muted-foreground text-sm">No documents linked.</p>
             )}
           </GlassCard>
 
@@ -1216,10 +1216,10 @@ function PLNumberDetailView({
                 {(pl.linkedWorkIds ?? []).map(id => {
                   const isOpen = id.startsWith('WR-OPEN') || id.includes('-OPEN-');
                   const isClosed = id.startsWith('WR-CLOSED') || id.includes('-CLOSED-');
-                  const statusVariant = isClosed ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30' : isOpen ? 'bg-slate-700/50 text-slate-400 border-slate-600/40' : 'bg-amber-500/10 text-amber-300 border-amber-500/30';
+                  const statusVariant = isClosed ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30' : isOpen ? 'bg-slate-700/50 text-muted-foreground border-slate-600/40' : 'bg-amber-500/10 text-amber-300 border-amber-500/30';
                   const statusLabel = isClosed ? 'Closed' : isOpen ? 'Open' : 'In Progress';
                   return (
-                    <div key={id} className="flex items-center gap-3 p-2.5 rounded-lg bg-slate-800/30 border border-slate-700/40 cursor-pointer hover:border-blue-500/30 transition-all" onClick={() => navigate(`/ledger?id=${id}`)}>
+                    <div key={id} className="flex items-center gap-3 p-2.5 rounded-lg bg-secondary/30 border border-border/40 cursor-pointer hover:border-blue-500/30 transition-all" onClick={() => navigate(`/ledger?id=${id}`)}>
                       <Briefcase className="w-4 h-4 text-blue-400 shrink-0" />
                       <span className="font-mono text-xs text-blue-300 flex-1">{id}</span>
                       <span className={`text-[9px] px-1.5 py-0.5 rounded-full border font-semibold shrink-0 ${statusVariant}`}>{statusLabel}</span>
@@ -1229,7 +1229,7 @@ function PLNumberDetailView({
                 })}
               </div>
             ) : (
-              <p className="text-slate-500 text-sm">No work records linked to this PL.</p>
+              <p className="text-muted-foreground text-sm">No work records linked to this PL.</p>
             )}
           </GlassCard>
 
@@ -1246,9 +1246,9 @@ function PLNumberDetailView({
                   const isClosed = id.includes('-CLOSED') || id.includes('RESOLVED');
                   const isOpen = id.includes('-OPEN') || id.includes('ACTIVE');
                   const caseStatus = isClosed ? 'Resolved' : isOpen ? 'Active' : 'Open';
-                  const caseVariant = isClosed ? 'bg-slate-700/50 text-slate-400 border-slate-600/40' : 'bg-amber-500/10 text-amber-300 border-amber-500/30';
+                  const caseVariant = isClosed ? 'bg-slate-700/50 text-muted-foreground border-slate-600/40' : 'bg-amber-500/10 text-amber-300 border-amber-500/30';
                   return (
-                    <div key={id} className="flex items-center gap-3 p-2.5 rounded-lg bg-slate-800/30 border border-slate-700/40 cursor-pointer hover:border-amber-500/30 transition-all" onClick={() => navigate(`/cases?id=${id}`)}>
+                    <div key={id} className="flex items-center gap-3 p-2.5 rounded-lg bg-secondary/30 border border-border/40 cursor-pointer hover:border-amber-500/30 transition-all" onClick={() => navigate(`/cases?id=${id}`)}>
                       <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
                       <span className="font-mono text-xs text-amber-300 flex-1">{id}</span>
                       <span className={`text-[9px] px-1.5 py-0.5 rounded-full border font-semibold shrink-0 ${caseVariant}`}>{caseStatus}</span>
@@ -1258,7 +1258,7 @@ function PLNumberDetailView({
                 })}
               </div>
             ) : (
-              <p className="text-slate-500 text-sm">No cases linked to this PL.</p>
+              <p className="text-muted-foreground text-sm">No cases linked to this PL.</p>
             )}
           </GlassCard>
         </div>
@@ -1353,7 +1353,7 @@ export default function PLDetail() {
     return (
       <div className="space-y-6 max-w-[1400px] mx-auto">
         <div>
-          <button onClick={() => navigate('/pl')} className="flex items-center gap-2 text-slate-500 hover:text-teal-300 text-sm mb-4 transition-colors">
+          <button onClick={() => navigate('/pl')} className="flex items-center gap-2 text-muted-foreground hover:text-primary/90 text-sm mb-4 transition-colors">
             <ArrowLeft className="w-4 h-4" /> Back to PL Knowledge Hub
           </button>
           <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
@@ -1368,7 +1368,7 @@ export default function PLDetail() {
                   </span>
                 )}
               </div>
-              <p className="text-slate-400 text-sm font-mono pl-9 flex items-center gap-2">
+              <p className="text-muted-foreground text-sm font-mono pl-9 flex items-center gap-2">
                 <Hash className="w-3.5 h-3.5" />PL {plRecord.plNumber} · Rev {plRecord.revision} · {plRecord.type}
               </p>
             </div>
@@ -1380,13 +1380,13 @@ export default function PLDetail() {
           </div>
         </div>
 
-        <div className="flex gap-1 border-b border-slate-700/50 overflow-x-auto">
+        <div className="flex gap-1 border-b border-border overflow-x-auto">
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex-shrink-0 px-4 py-2.5 text-xs font-medium border-b-2 transition-all -mb-px ${
-                activeTab === tab.id ? 'border-teal-500 text-teal-300' : 'border-transparent text-slate-500 hover:text-slate-300'
+                activeTab === tab.id ? 'border-teal-500 text-primary/90' : 'border-transparent text-muted-foreground hover:text-foreground/90'
               }`}
             >
               {tab.label}
@@ -1399,7 +1399,7 @@ export default function PLDetail() {
             <div className="lg:col-span-2 space-y-4">
               <GlassCard className="p-6">
                 <h2 className="text-base font-bold text-white mb-3">Description</h2>
-                <p className="text-sm text-slate-300 leading-relaxed">{plRecord.description}</p>
+                <p className="text-sm text-foreground/90 leading-relaxed">{plRecord.description}</p>
               </GlassCard>
               <GlassCard className="p-6">
                 <h2 className="text-base font-bold text-white mb-4">Properties</h2>
@@ -1415,20 +1415,20 @@ export default function PLDetail() {
                     { icon: Calendar, label: 'Last Modified', value: plRecord.lastModified },
                   ].map(f => (
                     <div key={f.label} className="flex items-start gap-3">
-                      <f.icon className="w-4 h-4 text-slate-500 mt-0.5 shrink-0" />
+                      <f.icon className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                       <div>
-                        <p className="text-xs text-slate-500">{f.label}</p>
-                        <p className={`text-sm font-medium text-slate-200 ${f.mono ? 'font-mono' : ''}`}>{f.value}</p>
+                        <p className="text-xs text-muted-foreground">{f.label}</p>
+                        <p className={`text-sm font-medium text-foreground ${f.mono ? 'font-mono' : ''}`}>{f.value}</p>
                       </div>
                     </div>
                   ))}
                   {plRecord.supplier && (
                     <div className="flex items-start gap-3">
-                      <Building2 className="w-4 h-4 text-slate-500 mt-0.5 shrink-0" />
+                      <Building2 className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                       <div>
-                        <p className="text-xs text-slate-500">Supplier</p>
-                        <p className="text-sm font-medium text-slate-200">{plRecord.supplier}</p>
-                        {plRecord.supplierPartNo && <p className="text-xs text-slate-500 font-mono">{plRecord.supplierPartNo}</p>}
+                        <p className="text-xs text-muted-foreground">Supplier</p>
+                        <p className="text-sm font-medium text-foreground">{plRecord.supplier}</p>
+                        {plRecord.supplierPartNo && <p className="text-xs text-muted-foreground font-mono">{plRecord.supplierPartNo}</p>}
                       </div>
                     </div>
                   )}
@@ -1444,8 +1444,8 @@ export default function PLDetail() {
                     <span key={tag} className={`px-2 py-0.5 border text-xs rounded-full ${tagColor(tag)}`}>{tag}</span>
                   ))}
                 </div>
-                <div className="text-xs text-slate-500 mb-1">Classification</div>
-                <p className="text-xs text-slate-300">{plRecord.classification}</p>
+                <div className="text-xs text-muted-foreground mb-1">Classification</div>
+                <p className="text-xs text-foreground/90">{plRecord.classification}</p>
               </GlassCard>
               <GlassCard className="p-5">
                 <h3 className="text-sm font-bold text-white mb-3">Quick Stats</h3>
@@ -1458,8 +1458,8 @@ export default function PLDetail() {
                     { label: 'Alternates', value: plRecord.alternates.length },
                   ].map(s => (
                     <div key={s.label} className="flex justify-between text-sm">
-                      <span className="text-slate-500">{s.label}</span>
-                      <span className="text-teal-400 font-semibold">{s.value}</span>
+                      <span className="text-muted-foreground">{s.label}</span>
+                      <span className="text-primary font-semibold">{s.value}</span>
                     </div>
                   ))}
                 </div>
@@ -1476,14 +1476,14 @@ export default function PLDetail() {
                 <div
                   key={doc.docId}
                   {...getDocumentContextAttributes(doc.docId, doc.title)}
-                  className="flex items-center gap-4 p-4 rounded-xl bg-slate-800/30 border border-slate-700/50 hover:border-teal-500/30 cursor-pointer transition-all"
+                  className="flex items-center gap-4 p-4 rounded-xl bg-secondary/30 border border-border hover:border-teal-500/30 cursor-pointer transition-all"
                   onClick={() => navigate(`/documents/${doc.docId}`)}
                 >
-                  <FileText className="w-9 h-9 p-2 rounded-lg bg-teal-500/10 text-teal-400 shrink-0" />
+                  <FileText className="w-9 h-9 p-2 rounded-lg bg-teal-500/10 text-primary shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-200">{doc.title}</p>
-                    <div className="flex gap-3 text-xs text-slate-500 mt-0.5">
-                      <span className="font-mono text-teal-400">{doc.docId}</span>
+                    <p className="text-sm font-semibold text-foreground">{doc.title}</p>
+                    <div className="flex gap-3 text-xs text-muted-foreground mt-0.5">
+                      <span className="font-mono text-primary">{doc.docId}</span>
                       <span>{doc.type}</span>
                       <span>Rev {doc.revision}</span>
                       <span>{doc.size}</span>
@@ -1495,13 +1495,13 @@ export default function PLDetail() {
                       documentId={doc.docId}
                       title={doc.title}
                       iconOnly
-                      className="h-8 min-h-0 px-2 text-slate-300 hover:text-teal-200"
+                      className="h-8 min-h-0 px-2 text-foreground/90 hover:text-teal-200"
                     />
-                    <ExternalLink className="w-4 h-4 text-slate-600 hover:text-teal-400 transition-colors" />
+                    <ExternalLink className="w-4 h-4 text-slate-600 hover:text-primary transition-colors" />
                   </div>
                 </div>
               ))}
-              {plRecord.linkedDocuments.length === 0 && <p className="text-slate-500 text-sm">No documents linked to this PL record.</p>}
+              {plRecord.linkedDocuments.length === 0 && <p className="text-muted-foreground text-sm">No documents linked to this PL record.</p>}
             </div>
           </GlassCard>
         )}
@@ -1512,7 +1512,7 @@ export default function PLDetail() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-700/50 text-slate-400">
+                  <tr className="border-b border-border text-muted-foreground">
                     <th className="pb-3 text-left font-semibold pl-4">Drawing ID</th>
                     <th className="pb-3 text-left font-semibold">Title</th>
                     <th className="pb-3 text-left font-semibold">Sheet</th>
@@ -1523,18 +1523,18 @@ export default function PLDetail() {
                 </thead>
                 <tbody className="divide-y divide-slate-800/30">
                   {plRecord.linkedDrawings.map(d => (
-                    <tr key={d.drawingId} className="hover:bg-slate-800/30 transition-colors">
-                      <td className="py-3 pl-4 font-mono text-xs text-teal-400">{d.drawingId}</td>
-                      <td className="py-3 text-slate-200 text-sm">{d.title}</td>
-                      <td className="py-3 text-slate-400 text-xs">{d.sheetNo}</td>
-                      <td className="py-3 font-mono text-xs text-slate-300">{d.revision}</td>
-                      <td className="py-3 text-slate-400 text-xs">{d.format}</td>
+                    <tr key={d.drawingId} className="hover:bg-secondary/30 transition-colors">
+                      <td className="py-3 pl-4 font-mono text-xs text-primary">{d.drawingId}</td>
+                      <td className="py-3 text-foreground text-sm">{d.title}</td>
+                      <td className="py-3 text-muted-foreground text-xs">{d.sheetNo}</td>
+                      <td className="py-3 font-mono text-xs text-foreground/90">{d.revision}</td>
+                      <td className="py-3 text-muted-foreground text-xs">{d.format}</td>
                       <td className="py-3"><Badge variant={statusBadgeVariant(d.status)}>{d.status}</Badge></td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              {plRecord.linkedDrawings.length === 0 && <p className="text-slate-500 text-sm mt-4">No drawings linked to this PL record.</p>}
+              {plRecord.linkedDrawings.length === 0 && <p className="text-muted-foreground text-sm mt-4">No drawings linked to this PL record.</p>}
             </div>
           </GlassCard>
         )}
@@ -1545,21 +1545,21 @@ export default function PLDetail() {
             {plRecord.whereUsed.length > 0 ? (
               <div className="space-y-3">
                 {plRecord.whereUsed.map((u, i) => (
-                  <div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-slate-800/30 border border-slate-700/50 cursor-pointer hover:border-teal-500/30 transition-all" onClick={() => navigate(`/pl/${u.parentPL}`)}>
+                  <div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-secondary/30 border border-border cursor-pointer hover:border-teal-500/30 transition-all" onClick={() => navigate(`/pl/${u.parentPL}`)}>
                     <Box className="w-8 h-8 p-1.5 rounded-lg bg-blue-500/10 text-blue-400 shrink-0" />
                     <div className="flex-1">
-                      <p className="text-sm font-semibold text-slate-200">{u.parentName}</p>
-                      <p className="text-xs text-slate-500 font-mono">{u.parentPL} · Find No. {u.findNumber}</p>
+                      <p className="text-sm font-semibold text-foreground">{u.parentName}</p>
+                      <p className="text-xs text-muted-foreground font-mono">{u.parentPL} · Find No. {u.findNumber}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-slate-400">Quantity</p>
-                      <p className="text-lg font-bold text-teal-400">{u.quantity}</p>
+                      <p className="text-xs text-muted-foreground">Quantity</p>
+                      <p className="text-lg font-bold text-primary">{u.quantity}</p>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-slate-500 text-sm">This is a top-level assembly and is not used in any parent assemblies.</p>
+              <p className="text-muted-foreground text-sm">This is a top-level assembly and is not used in any parent assemblies.</p>
             )}
           </GlassCard>
         )}
@@ -1572,23 +1572,23 @@ export default function PLDetail() {
                 {plRecord.changeHistory.map((c, i) => (
                   <div key={c.changeId} className="flex gap-4">
                     <div className="flex flex-col items-center">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border ${c.status === 'Implemented' ? 'bg-teal-500/10 border-teal-500/30 text-teal-300' : 'bg-amber-500/10 border-amber-500/30 text-amber-300'}`}>{c.type.slice(0, 1)}</div>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border ${c.status === 'Implemented' ? 'bg-teal-500/10 border-teal-500/30 text-primary/90' : 'bg-amber-500/10 border-amber-500/30 text-amber-300'}`}>{c.type.slice(0, 1)}</div>
                       {i < plRecord.changeHistory.length - 1 && <div className="w-px flex-1 bg-slate-700/50 mt-2" />}
                     </div>
                     <div className="flex-1 pb-4">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="font-mono text-xs text-teal-400">{c.changeId}</span>
-                        <span className="text-xs px-1.5 py-0.5 bg-slate-800 rounded text-slate-400">{c.type}</span>
+                        <span className="font-mono text-xs text-primary">{c.changeId}</span>
+                        <span className="text-xs px-1.5 py-0.5 bg-secondary rounded text-muted-foreground">{c.type}</span>
                         <Badge variant={statusBadgeVariant(c.status)}>{c.status}</Badge>
                       </div>
-                      <p className="text-sm font-medium text-slate-200">{c.title}</p>
-                      <p className="text-xs text-slate-500 mt-0.5">{c.author} · {c.date}</p>
+                      <p className="text-sm font-medium text-foreground">{c.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{c.author} · {c.date}</p>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-slate-500 text-sm">No change history recorded for this PL record.</p>
+              <p className="text-muted-foreground text-sm">No change history recorded for this PL record.</p>
             )}
           </GlassCard>
         )}
@@ -1598,9 +1598,9 @@ export default function PLDetail() {
             <h2 className="text-base font-bold text-white mb-4">Effectivity</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {Object.entries(plRecord.effectivity).filter(([, v]) => v).map(([key, value]) => (
-                <div key={key} className="bg-slate-800/30 rounded-xl p-4">
-                  <p className="text-xs text-slate-500 mb-1 capitalize">{key.replace(/([A-Z])/g, ' $1')}</p>
-                  <p className="text-sm font-medium text-slate-200">{String(value)}</p>
+                <div key={key} className="bg-secondary/30 rounded-xl p-4">
+                  <p className="text-xs text-muted-foreground mb-1 capitalize">{key.replace(/([A-Z])/g, ' $1')}</p>
+                  <p className="text-sm font-medium text-foreground">{String(value)}</p>
                 </div>
               ))}
             </div>
@@ -1613,20 +1613,20 @@ export default function PLDetail() {
   if (legacyPL) {
     return (
       <div className="space-y-6 max-w-[1200px] mx-auto">
-        <button onClick={() => navigate('/pl')} className="flex items-center gap-2 text-slate-500 hover:text-teal-300 text-sm mb-4 transition-colors">
+        <button onClick={() => navigate('/pl')} className="flex items-center gap-2 text-muted-foreground hover:text-primary/90 text-sm mb-4 transition-colors">
           <ArrowLeft className="w-4 h-4" /> Back to PL Knowledge Hub
         </button>
         <div className="flex items-center gap-3 mb-2">
-          <DatabaseBackup className="w-6 h-6 text-slate-400" />
+          <DatabaseBackup className="w-6 h-6 text-muted-foreground" />
           <h1 className="text-2xl font-bold text-white">{legacyPL.title}</h1>
           <Badge variant={legacyPL.status === 'Active' ? 'success' : legacyPL.status === 'Obsolete' ? 'danger' : 'warning'}>{legacyPL.status}</Badge>
         </div>
-        <p className="text-slate-400 text-sm font-mono">{legacyPL.id} · {legacyPL.lifecycle}</p>
+        <p className="text-muted-foreground text-sm font-mono">{legacyPL.id} · {legacyPL.lifecycle}</p>
         <GlassCard className="p-6">
-          <p className="text-slate-300">{legacyPL.description}</p>
+          <p className="text-foreground/90">{legacyPL.description}</p>
           <div className="mt-4 grid grid-cols-2 gap-4">
-            <div><p className="text-xs text-slate-500">Owner</p><p className="text-sm text-slate-200">{legacyPL.owner}</p></div>
-            <div><p className="text-xs text-slate-500">Last Updated</p><p className="text-sm text-slate-200">{legacyPL.lastUpdated}</p></div>
+            <div><p className="text-xs text-muted-foreground">Owner</p><p className="text-sm text-foreground">{legacyPL.owner}</p></div>
+            <div><p className="text-xs text-muted-foreground">Last Updated</p><p className="text-sm text-foreground">{legacyPL.lastUpdated}</p></div>
           </div>
         </GlassCard>
       </div>
@@ -1638,7 +1638,7 @@ export default function PLDetail() {
       <GlassCard className="p-12 text-center max-w-md">
         <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
         <h2 className="text-xl font-bold text-white mb-2">PL Record Not Found</h2>
-        <p className="text-slate-400 text-sm mb-4">No PL record with ID <span className="font-mono text-teal-400">{id}</span> exists.</p>
+        <p className="text-muted-foreground text-sm mb-4">No PL record with ID <span className="font-mono text-primary">{id}</span> exists.</p>
         <Button onClick={() => navigate('/pl')}>
           <ArrowLeft className="w-4 h-4" /> Back to PL Knowledge Hub
         </Button>

@@ -46,8 +46,8 @@ const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
 
 function RouteFallback() {
   return (
-    <div className="app-shell-bg min-h-screen text-slate-200 flex items-center justify-center">
-      <div className="text-sm text-slate-400">Loading workspace...</div>
+    <div className="app-shell-bg min-h-screen text-foreground flex items-center justify-center">
+      <div className="text-sm text-muted-foreground">Loading workspace...</div>
     </div>
   );
 }

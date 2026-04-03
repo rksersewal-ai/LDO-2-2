@@ -57,8 +57,8 @@ export default function AppLayout() {
 
   if (isLoading) {
     return (
-      <div className="app-shell-bg min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-teal-500" />
+      <div className="bg-background min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -87,7 +87,7 @@ export default function AppLayout() {
   };
 
   return (
-    <div className="app-shell-bg min-h-screen text-slate-200 font-sans overflow-hidden flex flex-col">
+    <div className="bg-background min-h-screen text-foreground font-sans overflow-hidden flex flex-col">
       <RightClickPalette />
       <div className="flex flex-1 overflow-hidden relative">
         <Sidebar />
@@ -96,12 +96,12 @@ export default function AppLayout() {
 
           {/* Multi-document tab strip — only shown when 2+ docs are open */}
           {tabs.length > 1 && (
-            <div className="flex items-center bg-slate-900/60 border-b border-white/5 shrink-0">
+            <div className="flex items-center bg-card border-b border-border shrink-0">
               {/* Left scroll button */}
               {canScrollLeft && (
                 <button
                   onClick={() => scroll('left')}
-                  className="p-1.5 text-slate-500 hover:text-slate-300 hover:bg-slate-800/50 transition-colors shrink-0"
+                  className="p-1.5 text-muted-foreground hover:text-foreground/90 hover:bg-secondary/50 transition-colors shrink-0"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -120,8 +120,8 @@ export default function AppLayout() {
                     onClick={() => navigate(`/documents/${tab.id}`)}
                     className={`flex items-center gap-2 px-3 py-1.5 rounded-t-xl cursor-pointer text-xs font-medium whitespace-nowrap transition-all group border-b-2 ${
                       activeDocId === tab.id
-                        ? 'bg-slate-800/70 text-teal-300 border-teal-500'
-                        : 'bg-slate-900/40 text-slate-500 hover:text-slate-300 border-transparent hover:bg-slate-800/40'
+                        ? 'bg-secondary/70 text-primary/90 border-teal-500'
+                        : 'bg-card/40 text-muted-foreground hover:text-foreground/90 border-transparent hover:bg-secondary/40'
                     }`}
                   >
                     <FileText className="w-3.5 h-3.5 shrink-0" />
@@ -140,7 +140,7 @@ export default function AppLayout() {
               {canScrollRight && (
                 <button
                   onClick={() => scroll('right')}
-                  className="p-1.5 text-slate-500 hover:text-slate-300 hover:bg-slate-800/50 transition-colors shrink-0"
+                  className="p-1.5 text-muted-foreground hover:text-foreground/90 hover:bg-secondary/50 transition-colors shrink-0"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>

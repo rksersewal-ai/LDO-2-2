@@ -54,7 +54,7 @@ export default function ReportTablePage() {
       <div className="max-w-5xl mx-auto">
         <GlassCard className="p-8 text-center">
           <h1 className="text-xl font-bold text-white">Report not found</h1>
-          <p className="mt-2 text-sm text-slate-400">The selected report definition does not exist.</p>
+          <p className="mt-2 text-sm text-muted-foreground">The selected report definition does not exist.</p>
           <Button className="mt-4" onClick={() => navigate('/reports')}>
             <ArrowLeft className="w-4 h-4" /> Back to Reports
           </Button>
@@ -76,7 +76,7 @@ export default function ReportTablePage() {
     <div ref={detailRef} className="space-y-6 max-w-7xl mx-auto">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <button onClick={() => navigate('/reports')} className="mb-3 inline-flex items-center gap-2 text-xs text-teal-300 hover:text-teal-200 transition-colors">
+          <button onClick={() => navigate('/reports')} className="mb-3 inline-flex items-center gap-2 text-xs text-primary/90 hover:text-teal-200 transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" />
             Back to reports
           </button>
@@ -84,7 +84,7 @@ export default function ReportTablePage() {
             <h1 className="text-3xl font-bold text-white">{report.name}</h1>
             <Badge variant={getStatusVariant(report.status)}>{report.status}</Badge>
           </div>
-          <p className="mt-2 text-sm text-slate-400">{report.description}</p>
+          <p className="mt-2 text-sm text-muted-foreground">{report.description}</p>
         </div>
 
         <div className="flex gap-2 flex-wrap justify-end">
@@ -108,9 +108,9 @@ export default function ReportTablePage() {
           <DatePicker label="Date From" value={dateFrom} onChange={setDateFrom} placeholder="All dates" />
           <DatePicker label="Date To" value={dateTo} onChange={setDateTo} placeholder="All dates" />
           <div className="md:col-span-2">
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">Search In Rows</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1.5">Search In Rows</label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
               <Input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
@@ -125,7 +125,7 @@ export default function ReportTablePage() {
           <div className="flex items-center gap-2 flex-wrap">
             <Badge variant="info">{filteredRows.length} rows</Badge>
             <Badge variant="default">{report.category}</Badge>
-            <span className="text-xs text-slate-500">Generated {report.generated}</span>
+            <span className="text-xs text-muted-foreground">Generated {report.generated}</span>
           </div>
           <Button
             variant="secondary"
@@ -142,24 +142,24 @@ export default function ReportTablePage() {
       </GlassCard>
 
       <GlassCard className="overflow-hidden">
-        <div className="border-b border-white/5 px-5 py-3">
-          <p className="text-xs text-slate-400">{subtitle}</p>
+        <div className="border-b border-border px-5 py-3">
+          <p className="text-xs text-muted-foreground">{subtitle}</p>
         </div>
 
         {filteredRows.length === 0 ? (
           <div className="p-8 text-center">
-            <p className="text-slate-300 font-medium">No rows available</p>
-            <p className="mt-2 text-sm text-slate-500">{report.emptyState}</p>
+            <p className="text-foreground/90 font-medium">No rows available</p>
+            <p className="mt-2 text-sm text-muted-foreground">{report.emptyState}</p>
           </div>
         ) : (
           <div className="overflow-auto max-h-[70vh]">
             <table className="w-full min-w-[980px]">
               <thead className="sticky top-0 z-10 bg-slate-950/95 backdrop-blur">
-                <tr className="border-b border-white/5">
+                <tr className="border-b border-border">
                   {report.columns.map((column) => (
                     <th
                       key={column.key}
-                      className={`px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-400 ${column.align === 'right' ? 'text-right' : 'text-left'}`}
+                      className={`px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground ${column.align === 'right' ? 'text-right' : 'text-left'}`}
                     >
                       {column.label}
                     </th>
@@ -168,11 +168,11 @@ export default function ReportTablePage() {
               </thead>
               <tbody>
                 {filteredRows.map((row, rowIndex) => (
-                  <tr key={`${report.id}-${rowIndex}`} className="border-b border-white/5 hover:bg-slate-900/30 transition-colors">
+                  <tr key={`${report.id}-${rowIndex}`} className="border-b border-border hover:bg-card/30 transition-colors">
                     {report.columns.map((column) => (
                       <td
                         key={column.key}
-                        className={`px-4 py-3 text-sm ${column.align === 'right' ? 'text-right' : 'text-left'} ${column.mono ? 'font-mono text-teal-300' : 'text-slate-200'}`}
+                        className={`px-4 py-3 text-sm ${column.align === 'right' ? 'text-right' : 'text-left'} ${column.mono ? 'font-mono text-primary/90' : 'text-foreground'}`}
                       >
                         {String(row[column.key] ?? '—')}
                       </td>

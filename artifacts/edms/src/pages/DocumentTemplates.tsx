@@ -240,7 +240,7 @@ export default function DocumentTemplates() {
 
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search templates..." className="pl-9" />
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -248,7 +248,7 @@ export default function DocumentTemplates() {
             <button
               key={category}
               onClick={() => setActiveCategory(category)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${activeCategory === category ? 'bg-teal-500/20 text-teal-300 border border-teal-500/30' : 'bg-slate-800/50 text-slate-400 border border-white/6 hover:border-white/12'}`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${activeCategory === category ? 'bg-teal-500/20 text-primary/90 border border-teal-500/30' : 'bg-secondary/50 text-muted-foreground border border-white/6 hover:border-white/12'}`}
             >
               {category}
             </button>
@@ -262,21 +262,21 @@ export default function DocumentTemplates() {
           onClick={() => setShowCreateModal(false)}
         >
           <GlassCard className="w-full max-w-3xl p-6 relative max-h-[90vh] overflow-y-auto" onClick={(event) => event.stopPropagation()}>
-            <button onClick={() => setShowCreateModal(false)} className="absolute top-4 right-4 text-slate-500 hover:text-white">
+            <button onClick={() => setShowCreateModal(false)} className="absolute top-4 right-4 text-muted-foreground hover:text-white">
               <X className="w-4 h-4" />
             </button>
             <div className="mb-5">
               <h3 className="text-lg font-semibold text-white">Create Template</h3>
-              <p className="text-sm text-slate-500 mt-1">Define the reusable metadata fields that should be captured before document ingest.</p>
+              <p className="text-sm text-muted-foreground mt-1">Define the reusable metadata fields that should be captured before document ingest.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs text-slate-400 mb-1.5 block">Template Name</label>
+                <label className="text-xs text-muted-foreground mb-1.5 block">Template Name</label>
                 <Input value={draftTemplate.name} onChange={(event) => setDraftTemplate((current) => ({ ...current, name: event.target.value }))} />
               </div>
               <div>
-                <label className="text-xs text-slate-400 mb-1.5 block">Category</label>
+                <label className="text-xs text-muted-foreground mb-1.5 block">Category</label>
                 <Select value={draftTemplate.category} onChange={(event) => setDraftTemplate((current) => ({ ...current, category: event.target.value }))}>
                   {CATEGORY_SEED.map((category) => <option key={category} value={category}>{category}</option>)}
                 </Select>
@@ -284,16 +284,16 @@ export default function DocumentTemplates() {
             </div>
 
             <div className="mt-4">
-              <label className="text-xs text-slate-400 mb-1.5 block">Description</label>
+              <label className="text-xs text-muted-foreground mb-1.5 block">Description</label>
               <textarea
                 value={draftTemplate.description}
                 onChange={(event) => setDraftTemplate((current) => ({ ...current, description: event.target.value }))}
-                className="min-h-24 w-full rounded-lg border border-slate-700/50 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-200 placeholder:text-slate-600 focus:border-teal-500/50 focus:outline-none focus:ring-1 focus:ring-teal-500/30"
+                className="min-h-24 w-full rounded-lg border border-border bg-slate-950/60 px-3 py-2.5 text-sm text-foreground placeholder:text-slate-600 focus:border-teal-500/50 focus:outline-none focus:ring-1 focus:ring-teal-500/30"
               />
             </div>
 
             <div className="mt-4">
-              <label className="text-xs text-slate-400 mb-1.5 block">Tags</label>
+              <label className="text-xs text-muted-foreground mb-1.5 block">Tags</label>
               <Input
                 value={draftTemplate.tagsText}
                 onChange={(event) => setDraftTemplate((current) => ({ ...current, tagsText: event.target.value }))}
@@ -310,14 +310,14 @@ export default function DocumentTemplates() {
               </div>
               <div className="space-y-3">
                 {draftTemplate.fields.map((field, index) => (
-                  <div key={`${index}-${field.label}`} className="rounded-xl border border-white/6 bg-slate-900/40 p-3">
+                  <div key={`${index}-${field.label}`} className="rounded-xl border border-white/6 bg-card/40 p-3">
                     <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_auto_auto] gap-3 items-end">
                       <div>
-                        <label className="text-xs text-slate-400 mb-1.5 block">Field Label</label>
+                        <label className="text-xs text-muted-foreground mb-1.5 block">Field Label</label>
                         <Input value={field.label} onChange={(event) => updateDraftField(index, { label: event.target.value })} placeholder="e.g. Equipment ID" />
                       </div>
                       <div>
-                        <label className="text-xs text-slate-400 mb-1.5 block">Field Type</label>
+                        <label className="text-xs text-muted-foreground mb-1.5 block">Field Type</label>
                         <Select
                           value={field.type}
                           onChange={(event) => updateDraftField(index, { type: event.target.value as EditableField['type'] })}
@@ -333,7 +333,7 @@ export default function DocumentTemplates() {
                           onCheckedChange={(checked) => updateDraftField(index, { required: checked })}
                           aria-label={`Toggle required for field ${index + 1}`}
                         />
-                        <span className="text-xs text-slate-400">Required</span>
+                        <span className="text-xs text-muted-foreground">Required</span>
                       </div>
                       <Button variant="ghost" size="sm" onClick={() => removeTemplateField(index)} disabled={draftTemplate.fields.length === 1}>
                         <Trash2 className="w-3.5 h-3.5" />
@@ -341,7 +341,7 @@ export default function DocumentTemplates() {
                     </div>
                     {field.type === 'select' && (
                       <div className="mt-3">
-                        <label className="text-xs text-slate-400 mb-1.5 block">Options</label>
+                        <label className="text-xs text-muted-foreground mb-1.5 block">Options</label>
                         <Input
                           value={field.optionsText}
                           onChange={(event) => updateDraftField(index, { optionsText: event.target.value })}
@@ -369,19 +369,19 @@ export default function DocumentTemplates() {
         >
           <GlassCard className="w-full max-w-lg p-6 relative" onClick={(event) => event.stopPropagation()}>
             <button onClick={closeUseModal} className="absolute top-4 right-4">
-              <X className="w-4 h-4 text-slate-500 hover:text-white" />
+              <X className="w-4 h-4 text-muted-foreground hover:text-white" />
             </button>
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-teal-500/15 flex items-center justify-center"><BookOpen className="w-4 h-4 text-teal-400" /></div>
+              <div className="w-8 h-8 rounded-lg bg-teal-500/15 flex items-center justify-center"><BookOpen className="w-4 h-4 text-primary" /></div>
               <div>
                 <h3 className="text-sm font-semibold text-white">{previewTemplate.name}</h3>
-                <p className="text-xs text-slate-500">{previewTemplate.category}</p>
+                <p className="text-xs text-muted-foreground">{previewTemplate.category}</p>
               </div>
             </div>
             <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
               {previewTemplate.fields.map((field) => (
                 <div key={field.label}>
-                  <label className="text-xs text-slate-400 mb-1 block">
+                  <label className="text-xs text-muted-foreground mb-1 block">
                     {field.label} {field.required && <span className="text-rose-400">*</span>}
                   </label>
                   {field.type === 'select' ? (
@@ -415,7 +415,7 @@ export default function DocumentTemplates() {
 
       {starred.length > 0 && (
         <div>
-          <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2"><Star className="w-3.5 h-3.5 text-amber-400" /> Starred Templates</h2>
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2"><Star className="w-3.5 h-3.5 text-amber-400" /> Starred Templates</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {starred.map((template) => <TemplateCard key={template.id} template={template} onStar={toggleStar} onUse={useTemplate} />)}
           </div>
@@ -423,9 +423,9 @@ export default function DocumentTemplates() {
       )}
 
       <div>
-        <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">All Templates</h2>
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">All Templates</h2>
         {unstarred.length === 0 && starred.length === 0 ? (
-          <GlassCard className="p-10 text-center text-slate-500 text-sm">No templates match your search.</GlassCard>
+          <GlassCard className="p-10 text-center text-muted-foreground text-sm">No templates match your search.</GlassCard>
         ) : unstarred.length === 0 ? null : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {unstarred.map((template) => <TemplateCard key={template.id} template={template} onStar={toggleStar} onUse={useTemplate} />)}
@@ -449,23 +449,23 @@ function TemplateCard({
     <GlassCard className="p-5 flex flex-col gap-3 hover:border-teal-500/30 transition-all group">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-teal-500/10 flex items-center justify-center"><FileText className="w-4 h-4 text-teal-400" /></div>
+          <div className="w-8 h-8 rounded-lg bg-teal-500/10 flex items-center justify-center"><FileText className="w-4 h-4 text-primary" /></div>
           <div>
             <div className="text-sm font-semibold text-white">{template.name}</div>
-            <div className="text-xs text-slate-500">{template.category}</div>
+            <div className="text-xs text-muted-foreground">{template.category}</div>
           </div>
         </div>
         <button onClick={() => void onStar(template.id)} className="text-slate-600 hover:text-amber-400 transition-colors">
           {template.starred ? <Star className="w-4 h-4 text-amber-400" /> : <StarOff className="w-4 h-4" />}
         </button>
       </div>
-      <p className="text-xs text-slate-500 leading-relaxed">{template.description}</p>
+      <p className="text-xs text-muted-foreground leading-relaxed">{template.description}</p>
       <div className="flex flex-wrap gap-1">
         {template.tags.map((tag) => (
-          <span key={tag} className="flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 bg-slate-800/50 text-slate-400 rounded"><Tag className="w-2.5 h-2.5" /> {tag}</span>
+          <span key={tag} className="flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 bg-secondary/50 text-muted-foreground rounded"><Tag className="w-2.5 h-2.5" /> {tag}</span>
         ))}
       </div>
-      <div className="flex items-center justify-between text-xs text-slate-600 mt-auto pt-2 border-t border-white/5">
+      <div className="flex items-center justify-between text-xs text-slate-600 mt-auto pt-2 border-t border-border">
         <span>Used {template.usageCount}×</span>
         {template.lastUsed && <span>Last: {template.lastUsed}</span>}
       </div>

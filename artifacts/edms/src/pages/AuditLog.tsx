@@ -22,7 +22,7 @@ const severityVariant = (s: string) => {
 const severityIcon = (s: string) => {
   if (s === 'Critical') return <AlertCircle className="w-3.5 h-3.5 text-rose-400" />;
   if (s === 'Warning') return <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />;
-  return <Info className="w-3.5 h-3.5 text-slate-400" />;
+  return <Info className="w-3.5 h-3.5 text-muted-foreground" />;
 };
 
 const PAGE_SIZE = 20;
@@ -121,7 +121,7 @@ export default function AuditLog() {
         {/* Search + Filters */}
         <div className="flex flex-wrap items-center gap-3 mb-4">
           <div className="relative flex-1 min-w-[220px]">
-            <FileSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <FileSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search by user, entity, action..."
               className="pl-9 w-full"
@@ -134,7 +134,7 @@ export default function AuditLog() {
           <select
             value={moduleFilter}
             onChange={e => setModuleFilter(e.target.value)}
-            className="bg-slate-950/50 border border-teal-500/20 text-slate-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:border-teal-500/40"
+            className="bg-slate-950/50 border border-teal-500/20 text-foreground text-sm rounded-xl px-3 py-2 focus:outline-none focus:border-teal-500/40"
           >
             {modules.map(m => <option key={m}>{m}</option>)}
           </select>
@@ -143,7 +143,7 @@ export default function AuditLog() {
           <select
             value={severityFilter}
             onChange={e => setSeverityFilter(e.target.value)}
-            className="bg-slate-950/50 border border-teal-500/20 text-slate-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:border-teal-500/40"
+            className="bg-slate-950/50 border border-teal-500/20 text-foreground text-sm rounded-xl px-3 py-2 focus:outline-none focus:border-teal-500/40"
           >
             {['All', 'Critical', 'Warning', 'Info'].map(s => <option key={s}>{s}</option>)}
           </select>
@@ -152,7 +152,7 @@ export default function AuditLog() {
           <select
             value={userFilter}
             onChange={e => setUserFilter(e.target.value)}
-            className="bg-slate-950/50 border border-teal-500/20 text-slate-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:border-teal-500/40"
+            className="bg-slate-950/50 border border-teal-500/20 text-foreground text-sm rounded-xl px-3 py-2 focus:outline-none focus:border-teal-500/40"
           >
             {users.map(u => <option key={u}>{u}</option>)}
           </select>
@@ -168,8 +168,8 @@ export default function AuditLog() {
         </div>
 
         {/* Date range row */}
-        <div className="flex flex-wrap items-center gap-3 mb-4 pb-4 border-b border-white/5">
-          <div className="flex items-center gap-2 text-xs text-slate-500">
+        <div className="flex flex-wrap items-center gap-3 mb-4 pb-4 border-b border-border">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Calendar className="w-3.5 h-3.5 text-slate-600" />
             <span>Date range:</span>
           </div>
@@ -188,8 +188,8 @@ export default function AuditLog() {
             minDate={dateFrom || undefined}
             className="w-[168px]"
           />
-          <span className="text-xs text-slate-500 ml-auto">
-            <span className="text-teal-400 font-semibold">{filtered.length}</span> events
+          <span className="text-xs text-muted-foreground ml-auto">
+            <span className="text-primary font-semibold">{filtered.length}</span> events
             {activeFilters > 0 && <span className="text-slate-600"> (filtered from {MOCK_AUDIT_EXTENDED.length})</span>}
           </span>
         </div>
@@ -198,7 +198,7 @@ export default function AuditLog() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm whitespace-nowrap">
             <thead>
-              <tr className="border-b border-slate-700/50 text-slate-400">
+              <tr className="border-b border-border text-muted-foreground">
                 <th className="pb-3 pl-4 font-semibold text-xs">Event ID</th>
                 <th className="pb-3 font-semibold text-xs">Severity</th>
                 <th className="pb-3 font-semibold text-xs">Action</th>
@@ -215,30 +215,30 @@ export default function AuditLog() {
               {paginated.map(event => (
                 <tr
                   key={event.id}
-                  className={`hover:bg-slate-800/30 cursor-pointer transition-colors ${selectedEvent?.id === event.id ? 'bg-slate-800/40' : ''}`}
+                  className={`hover:bg-secondary/30 cursor-pointer transition-colors ${selectedEvent?.id === event.id ? 'bg-secondary/40' : ''}`}
                   onClick={() => setSelectedEvent(selectedEvent?.id === event.id ? null : event)}
                 >
-                  <td className="py-3 pl-4 font-mono text-xs text-teal-400">{event.id}</td>
+                  <td className="py-3 pl-4 font-mono text-xs text-primary">{event.id}</td>
                   <td className="py-3">
                     <div className="flex items-center gap-1.5">
                       {severityIcon(event.severity)}
                       <Badge variant={severityVariant(event.severity)}>{event.severity}</Badge>
                     </div>
                   </td>
-                  <td className="py-3 font-mono text-xs text-slate-300">{event.action}</td>
-                  <td className="py-3 text-slate-400 text-xs">{event.module}</td>
+                  <td className="py-3 font-mono text-xs text-foreground/90">{event.action}</td>
+                  <td className="py-3 text-muted-foreground text-xs">{event.module}</td>
                   <td className="py-3 font-mono text-xs text-blue-400">{event.entity}</td>
-                  <td className="py-3 text-slate-300 text-xs">{event.user}</td>
-                  <td className="py-3 font-mono text-xs text-slate-500">{event.ip}</td>
-                  <td className="py-3 text-slate-500 text-xs">{event.time}</td>
+                  <td className="py-3 text-foreground/90 text-xs">{event.user}</td>
+                  <td className="py-3 font-mono text-xs text-muted-foreground">{event.ip}</td>
+                  <td className="py-3 text-muted-foreground text-xs">{event.time}</td>
                 </tr>
               ))}
               {paginated.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="py-16 text-center text-slate-500">
+                  <td colSpan={8} className="py-16 text-center text-muted-foreground">
                     <Filter className="w-8 h-8 mx-auto mb-2 opacity-20" />
-                    <p className="font-medium text-slate-400">No events match your filters</p>
-                    <button onClick={clearFilters} className="mt-2 text-xs text-teal-400 hover:text-teal-300">Clear filters</button>
+                    <p className="font-medium text-muted-foreground">No events match your filters</p>
+                    <button onClick={clearFilters} className="mt-2 text-xs text-primary hover:text-primary/90">Clear filters</button>
                   </td>
                 </tr>
               )}
@@ -248,18 +248,18 @@ export default function AuditLog() {
 
         {/* Expanded event detail */}
         {selectedEvent && (
-          <div className="mt-4 p-4 bg-slate-800/30 rounded-xl border border-teal-500/20">
+          <div className="mt-4 p-4 bg-secondary/30 rounded-xl border border-teal-500/20">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold text-white">Event Detail: <span className="font-mono text-teal-400">{selectedEvent.id}</span></h3>
-              <button onClick={() => setSelectedEvent(null)} className="text-slate-500 hover:text-white transition-colors">
+              <h3 className="text-sm font-bold text-white">Event Detail: <span className="font-mono text-primary">{selectedEvent.id}</span></h3>
+              <button onClick={() => setSelectedEvent(null)} className="text-muted-foreground hover:text-white transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {Object.entries(selectedEvent).map(([k, v]) => (
                 <div key={k}>
-                  <p className="text-[10px] text-slate-500 mb-0.5 uppercase tracking-wider font-semibold">{k}</p>
-                  <p className="text-xs font-mono text-slate-200 break-all">{String(v)}</p>
+                  <p className="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-semibold">{k}</p>
+                  <p className="text-xs font-mono text-foreground break-all">{String(v)}</p>
                 </div>
               ))}
             </div>
@@ -268,16 +268,16 @@ export default function AuditLog() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between pt-4 mt-4 border-t border-white/5">
-            <span className="text-xs text-slate-500">
-              Page <span className="text-slate-400 font-semibold">{page}</span> of {totalPages}
+          <div className="flex items-center justify-between pt-4 mt-4 border-t border-border">
+            <span className="text-xs text-muted-foreground">
+              Page <span className="text-muted-foreground font-semibold">{page}</span> of {totalPages}
               {' · '}showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)}
             </span>
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-teal-300 hover:bg-slate-800/60 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-primary/90 hover:bg-secondary/60 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
               >
                 <ChevronLeft className="w-3.5 h-3.5" /> Prev
               </button>
@@ -288,14 +288,14 @@ export default function AuditLog() {
                   <button
                     key={pg}
                     onClick={() => setPage(pg)}
-                    className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all ${pg === page ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40' : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/60'}`}
+                    className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all ${pg === page ? 'bg-teal-500/20 text-primary/90 border border-teal-500/40' : 'text-muted-foreground hover:text-foreground/90 hover:bg-secondary/60'}`}
                   >{pg}</button>
                 );
               })}
               <button
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-teal-300 hover:bg-slate-800/60 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-primary/90 hover:bg-secondary/60 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
               >
                 Next <ChevronRight className="w-3.5 h-3.5" />
               </button>

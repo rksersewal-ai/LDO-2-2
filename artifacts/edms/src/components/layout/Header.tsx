@@ -85,7 +85,7 @@ export function Header() {
         : 'bg-teal-500/12 border-teal-400/35 text-teal-100 shadow-[0_10px_28px_rgba(20,184,166,0.16)]';
     }
 
-    return 'bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-teal-300 hover:border-teal-500/30 hover:bg-slate-800/70';
+    return 'bg-secondary/50 border-border text-muted-foreground hover:text-primary/90 hover:border-teal-500/30 hover:bg-secondary/70';
   };
 
   // Cmd+K / Ctrl+K global shortcut
@@ -161,16 +161,16 @@ export function Header() {
 
         <header className="h-14 px-6 flex items-center justify-between z-30 relative border-b border-white/[0.04] shrink-0">
           <div className="flex items-center gap-3">
-            <div className="flex items-center text-xs text-slate-500 font-medium">
+            <div className="flex items-center text-xs text-muted-foreground font-medium">
               {breadcrumbs.map((crumb, i) => (
                 <div key={i} className="flex items-center">
                   {i > 0 && <span className="mx-1.5 text-slate-700">/</span>}
                   {i === breadcrumbs.length - 1 ? (
-                    <span className="text-slate-300 font-semibold">{crumb}</span>
+                    <span className="text-foreground/90 font-semibold">{crumb}</span>
                   ) : (
                     <button
                       onClick={() => navigate(getBreadcrumbPath(i))}
-                      className="hover:text-slate-200 transition-colors cursor-pointer"
+                      className="hover:text-foreground transition-colors cursor-pointer"
                     >
                       {crumb}
                     </button>
@@ -182,7 +182,7 @@ export function Header() {
 
           <div className="flex items-center gap-3">
             {preferences.showLiveClock && (
-              <div className="hidden md:flex items-center rounded-lg border border-teal-500/18 bg-slate-950/55 px-3 py-1.5 text-xs font-medium text-slate-300 shadow-[0_10px_26px_rgba(15,23,42,0.22)]">
+              <div className="hidden md:flex items-center rounded-lg border border-teal-500/18 bg-slate-950/55 px-3 py-1.5 text-xs font-medium text-foreground/90 shadow-[0_10px_26px_rgba(15,23,42,0.22)]">
                 {clockLabel}
               </div>
             )}
@@ -190,11 +190,11 @@ export function Header() {
             {/* Search → Command Palette trigger */}
             <button
               onClick={() => setCommandOpen(true)}
-              className="flex items-center gap-2 w-56 md:w-64 xl:w-72 px-3 py-1.5 border border-teal-500/20 rounded-lg bg-slate-900/50 text-slate-500 hover:border-teal-400/40 hover:text-slate-400 text-sm transition-all text-left"
+              className="flex items-center gap-2 w-56 md:w-64 xl:w-72 px-3 py-1.5 border border-teal-500/20 rounded-lg bg-secondary/50 text-muted-foreground hover:border-teal-400/40 hover:text-muted-foreground text-sm transition-all text-left"
             >
               <Search className="h-3.5 w-3.5 shrink-0" />
               <span className="flex-1">Search, navigate, act...</span>
-              <span className="text-xs border border-slate-700 rounded px-1.5 py-0.5 font-semibold">⌘K</span>
+              <span className="text-xs border border-border rounded px-1.5 py-0.5 font-semibold">⌘K</span>
             </button>
 
             {/* Theme Toggle */}
@@ -204,8 +204,8 @@ export function Header() {
               aria-pressed={theme === 'light'}
               className={`flex h-10 w-10 items-center justify-center rounded-lg border transition-all ${
                 theme === 'dark'
-                  ? 'bg-amber-500/10 border-amber-400/25 text-amber-200 shadow-[0_10px_28px_rgba(245,158,11,0.14)] hover:border-amber-300/45 hover:bg-amber-500/14'
-                  : 'bg-indigo-500/10 border-indigo-400/25 text-indigo-200 shadow-[0_10px_28px_rgba(99,102,241,0.14)] hover:border-indigo-300/45 hover:bg-indigo-500/14'
+                  ? 'bg-card border-border text-foreground hover:bg-secondary'
+                  : 'bg-card border-border text-foreground hover:bg-secondary'
               }`}
             >
               {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -221,11 +221,11 @@ export function Header() {
                 <Type className="w-4 h-4" />
               </button>
               {showTextControls && (
-                <div className="absolute right-0 top-full mt-2 bg-slate-900/95 backdrop-blur-xl border border-teal-500/20 rounded-xl shadow-xl p-3 flex items-center gap-2 z-50">
-                  <button onClick={() => adjustFontSize(-1)} className="w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors"><Minus className="w-3 h-3" /></button>
-                  <span className="text-slate-300 text-sm font-mono w-8 text-center">{fontSize}</span>
-                  <button onClick={() => adjustFontSize(1)} className="w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors"><Plus className="w-3 h-3" /></button>
-                  <button onClick={resetFontSize} className="w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors"><RotateCcw className="w-3 h-3" /></button>
+                <div className="absolute right-0 top-full mt-2 bg-card/95 backdrop-blur-xl border border-teal-500/20 rounded-xl shadow-xl p-3 flex items-center gap-2 z-50">
+                  <button onClick={() => adjustFontSize(-1)} className="w-7 h-7 rounded-lg bg-secondary text-muted-foreground hover:text-white flex items-center justify-center transition-colors"><Minus className="w-3 h-3" /></button>
+                  <span className="text-foreground/90 text-sm font-mono w-8 text-center">{fontSize}</span>
+                  <button onClick={() => adjustFontSize(1)} className="w-7 h-7 rounded-lg bg-secondary text-muted-foreground hover:text-white flex items-center justify-center transition-colors"><Plus className="w-3 h-3" /></button>
+                  <button onClick={resetFontSize} className="w-7 h-7 rounded-lg bg-secondary text-muted-foreground hover:text-white flex items-center justify-center transition-colors"><RotateCcw className="w-3 h-3" /></button>
                 </div>
               )}
             </div>
@@ -265,32 +265,32 @@ export function Header() {
                 aria-pressed={showProfile}
                 className={`flex items-center gap-2 rounded-xl border pl-2 pr-3 py-1.5 transition-all ${floatingToggleClass(showProfile)}`}
               >
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-teal-400 to-emerald-600 flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">{user?.name.charAt(0) ?? 'U'}</span>
+                <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center">
+                  <span className="text-primary-foreground text-xs font-bold">{user?.name.charAt(0) ?? 'U'}</span>
                 </div>
                 <div className="text-left hidden md:block">
-                  <div className="text-xs font-medium text-slate-200">{user?.name ?? 'User'}</div>
-                  <div className="text-[10px] text-slate-500">{user?.role ?? 'viewer'}</div>
+                  <div className="text-xs font-medium text-foreground">{user?.name ?? 'User'}</div>
+                  <div className="text-[10px] text-muted-foreground">{user?.role ?? 'viewer'}</div>
                 </div>
               </button>
               {showProfile && (
-                <div className="absolute right-0 top-full mt-2 w-64 bg-slate-900/95 backdrop-blur-xl border border-teal-500/20 rounded-xl shadow-2xl z-50 overflow-hidden">
-                  <div className="p-4 border-b border-slate-700/50">
+                <div className="absolute right-0 top-full mt-2 w-64 bg-card/95 backdrop-blur-xl border border-teal-500/20 rounded-xl shadow-2xl z-50 overflow-hidden">
+                  <div className="p-4 border-b border-border">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-emerald-600 flex items-center justify-center">
                         <span className="text-white font-bold">{user?.name.charAt(0)}</span>
                       </div>
                       <div>
-                        <div className="text-sm font-semibold text-slate-100">{user?.name}</div>
-                        <div className="text-xs text-slate-400">{user?.designation}</div>
-                        <div className="text-xs text-slate-500">{user?.email}</div>
+                        <div className="text-sm font-semibold text-foreground">{user?.name}</div>
+                        <div className="text-xs text-muted-foreground">{user?.designation}</div>
+                        <div className="text-xs text-muted-foreground">{user?.email}</div>
                       </div>
                     </div>
                   </div>
                   <div className="p-2">
                     <button
                       onClick={() => { navigate('/profile'); closeFloatingPanels(); }}
-                      className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-300 hover:text-slate-100 hover:bg-slate-800/50 rounded-lg transition-colors"
+                      className="w-full flex items-center gap-3 px-3 py-2 text-sm text-foreground/90 hover:text-foreground hover:bg-secondary/50 rounded-lg transition-colors"
                     >
                       <User className="w-4 h-4" /> Profile Settings
                     </button>
@@ -298,13 +298,13 @@ export function Header() {
                       <>
                         <button
                           onClick={() => { navigate('/admin/users'); closeFloatingPanels(); }}
-                          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-300 hover:text-slate-100 hover:bg-slate-800/50 rounded-lg transition-colors"
+                          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-foreground/90 hover:text-foreground hover:bg-secondary/50 rounded-lg transition-colors"
                         >
                           <User className="w-4 h-4" /> User Administration
                         </button>
                         <button
                           onClick={() => { navigate('/settings'); closeFloatingPanels(); }}
-                          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-300 hover:text-slate-100 hover:bg-slate-800/50 rounded-lg transition-colors"
+                          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-foreground/90 hover:text-foreground hover:bg-secondary/50 rounded-lg transition-colors"
                         >
                           <Moon className="w-4 h-4" /> System Settings
                         </button>
