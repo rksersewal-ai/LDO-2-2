@@ -4,10 +4,12 @@ from unittest.mock import patch, call, MagicMock
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test.utils import override_settings
 from shared.permissions import PermissionService
 
 from documents.services import DocumentService, OcrApplicationService, DocumentOcrProcessingService
 from documents.indexing import DocumentIndexOrchestrator
+from documents.serializers import DocumentIngestSerializer
 from edms_api.models import Document, OcrJob
 
 class DocumentServiceTests(TestCase):
@@ -110,3 +112,29 @@ class OcrApplicationServiceTests(TestCase):
         mock_process_job.assert_called_once_with(job)
         self.assertTrue(created)
         self.assertEqual(job.document, self.document)
+
+
+class DocumentIngestSerializerSecurityTests(TestCase):
+    @override_settings(EDMS_MAX_UPLOAD_SIZE_BYTES=10, EDMS_ALLOWED_UPLOAD_EXTENSIONS=['.pdf'])
+    def test_validate_rejects_oversized_upload(self):
+        serializer = DocumentIngestSerializer(
+            data={
+                'file': SimpleUploadedFile('secure.pdf', b'01234567890'),
+                'name': 'Secure File',
+                'category': 'spec',
+            }
+        )
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('File too large', str(serializer.errors))
+
+    @override_settings(EDMS_ALLOWED_UPLOAD_EXTENSIONS=['.pdf'])
+    def test_validate_rejects_disallowed_extension(self):
+        serializer = DocumentIngestSerializer(
+            data={
+                'file': SimpleUploadedFile('malicious.exe', b'content'),
+                'name': 'Not Allowed',
+                'category': 'spec',
+            }
+        )
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('Unsupported file extension', str(serializer.errors))

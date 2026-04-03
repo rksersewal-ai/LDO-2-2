@@ -1,0 +1,2 @@
+# Load-test toolchain (Phase 7)
+locust==2.41.6

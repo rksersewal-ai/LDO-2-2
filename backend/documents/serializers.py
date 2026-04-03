@@ -1,6 +1,7 @@
 from pathlib import Path
 import json
 
+from django.conf import settings
 from rest_framework import serializers
 
 from edms_api.models import Document, OcrJob
@@ -100,6 +101,23 @@ class DocumentIngestSerializer(serializers.Serializer):
     template_id = serializers.CharField(max_length=100, required=False, allow_blank=True)
     template_fields = serializers.JSONField(required=False)
 
+    DEFAULT_ALLOWED_EXTENSIONS = {
+        '.pdf',
+        '.tif',
+        '.tiff',
+        '.prt',
+        '.doc',
+        '.docx',
+        '.xls',
+        '.xlsx',
+        '.csv',
+        '.png',
+        '.jpg',
+        '.jpeg',
+        '.svg',
+        '.txt',
+    }
+
     def validate_tags(self, value):
         if value in (None, ''):
             return []
@@ -126,12 +144,38 @@ class DocumentIngestSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         file_obj = attrs['file']
-        extension = Path(file_obj.name).suffix.lower()
-        if not extension:
-            raise serializers.ValidationError({'file': 'Uploaded file must have an extension.'})
+        extension = self.validate_file_security(file_obj)
         attrs['resolved_file_type'] = self._resolve_file_type(extension)
         attrs['normalized_revision'] = self._normalize_revision(attrs.get('revision_label'))
         return attrs
+
+    @classmethod
+    def validate_file_security(cls, file_obj):
+        extension = Path(file_obj.name).suffix.lower()
+        if not extension:
+            raise serializers.ValidationError({'file': 'Uploaded file must have an extension.'})
+
+        allowed_extensions = getattr(settings, 'EDMS_ALLOWED_UPLOAD_EXTENSIONS', None)
+        if allowed_extensions:
+            normalized_extensions = {
+                (item if str(item).startswith('.') else f'.{item}').lower()
+                for item in allowed_extensions
+                if str(item).strip()
+            }
+        else:
+            normalized_extensions = cls.DEFAULT_ALLOWED_EXTENSIONS
+
+        if extension not in normalized_extensions:
+            allowed_display = ', '.join(sorted(normalized_extensions))
+            raise serializers.ValidationError(
+                {'file': f'Unsupported file extension "{extension}". Allowed extensions: {allowed_display}'}
+            )
+
+        max_size = int(getattr(settings, 'EDMS_MAX_UPLOAD_SIZE_BYTES', 100 * 1024 * 1024))
+        if file_obj.size > max_size:
+            raise serializers.ValidationError({'file': f'File too large. Maximum allowed size is {max_size} bytes.'})
+
+        return extension
 
     @staticmethod
     def _resolve_file_type(extension: str) -> str:
