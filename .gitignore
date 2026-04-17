@@ -70,3 +70,8 @@ __pycache__/
 .codex-run/
 attached_assets/
 venv/
+.playwright-mcp/
+.ruff_cache/
+artifacts/*.pen
+artifacts/edms-preview.log
+*.ipynb_checkpoints
