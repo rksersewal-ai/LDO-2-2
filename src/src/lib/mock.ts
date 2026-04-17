@@ -15,7 +15,7 @@ export const MOCK_DOCUMENTS = [
     category: "Electrical Schema",
     lifecycle: "Active",
     pages: 12,
-    tags: ["Engineering", "Electrical", "Schematic"]
+    tags: ["Engineering", "Electrical", "Schematic"],
   },
   {
     id: "DOC-2026-9022",
@@ -33,7 +33,7 @@ export const MOCK_DOCUMENTS = [
     category: "Specification",
     lifecycle: "Draft",
     pages: 45,
-    tags: ["Compliance", "Thermal"]
+    tags: ["Compliance", "Thermal"],
   },
   {
     id: "DOC-2026-9023",
@@ -51,7 +51,7 @@ export const MOCK_DOCUMENTS = [
     category: "CAD Output",
     lifecycle: "Draft",
     pages: 1,
-    tags: ["Mechanical", "CAD", "WIP"]
+    tags: ["Mechanical", "CAD", "WIP"],
   },
   {
     id: "DOC-2025-1104",
@@ -69,7 +69,7 @@ export const MOCK_DOCUMENTS = [
     category: "Calibration Log",
     lifecycle: "Archived",
     pages: 8,
-    tags: ["Archive", "Calibration"]
+    tags: ["Archive", "Calibration"],
   },
   {
     id: "DOC-2026-9040",
@@ -87,8 +87,8 @@ export const MOCK_DOCUMENTS = [
     category: "Financial / Yield",
     lifecycle: "Active",
     pages: 3,
-    tags: ["Report", "Materials"]
-  }
+    tags: ["Report", "Materials"],
+  },
 ];
 
 export const MOCK_PL_RECORDS = [
@@ -99,11 +99,12 @@ export const MOCK_PL_RECORDS = [
     lifecycle: "Production",
     owner: "M. Chen",
     lastUpdated: "2026-03-21",
-    description: "Core PL record managing the thermal and electrical specifications for the main turbine housing unit.",
+    description:
+      "Core PL record managing the thermal and electrical specifications for the main turbine housing unit.",
     linkedDocs: ["DOC-2026-9021", "DOC-2026-9022"],
     linkedBOMs: ["SUB-1100", "PART-1102"],
     cases: ["CAS-992"],
-    ledgerEntries: 14
+    ledgerEntries: 14,
   },
   {
     id: "PL-88104",
@@ -112,11 +113,12 @@ export const MOCK_PL_RECORDS = [
     lifecycle: "Prototyping",
     owner: "A. Kowalski",
     lastUpdated: "2026-03-22",
-    description: "Next-gen propulsion mechanics including new aerodynamic CAD outputs.",
+    description:
+      "Next-gen propulsion mechanics including new aerodynamic CAD outputs.",
     linkedDocs: ["DOC-2026-9023"],
     linkedBOMs: ["ASSY-1000"],
     cases: [],
-    ledgerEntries: 5
+    ledgerEntries: 5,
   },
   {
     id: "PL-11002",
@@ -129,8 +131,8 @@ export const MOCK_PL_RECORDS = [
     linkedDocs: ["DOC-2025-1104"],
     linkedBOMs: ["PART-9901 (Legacy)"],
     cases: ["CAS-104", "CAS-209"],
-    ledgerEntries: 89
-  }
+    ledgerEntries: 89,
+  },
 ];
 
 export const MOCK_BOM_TREE = [
@@ -146,9 +148,13 @@ export const MOCK_BOM_TREE = [
         type: "Sub-Assembly",
         expanded: true,
         children: [
-          { id: "PART-1101", name: "Outer Casing (Titanium)", type: "Component" },
-          { id: "PART-1102", name: "Thermal Shielding", type: "Component" }
-        ]
+          {
+            id: "PART-1101",
+            name: "Outer Casing (Titanium)",
+            type: "Component",
+          },
+          { id: "PART-1102", name: "Thermal Shielding", type: "Component" },
+        ],
       },
       {
         id: "SUB-1200",
@@ -157,17 +163,52 @@ export const MOCK_BOM_TREE = [
         expanded: false,
         children: [
           { id: "PART-1201", name: "Main Logic Board", type: "Component" },
-          { id: "PART-1202", name: "Sensor Array", type: "Component" }
-        ]
-      }
-    ]
-  }
+          { id: "PART-1202", name: "Sensor Array", type: "Component" },
+        ],
+      },
+    ],
+  },
 ];
 
 export const MOCK_AUDIT_LOG = [
-  { id: "EVT-9921", action: "READ", user: "m.chen", document: "DOC-2026-9021", ip: "10.0.4.22", time: "10:42:01 AM" },
-  { id: "EVT-9922", action: "UPDATE", user: "j.halloway", document: "DOC-2026-9022", ip: "10.0.4.15", time: "11:05:12 AM" },
-  { id: "EVT-9923", action: "OCR_SUCCESS", user: "SYSTEM", document: "DOC-2026-9021", ip: "localhost", time: "11:06:00 AM" },
-  { id: "EVT-9924", action: "APPROVAL_REQ", user: "a.kowalski", document: "DOC-2026-9023", ip: "10.0.8.50", time: "11:15:33 AM" },
-  { id: "EVT-9925", action: "DOWNLOAD", user: "s.vance", document: "DOC-2025-1104", ip: "10.0.2.11", time: "11:40:02 AM" },
+  {
+    id: "EVT-9921",
+    action: "READ",
+    user: "m.chen",
+    document: "DOC-2026-9021",
+    ip: "10.0.4.22",
+    time: "10:42:01 AM",
+  },
+  {
+    id: "EVT-9922",
+    action: "UPDATE",
+    user: "j.halloway",
+    document: "DOC-2026-9022",
+    ip: "10.0.4.15",
+    time: "11:05:12 AM",
+  },
+  {
+    id: "EVT-9923",
+    action: "OCR_SUCCESS",
+    user: "SYSTEM",
+    document: "DOC-2026-9021",
+    ip: "localhost",
+    time: "11:06:00 AM",
+  },
+  {
+    id: "EVT-9924",
+    action: "APPROVAL_REQ",
+    user: "a.kowalski",
+    document: "DOC-2026-9023",
+    ip: "10.0.8.50",
+    time: "11:15:33 AM",
+  },
+  {
+    id: "EVT-9925",
+    action: "DOWNLOAD",
+    user: "s.vance",
+    document: "DOC-2025-1104",
+    ip: "10.0.2.11",
+    time: "11:40:02 AM",
+  },
 ];

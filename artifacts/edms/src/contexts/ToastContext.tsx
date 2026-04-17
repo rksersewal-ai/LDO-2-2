@@ -1,5 +1,11 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import type { ToastMessage, ToastType } from '../components/ui/Toast';
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  ReactNode,
+} from "react";
+import type { ToastMessage, ToastType } from "../components/ui/Toast";
 
 interface ToastContextType {
   toasts: ToastMessage[];
@@ -19,41 +25,54 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const generateId = () => `toast-${Date.now()}-${Math.random()}`;
 
   const addToast = useCallback(
-    (message: string, type: ToastType = 'info', duration: number = 4000) => {
+    (message: string, type: ToastType = "info", duration: number = 4000) => {
       const id = generateId();
       const toast: ToastMessage = { id, message, type, duration };
-      setToasts(prev => [...prev, toast]);
+      setToasts((prev) => [...prev, toast]);
       return id;
     },
-    []
+    [],
   );
 
   const removeToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
+    setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
   const showSuccess = useCallback(
-    (message: string, duration?: number) => addToast(message, 'success', duration),
-    [addToast]
+    (message: string, duration?: number) =>
+      addToast(message, "success", duration),
+    [addToast],
   );
 
   const showError = useCallback(
-    (message: string, duration?: number) => addToast(message, 'error', duration),
-    [addToast]
+    (message: string, duration?: number) =>
+      addToast(message, "error", duration),
+    [addToast],
   );
 
   const showWarning = useCallback(
-    (message: string, duration?: number) => addToast(message, 'warning', duration),
-    [addToast]
+    (message: string, duration?: number) =>
+      addToast(message, "warning", duration),
+    [addToast],
   );
 
   const showInfo = useCallback(
-    (message: string, duration?: number) => addToast(message, 'info', duration),
-    [addToast]
+    (message: string, duration?: number) => addToast(message, "info", duration),
+    [addToast],
   );
 
   return (
-    <ToastContext.Provider value={{ toasts, addToast, removeToast, showSuccess, showError, showWarning, showInfo }}>
+    <ToastContext.Provider
+      value={{
+        toasts,
+        addToast,
+        removeToast,
+        showSuccess,
+        showError,
+        showWarning,
+        showInfo,
+      }}
+    >
       {children}
     </ToastContext.Provider>
   );
@@ -62,7 +81,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 export function useToast() {
   const ctx = useContext(ToastContext);
   if (!ctx) {
-    throw new Error('useToast must be used within ToastProvider');
+    throw new Error("useToast must be used within ToastProvider");
   }
   return ctx;
 }

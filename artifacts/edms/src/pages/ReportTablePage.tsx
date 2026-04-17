@@ -1,19 +1,33 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
-import { ArrowLeft, Download, FileText, RefreshCw, Search, X } from 'lucide-react';
-import { GlassCard, Badge, Button, Input } from '../components/ui/Shared';
-import { DatePicker } from '../components/ui/DatePicker';
-import { ExportImportService } from '../services/ExportImportService';
-import { getReportDefinition, parseReportDate, type ReportColumn, type ReportRow } from '../lib/reporting';
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router";
+import {
+  ArrowLeft,
+  Download,
+  FileText,
+  RefreshCw,
+  Search,
+  X,
+} from "lucide-react";
+import { GlassCard, Badge, Button, Input } from "../components/ui/Shared";
+import { DatePicker } from "../components/ui/DatePicker";
+import { ExportImportService } from "../services/ExportImportService";
+import {
+  getReportDefinition,
+  parseReportDate,
+  type ReportColumn,
+  type ReportRow,
+} from "../lib/reporting";
 
 function getStatusVariant(status: string) {
-  if (status === 'Ready') return 'success';
-  if (status === 'Generating') return 'processing';
-  return 'warning';
+  if (status === "Ready") return "success";
+  if (status === "Generating") return "processing";
+  return "warning";
 }
 
 function buildExportRows(rows: ReportRow[], columns: ReportColumn[]) {
-  return rows.map((row) => columns.map((column) => String(row[column.key] ?? '—')));
+  return rows.map((row) =>
+    columns.map((column) => String(row[column.key] ?? "—")),
+  );
 }
 
 export default function ReportTablePage() {
@@ -21,31 +35,37 @@ export default function ReportTablePage() {
   const { reportId } = useParams<{ reportId: string }>();
   const report = getReportDefinition(reportId);
   const detailRef = useRef<HTMLDivElement | null>(null);
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
-  const [search, setSearch] = useState('');
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [search, setSearch] = useState("");
   const [refreshStamp, setRefreshStamp] = useState(Date.now());
 
-  const allRows = useMemo(() => (report ? report.getRows() : []), [report, refreshStamp]);
+  const allRows = useMemo(
+    () => (report ? report.getRows() : []),
+    [report, refreshStamp],
+  );
 
   const filteredRows = useMemo(() => {
     return allRows.filter((row) => {
-      const rowDate = parseReportDate(row[report?.dateKey ?? '']);
-      const fromTime = dateFrom ? new Date(`${dateFrom}T00:00:00`).getTime() : null;
+      const rowDate = parseReportDate(row[report?.dateKey ?? ""]);
+      const fromTime = dateFrom
+        ? new Date(`${dateFrom}T00:00:00`).getTime()
+        : null;
       const toTime = dateTo ? new Date(`${dateTo}T23:59:59`).getTime() : null;
       const matchesDate =
         (!fromTime || (rowDate != null && rowDate >= fromTime)) &&
         (!toTime || (rowDate != null && rowDate <= toTime));
 
-      const haystack = Object.values(row).join(' ').toLowerCase();
-      const matchesSearch = !search.trim() || haystack.includes(search.trim().toLowerCase());
+      const haystack = Object.values(row).join(" ").toLowerCase();
+      const matchesSearch =
+        !search.trim() || haystack.includes(search.trim().toLowerCase());
       return matchesDate && matchesSearch;
     });
   }, [allRows, dateFrom, dateTo, report, search]);
 
   useEffect(() => {
     if (detailRef.current) {
-      detailRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      detailRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [reportId]);
 
@@ -54,8 +74,10 @@ export default function ReportTablePage() {
       <div className="max-w-5xl mx-auto">
         <GlassCard className="p-8 text-center">
           <h1 className="text-xl font-bold text-white">Report not found</h1>
-          <p className="mt-2 text-sm text-muted-foreground">The selected report definition does not exist.</p>
-          <Button className="mt-4" onClick={() => navigate('/reports')}>
+          <p className="mt-2 text-sm text-muted-foreground">
+            The selected report definition does not exist.
+          </p>
+          <Button className="mt-4" onClick={() => navigate("/reports")}>
             <ArrowLeft className="w-4 h-4" /> Back to Reports
           </Button>
         </GlassCard>
@@ -70,34 +92,82 @@ export default function ReportTablePage() {
     dateFrom ? `From: ${dateFrom}` : null,
     dateTo ? `To: ${dateTo}` : null,
     `Refreshed: ${new Date(refreshStamp).toLocaleString()}`,
-  ].filter(Boolean).join(' · ');
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <div ref={detailRef} className="space-y-6 max-w-7xl mx-auto">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <button onClick={() => navigate('/reports')} className="mb-3 inline-flex items-center gap-2 text-xs text-primary/90 hover:text-teal-200 transition-colors">
+          <button
+            onClick={() => navigate("/reports")}
+            className="mb-3 inline-flex items-center gap-2 text-xs text-primary/90 hover:text-teal-200 transition-colors"
+          >
             <ArrowLeft className="w-3.5 h-3.5" />
             Back to reports
           </button>
           <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-3xl font-bold text-white">{report.name}</h1>
-            <Badge variant={getStatusVariant(report.status)}>{report.status}</Badge>
+            <h1 className="text-2xl font-semibold text-foreground">
+              {report.name}
+            </h1>
+            <Badge variant={getStatusVariant(report.status)}>
+              {report.status}
+            </Badge>
           </div>
-          <p className="mt-2 text-sm text-muted-foreground">{report.description}</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {report.description}
+          </p>
         </div>
 
         <div className="flex gap-2 flex-wrap justify-end">
-          <Button variant="secondary" size="sm" onClick={() => setRefreshStamp(Date.now())}>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setRefreshStamp(Date.now())}
+          >
             <RefreshCw className="w-3.5 h-3.5" /> Refresh snapshot
           </Button>
-          <Button variant="secondary" size="sm" onClick={() => ExportImportService.exportGenericTableExcel(report.name, exportHeaders, exportRows, report.filenamePrefix)}>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() =>
+              ExportImportService.exportGenericTableExcel(
+                report.name,
+                exportHeaders,
+                exportRows,
+                report.filenamePrefix,
+              )
+            }
+          >
             <Download className="w-3.5 h-3.5" /> Excel
           </Button>
-          <Button variant="secondary" size="sm" onClick={() => ExportImportService.exportGenericTablePdf(report.name, exportHeaders, exportRows, subtitle)}>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() =>
+              ExportImportService.exportGenericTablePdf(
+                report.name,
+                exportHeaders,
+                exportRows,
+                subtitle,
+              )
+            }
+          >
             <Download className="w-3.5 h-3.5" /> PDF
           </Button>
-          <Button size="sm" onClick={() => ExportImportService.exportGenericTableWord(report.name, exportHeaders, exportRows, report.filenamePrefix, subtitle)}>
+          <Button
+            size="sm"
+            onClick={() =>
+              ExportImportService.exportGenericTableWord(
+                report.name,
+                exportHeaders,
+                exportRows,
+                report.filenamePrefix,
+                subtitle,
+              )
+            }
+          >
             <FileText className="w-3.5 h-3.5" /> Word
           </Button>
         </div>
@@ -105,10 +175,22 @@ export default function ReportTablePage() {
 
       <GlassCard className="p-5 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-          <DatePicker label="Date From" value={dateFrom} onChange={setDateFrom} placeholder="All dates" />
-          <DatePicker label="Date To" value={dateTo} onChange={setDateTo} placeholder="All dates" />
+          <DatePicker
+            label="Date From"
+            value={dateFrom}
+            onChange={setDateFrom}
+            placeholder="All dates"
+          />
+          <DatePicker
+            label="Date To"
+            value={dateTo}
+            onChange={setDateTo}
+            placeholder="All dates"
+          />
           <div className="md:col-span-2">
-            <label className="block text-xs font-medium text-muted-foreground mb-1.5">Search In Rows</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+              Search In Rows
+            </label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
               <Input
@@ -125,15 +207,17 @@ export default function ReportTablePage() {
           <div className="flex items-center gap-2 flex-wrap">
             <Badge variant="info">{filteredRows.length} rows</Badge>
             <Badge variant="default">{report.category}</Badge>
-            <span className="text-xs text-muted-foreground">Generated {report.generated}</span>
+            <span className="text-xs text-muted-foreground">
+              Generated {report.generated}
+            </span>
           </div>
           <Button
             variant="secondary"
             size="sm"
             onClick={() => {
-              setDateFrom('');
-              setDateTo('');
-              setSearch('');
+              setDateFrom("");
+              setDateTo("");
+              setSearch("");
             }}
           >
             <X className="w-3.5 h-3.5" /> Reset Filters
@@ -149,7 +233,9 @@ export default function ReportTablePage() {
         {filteredRows.length === 0 ? (
           <div className="p-8 text-center">
             <p className="text-foreground/90 font-medium">No rows available</p>
-            <p className="mt-2 text-sm text-muted-foreground">{report.emptyState}</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {report.emptyState}
+            </p>
           </div>
         ) : (
           <div className="overflow-auto max-h-[70vh]">
@@ -159,7 +245,7 @@ export default function ReportTablePage() {
                   {report.columns.map((column) => (
                     <th
                       key={column.key}
-                      className={`px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground ${column.align === 'right' ? 'text-right' : 'text-left'}`}
+                      className={`px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground ${column.align === "right" ? "text-right" : "text-left"}`}
                     >
                       {column.label}
                     </th>
@@ -168,13 +254,16 @@ export default function ReportTablePage() {
               </thead>
               <tbody>
                 {filteredRows.map((row, rowIndex) => (
-                  <tr key={`${report.id}-${rowIndex}`} className="border-b border-border hover:bg-card/30 transition-colors">
+                  <tr
+                    key={`${report.id}-${rowIndex}`}
+                    className="border-b border-border hover:bg-card/30 transition-colors"
+                  >
                     {report.columns.map((column) => (
                       <td
                         key={column.key}
-                        className={`px-4 py-3 text-sm ${column.align === 'right' ? 'text-right' : 'text-left'} ${column.mono ? 'font-mono text-primary/90' : 'text-foreground'}`}
+                        className={`px-4 py-3 text-sm ${column.align === "right" ? "text-right" : "text-left"} ${column.mono ? "font-mono text-primary/90" : "text-foreground"}`}
                       >
-                        {String(row[column.key] ?? '—')}
+                        {String(row[column.key] ?? "—")}
                       </td>
                     ))}
                   </tr>

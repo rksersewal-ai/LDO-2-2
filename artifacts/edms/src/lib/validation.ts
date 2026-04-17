@@ -1,9 +1,9 @@
 /**
  * Runtime Schema Validation with Zod
- * 
+ *
  * Validates all API responses at runtime to ensure data shape matches expectations.
  * Catches backend schema changes, missing fields, type mismatches before they crash the UI.
- * 
+ *
  * Usage:
  *   const result = validateDocument(apiResponse);
  *   if (result.success) {
@@ -13,38 +13,89 @@
  *   }
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // ─────────────────────────────────────────────────────────────────────────
 // Enum Schemas
 // ─────────────────────────────────────────────────────────────────────────
 
 export const DocumentCategorySchema = z.enum([
-  'DRAWING', 'SPECIFICATION', 'ELIGIBILITY_CRITERIA', 'SCOPE_OF_SUPPLY',
-  'SMI', 'STANDARD', 'TENDER', 'SDR', 'TEST_REPORT', 'CERTIFICATE',
-  'PROCEDURE', 'OTHER'
+  "DRAWING",
+  "SPECIFICATION",
+  "ELIGIBILITY_CRITERIA",
+  "SCOPE_OF_SUPPLY",
+  "SMI",
+  "STANDARD",
+  "TENDER",
+  "SDR",
+  "TEST_REPORT",
+  "CERTIFICATE",
+  "PROCEDURE",
+  "OTHER",
 ]);
 
-export const DocumentStatusSchema = z.enum(['ACTIVE', 'OBSOLETE', 'UNDER_REVIEW', 'DRAFT', 'APPROVED']);
+export const DocumentStatusSchema = z.enum([
+  "ACTIVE",
+  "OBSOLETE",
+  "UNDER_REVIEW",
+  "DRAFT",
+  "APPROVED",
+]);
 
 export const OcrStatusSchema = z.enum([
-  'PENDING', 'PROCESSING', 'COMPLETED', 'FAILED', 'FLAGGED', 'SKIPPED', 'NOT_REQUIRED'
+  "PENDING",
+  "PROCESSING",
+  "COMPLETED",
+  "FAILED",
+  "FLAGGED",
+  "SKIPPED",
+  "NOT_REQUIRED",
 ]);
 
-export const WorkRecordStatusSchema = z.enum(['OPEN', 'SUBMITTED', 'VERIFIED', 'CLOSED']);
+export const WorkRecordStatusSchema = z.enum([
+  "OPEN",
+  "SUBMITTED",
+  "VERIFIED",
+  "CLOSED",
+]);
 
-export const PLStatusSchema = z.enum(['ACTIVE', 'UNDER_REVIEW', 'OBSOLETE']);
+export const PLStatusSchema = z.enum(["ACTIVE", "UNDER_REVIEW", "OBSOLETE"]);
 
-export const SafetyClassificationSchema = z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']);
+export const SafetyClassificationSchema = z.enum([
+  "LOW",
+  "MEDIUM",
+  "HIGH",
+  "CRITICAL",
+]);
 
 export const WorkCategorySchema = z.enum([
-  'GENERAL', 'DRAWING', 'SPECIFICATION', 'TENDER', 'SHOP', 'IC',
-  'AMENDMENT', 'VENDOR', 'EXTERNAL', 'FAILURE', 'INSPECTION'
+  "GENERAL",
+  "DRAWING",
+  "SPECIFICATION",
+  "TENDER",
+  "SHOP",
+  "IC",
+  "AMENDMENT",
+  "VENDOR",
+  "EXTERNAL",
+  "FAILURE",
+  "INSPECTION",
 ]);
 
-export const InspectionCategorySchema = z.enum(['CAT-A', 'CAT-B', 'CAT-C', 'CAT-D']);
+export const InspectionCategorySchema = z.enum([
+  "CAT-A",
+  "CAT-B",
+  "CAT-C",
+  "CAT-D",
+]);
 
-export const UserRoleSchema = z.enum(['admin', 'supervisor', 'engineer', 'reviewer', 'viewer']);
+export const UserRoleSchema = z.enum([
+  "admin",
+  "supervisor",
+  "engineer",
+  "reviewer",
+  "viewer",
+]);
 
 // ─────────────────────────────────────────────────────────────────────────
 // Core Entity Schemas
@@ -104,7 +155,7 @@ export const PLNumberSchema = z.object({
   designSupervisor: z.string().optional(),
   concernedSupervisor: z.string().optional(),
   eOfficeFile: z.string().optional(),
-  vendorType: z.enum(['VD', 'NVD']).optional(),
+  vendorType: z.enum(["VD", "NVD"]).optional(),
   recentActivity: z.array(z.string()).optional(),
   engineeringChanges: z.array(z.any()).optional(), // Lazy to prevent circular refs
   linkedDocumentIds: z.array(z.string()),
@@ -128,7 +179,7 @@ export const WorkRecordSchema = z.object({
   workCategory: WorkCategorySchema,
   recordType: z.string().optional(),
   status: WorkRecordStatusSchema,
-  priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']).optional(),
+  priority: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]).optional(),
   targetDays: z.number().optional(),
   description: z.string().optional(),
   createdAt: z.string(),
@@ -155,7 +206,9 @@ export const UserSchema = z.object({
 /**
  * Standard paginated list response format
  */
-export const PaginatedResponseSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
+export const PaginatedResponseSchema = <T extends z.ZodTypeAny>(
+  itemSchema: T,
+) =>
   z.object({
     results: z.array(itemSchema),
     total: z.number(),
@@ -205,12 +258,16 @@ export const ErrorResponseSchema = z.object({
 // Specific API Response Validators
 // ─────────────────────────────────────────────────────────────────────────
 
-export const DocumentListResponseSchema = PaginatedResponseSchema(DocumentSchema);
+export const DocumentListResponseSchema =
+  PaginatedResponseSchema(DocumentSchema);
 export const DocumentItemResponseSchema = ItemResponseSchema(DocumentSchema);
-export const PLNumberListResponseSchema = PaginatedResponseSchema(PLNumberSchema);
+export const PLNumberListResponseSchema =
+  PaginatedResponseSchema(PLNumberSchema);
 export const PLNumberItemResponseSchema = ItemResponseSchema(PLNumberSchema);
-export const WorkRecordListResponseSchema = PaginatedResponseSchema(WorkRecordSchema);
-export const WorkRecordItemResponseSchema = ItemResponseSchema(WorkRecordSchema);
+export const WorkRecordListResponseSchema =
+  PaginatedResponseSchema(WorkRecordSchema);
+export const WorkRecordItemResponseSchema =
+  ItemResponseSchema(WorkRecordSchema);
 export const UserListResponseSchema = PaginatedResponseSchema(UserSchema);
 export const UserItemResponseSchema = ItemResponseSchema(UserSchema);
 
@@ -226,16 +283,16 @@ export const UserItemResponseSchema = ItemResponseSchema(UserSchema);
 export function safeValidate<T>(
   schema: z.ZodSchema<T>,
   data: unknown,
-  context?: string
-): {success: true; data: T} | {success: false; error: z.ZodError} {
+  context?: string,
+): { success: true; data: T } | { success: false; error: z.ZodError } {
   try {
     const validated = schema.parse(data);
     return { success: true, data: validated };
   } catch (error) {
     if (error instanceof z.ZodError) {
       console.error(
-        `[Validation Error]${context ? ` ${context}` : ''}:`,
-        error.errors.map(e => `${e.path.join('.')}: ${e.message}`)
+        `[Validation Error]${context ? ` ${context}` : ""}:`,
+        error.errors.map((e) => `${e.path.join(".")}: ${e.message}`),
       );
       return { success: false, error };
     }
@@ -248,7 +305,9 @@ export function safeValidate<T>(
  * Useful for reusable validators
  */
 export function createValidator<T>(schema: z.ZodSchema<T>, name: string) {
-  return (data: unknown): {success: true; data: T} | {success: false; error: z.ZodError} => {
+  return (
+    data: unknown,
+  ): { success: true; data: T } | { success: false; error: z.ZodError } => {
     return safeValidate(schema, data, name);
   };
 }
@@ -257,15 +316,33 @@ export function createValidator<T>(schema: z.ZodSchema<T>, name: string) {
 // Pre-built Validators (for common use cases)
 // ─────────────────────────────────────────────────────────────────────────
 
-export const validateDocument = createValidator(DocumentSchema, 'Document');
-export const validateDocumentList = createValidator(DocumentListResponseSchema, 'DocumentList');
-export const validatePLNumber = createValidator(PLNumberSchema, 'PLNumber');
-export const validatePLNumberList = createValidator(PLNumberListResponseSchema, 'PLNumberList');
-export const validateWorkRecord = createValidator(WorkRecordSchema, 'WorkRecord');
-export const validateWorkRecordList = createValidator(WorkRecordListResponseSchema, 'WorkRecordList');
-export const validateUser = createValidator(UserSchema, 'User');
-export const validateUserList = createValidator(UserListResponseSchema, 'UserList');
-export const validateAuthResponse = createValidator(AuthResponseSchema, 'AuthResponse');
+export const validateDocument = createValidator(DocumentSchema, "Document");
+export const validateDocumentList = createValidator(
+  DocumentListResponseSchema,
+  "DocumentList",
+);
+export const validatePLNumber = createValidator(PLNumberSchema, "PLNumber");
+export const validatePLNumberList = createValidator(
+  PLNumberListResponseSchema,
+  "PLNumberList",
+);
+export const validateWorkRecord = createValidator(
+  WorkRecordSchema,
+  "WorkRecord",
+);
+export const validateWorkRecordList = createValidator(
+  WorkRecordListResponseSchema,
+  "WorkRecordList",
+);
+export const validateUser = createValidator(UserSchema, "User");
+export const validateUserList = createValidator(
+  UserListResponseSchema,
+  "UserList",
+);
+export const validateAuthResponse = createValidator(
+  AuthResponseSchema,
+  "AuthResponse",
+);
 
 // ─────────────────────────────────────────────────────────────────────────
 // Type Exports (for TypeScript inference)
@@ -277,6 +354,8 @@ export type ValidatedWorkRecord = z.infer<typeof WorkRecordSchema>;
 export type ValidatedUser = z.infer<typeof UserSchema>;
 export type ValidatedDocumentList = z.infer<typeof DocumentListResponseSchema>;
 export type ValidatedPLNumberList = z.infer<typeof PLNumberListResponseSchema>;
-export type ValidatedWorkRecordList = z.infer<typeof WorkRecordListResponseSchema>;
+export type ValidatedWorkRecordList = z.infer<
+  typeof WorkRecordListResponseSchema
+>;
 export type ValidatedUserList = z.infer<typeof UserListResponseSchema>;
 export type ValidatedAuthResponse = z.infer<typeof AuthResponseSchema>;

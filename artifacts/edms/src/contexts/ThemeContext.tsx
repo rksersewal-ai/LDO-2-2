@@ -1,7 +1,15 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { PreferencesService } from '../services/PreferencesService';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+  ReactNode,
+} from "react";
+import { PreferencesService } from "../services/PreferencesService";
 
-type Theme = 'dark' | 'light';
+type Theme = "dark" | "light";
 
 interface ThemeContextType {
   theme: Theme;
@@ -10,7 +18,7 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: 'dark',
+  theme: "light",
   toggleTheme: () => {},
   setTheme: () => {},
 });
@@ -18,28 +26,34 @@ const ThemeContext = createContext<ThemeContextType>({
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
     const prefs = PreferencesService.get();
-    return prefs.theme === 'light' ? 'light' : 'dark';
+    return prefs.theme === "dark" ? "dark" : "light";
   });
 
   useEffect(() => {
     const root = document.documentElement;
-    if (theme === 'light') {
-      root.classList.add('light');
-      root.classList.remove('dark');
+    if (theme === "light") {
+      root.classList.add("light-theme");
+      root.classList.remove("dark");
     } else {
-      root.classList.remove('light');
-      root.classList.add('dark');
+      root.classList.remove("light-theme");
+      root.classList.add("dark");
     }
     PreferencesService.set({ theme });
   }, [theme]);
 
-  const setTheme = (t: Theme) => setThemeState(t);
-  const toggleTheme = () => setThemeState(prev => prev === 'dark' ? 'light' : 'dark');
+  const setTheme = useCallback((t: Theme) => setThemeState(t), []);
+  const toggleTheme = useCallback(
+    () => setThemeState((prev) => (prev === "dark" ? "light" : "dark")),
+    [],
+  );
+
+  const value = useMemo(
+    () => ({ theme, toggleTheme, setTheme }),
+    [theme, toggleTheme, setTheme],
+  );
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
-      {children}
-    </ThemeContext.Provider>
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
 }
 

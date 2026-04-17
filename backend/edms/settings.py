@@ -1,19 +1,20 @@
 import os
+import sys
 from pathlib import Path
 from shared.startup import enforce_startup_config
 
 from .settings_api import (
     ADDITIONAL_INSTALLED_APPS,
     ADDITIONAL_MIDDLEWARE,
-    ANONYMOUS_USER_NAME,
-    AUTHENTICATION_BACKENDS,
-    CORS_ALLOWED_ORIGINS,
-    CORS_ALLOW_CREDENTIALS,
-    CORS_EXPOSE_HEADERS,
-    CSRF_TRUSTED_ORIGINS,
+    ANONYMOUS_USER_NAME as DEFAULT_ANONYMOUS_USER_NAME,
+    AUTHENTICATION_BACKENDS as DEFAULT_AUTHENTICATION_BACKENDS,
+    CORS_ALLOWED_ORIGINS as DEFAULT_CORS_ALLOWED_ORIGINS,
+    CORS_ALLOW_CREDENTIALS as DEFAULT_CORS_ALLOW_CREDENTIALS,
+    CORS_EXPOSE_HEADERS as DEFAULT_CORS_EXPOSE_HEADERS,
+    CSRF_TRUSTED_ORIGINS as DEFAULT_CSRF_TRUSTED_ORIGINS,
     LOGGING as API_LOGGING,
-    REST_FRAMEWORK,
-    SIMPLE_JWT,
+    REST_FRAMEWORK as API_REST_FRAMEWORK,
+    SIMPLE_JWT as API_SIMPLE_JWT,
 )
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -39,18 +40,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework.authtoken',
     'rest_framework_simplejwt.token_blacklist',
     *ADDITIONAL_INSTALLED_APPS,
 ]
 
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'guardian.backends.ObjectPermissionBackend',
-]
-ANONYMOUS_USER_NAME = None
+AUTHENTICATION_BACKENDS = list(DEFAULT_AUTHENTICATION_BACKENDS)
+ANONYMOUS_USER_NAME = DEFAULT_ANONYMOUS_USER_NAME
 
 MIDDLEWARE = [
+    'django.middleware.gzip.GZipMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     *ADDITIONAL_MIDDLEWARE,
@@ -118,10 +116,17 @@ USE_TZ = True
 
 SESSION_COOKIE_SECURE = os.getenv('DJANGO_SESSION_COOKIE_SECURE', str(not DEBUG)).lower() == 'true'
 CSRF_COOKIE_SECURE = os.getenv('DJANGO_CSRF_COOKIE_SECURE', str(not DEBUG)).lower() == 'true'
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = 'Lax'
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = os.getenv('DJANGO_SECURE_SSL_REDIRECT', 'false').lower() == 'true'
+SECURE_HSTS_SECONDS = 0 if DEBUG else 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
+SECURE_HSTS_PRELOAD = not DEBUG
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = int(os.getenv('DJANGO_DATA_UPLOAD_MAX_MEMORY_SIZE', str(10 * 1024 * 1024)))
 FILE_UPLOAD_MAX_MEMORY_SIZE = int(os.getenv('DJANGO_FILE_UPLOAD_MAX_MEMORY_SIZE', str(10 * 1024 * 1024)))
@@ -133,23 +138,19 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-REST_FRAMEWORK = dict(REST_FRAMEWORK)
+REST_FRAMEWORK = dict(API_REST_FRAMEWORK)
 REST_FRAMEWORK['DEFAULT_PAGINATION_CLASS'] = 'shared.pagination.StandardResultsSetPagination'
 REST_FRAMEWORK['EXCEPTION_HANDLER'] = 'shared.exceptions.edms_exception_handler'
 REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'] = dict(REST_FRAMEWORK.get('DEFAULT_THROTTLE_RATES', {}))
-REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'].setdefault('login', os.getenv('EDMS_LOGIN_THROTTLE', '6000/hour'))
+REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'].setdefault('login', os.getenv('EDMS_LOGIN_THROTTLE', '10/minute'))
 REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'].setdefault('health', os.getenv('EDMS_HEALTH_THROTTLE', '12000/hour'))
-SIMPLE_JWT = dict(SIMPLE_JWT)
+SIMPLE_JWT = dict(API_SIMPLE_JWT)
 if not SIMPLE_JWT.get('SIGNING_KEY'):
     SIMPLE_JWT['SIGNING_KEY'] = SECRET_KEY
-CORS_ALLOWED_ORIGINS = CORS_ALLOWED_ORIGINS
-CORS_ALLOWED_ORIGINS = _env_list('CORS_ALLOWED_ORIGINS', CORS_ALLOWED_ORIGINS)
-CORS_EXPOSE_HEADERS = CORS_EXPOSE_HEADERS
-CORS_ALLOW_CREDENTIALS = CORS_ALLOW_CREDENTIALS
-CSRF_TRUSTED_ORIGINS = CSRF_TRUSTED_ORIGINS
-CSRF_TRUSTED_ORIGINS = _env_list('CSRF_TRUSTED_ORIGINS', CSRF_TRUSTED_ORIGINS)
-AUTHENTICATION_BACKENDS = AUTHENTICATION_BACKENDS
-ANONYMOUS_USER_NAME = ANONYMOUS_USER_NAME
+CORS_ALLOWED_ORIGINS = _env_list('CORS_ALLOWED_ORIGINS', DEFAULT_CORS_ALLOWED_ORIGINS)
+CORS_EXPOSE_HEADERS = list(DEFAULT_CORS_EXPOSE_HEADERS)
+CORS_ALLOW_CREDENTIALS = DEFAULT_CORS_ALLOW_CREDENTIALS
+CSRF_TRUSTED_ORIGINS = _env_list('CSRF_TRUSTED_ORIGINS', DEFAULT_CSRF_TRUSTED_ORIGINS)
 
 LOGGING = dict(API_LOGGING)
 LOGGING['filters']['request_context'] = {'()': 'shared.logging.RequestContextFilter'}
@@ -187,6 +188,23 @@ EDMS_HASH_BACKFILL_INTERVAL_MINUTES = EDMS_RUNTIME['hash_backfill_interval_minut
 EDMS_HASH_BACKFILL_BATCH_SIZE = EDMS_RUNTIME['hash_backfill_batch_size']
 EDMS_HASH_BACKFILL_FORCE_FULL_HASH = EDMS_RUNTIME['hash_backfill_force_full_hash']
 
+CACHE_BACKEND_USES_REDIS = not DEBUG and 'test' not in sys.argv
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': EDMS_RUNTIME['redis_url'],
+        'TIMEOUT': 300,
+        'OPTIONS': {
+            'db': 1,
+        },
+    }
+} if CACHE_BACKEND_USES_REDIS else {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
+
 CELERY_BROKER_URL = EDMS_RUNTIME['celery_broker_url']
 CELERY_RESULT_BACKEND = EDMS_RUNTIME['celery_result_backend']
 CELERY_TASK_ALWAYS_EAGER = os.getenv('CELERY_TASK_ALWAYS_EAGER', 'false').lower() == 'true'
@@ -196,5 +214,15 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+# Task timeouts — prevent hung tasks from blocking workers
+CELERY_TASK_TIME_LIMIT = int(os.getenv('CELERY_TASK_TIME_LIMIT', '300'))        # 5 min hard kill
+CELERY_TASK_SOFT_TIME_LIMIT = int(os.getenv('CELERY_TASK_SOFT_TIME_LIMIT', '240'))  # 4 min graceful
+CELERY_TASK_ROUTES = {
+    'edms_api.ocr_tasks.*': {'queue': 'ocr'},
+    'documents.tasks.*': {'queue': 'indexing'},
+    'work.tasks.*': {'queue': 'default'},
+    'integrations.*': {'queue': 'notifications'},
+}
 
 enforce_startup_config(debug=DEBUG, db_engine=db_engine)

@@ -1,6 +1,6 @@
-import { X, ChevronDown } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { RightPanelContent } from '../../contexts/RightPanelContext';
+import { X, ChevronDown } from "lucide-react";
+import { useEffect, useState } from "react";
+import type { RightPanelContent } from "../../contexts/RightPanelContext";
 
 interface RightPanelProps {
   content: RightPanelContent | null;
@@ -9,7 +9,7 @@ interface RightPanelProps {
 
 export function RightPanel({ content, onClose }: RightPanelProps) {
   const [expandedSections, setExpandedSections] = useState<Set<number>>(
-    new Set(content?.defaultExpandedSections ?? [0])
+    new Set(content?.defaultExpandedSections ?? [0]),
   );
 
   useEffect(() => {
@@ -35,11 +35,17 @@ export function RightPanel({ content, onClose }: RightPanelProps) {
       <div className="px-6 py-4 border-b border-border/30 shrink-0 bg-slate-950/20">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3 min-w-0">
-            {content.icon && <div className="text-primary mt-0.5 shrink-0">{content.icon}</div>}
+            {content.icon && (
+              <div className="text-primary mt-0.5 shrink-0">{content.icon}</div>
+            )}
             <div className="min-w-0">
-              <h2 className="text-sm font-semibold text-white truncate">{content.title}</h2>
+              <h2 className="text-sm font-semibold text-white truncate">
+                {content.title}
+              </h2>
               {content.subtitle && (
-                <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{content.subtitle}</p>
+                <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                  {content.subtitle}
+                </p>
               )}
             </div>
           </div>
@@ -69,7 +75,7 @@ export function RightPanel({ content, onClose }: RightPanelProps) {
                 </h3>
                 <ChevronDown
                   className={`w-4 h-4 text-slate-600 transition-transform ${
-                    expandedSections.has(i) ? 'rotate-180' : ''
+                    expandedSections.has(i) ? "rotate-180" : ""
                   }`}
                 />
               </button>

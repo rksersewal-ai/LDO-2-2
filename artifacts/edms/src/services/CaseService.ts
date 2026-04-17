@@ -1,34 +1,34 @@
-import type { CaseRecord, CaseStatus, CaseSeverity } from '../lib/types';
-import { MOCK_CASES } from '../lib/mockExtended';
+import type { CaseRecord, CaseStatus, CaseSeverity } from "../lib/types";
+import { MOCK_CASES } from "../lib/mockExtended";
 
-const STORAGE_KEY = 'ldo2_cases';
+const STORAGE_KEY = "ldo2_cases";
 
-function mapMockCase(c: typeof MOCK_CASES[0]): CaseRecord {
+function mapMockCase(c: (typeof MOCK_CASES)[0]): CaseRecord {
   const statusMap: Record<string, CaseStatus> = {
-    Open: 'OPEN',
-    'In Progress': 'IN_PROGRESS',
-    Closed: 'CLOSED',
+    Open: "OPEN",
+    "In Progress": "IN_PROGRESS",
+    Closed: "CLOSED",
   };
 
   const severityMap: Record<string, CaseSeverity> = {
-    High: 'HIGH',
-    Medium: 'MEDIUM',
-    Low: 'LOW',
-    Critical: 'CRITICAL',
+    High: "HIGH",
+    Medium: "MEDIUM",
+    Low: "LOW",
+    Critical: "CRITICAL",
   };
 
   return {
     id: c.id,
     caseNumber: c.id,
     title: c.title,
-    description: c.description ?? '',
-    status: statusMap[c.status] ?? 'OPEN',
-    severity: severityMap[c.severity] ?? 'MEDIUM',
+    description: c.description ?? "",
+    status: statusMap[c.status] ?? "OPEN",
+    severity: severityMap[c.severity] ?? "MEDIUM",
     plNumber: c.linkedPL,
     linkedDocumentIds: c.linkedDocs ?? [],
     linkedWorkIds: [],
     assignee: c.assignee,
-    type: 'Discrepancy',
+    type: "Discrepancy",
     createdAt: c.created,
     updatedAt: c.updated,
   };
@@ -39,7 +39,7 @@ function buildDefaultStore() {
 }
 
 function loadStore(): CaseRecord[] {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return buildDefaultStore();
   }
 
@@ -53,13 +53,17 @@ function loadStore(): CaseRecord[] {
 
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) {
-      throw new Error('Case store is invalid');
+      throw new Error("Case store is invalid");
     }
 
     return parsed.map((record) => ({
       ...record,
-      linkedDocumentIds: Array.isArray(record.linkedDocumentIds) ? record.linkedDocumentIds : [],
-      linkedWorkIds: Array.isArray(record.linkedWorkIds) ? record.linkedWorkIds : [],
+      linkedDocumentIds: Array.isArray(record.linkedDocumentIds)
+        ? record.linkedDocumentIds
+        : [],
+      linkedWorkIds: Array.isArray(record.linkedWorkIds)
+        ? record.linkedWorkIds
+        : [],
     }));
   } catch {
     const fallback = buildDefaultStore();
@@ -69,7 +73,7 @@ function loadStore(): CaseRecord[] {
 }
 
 function persist() {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(_store));
   }
 }
@@ -78,10 +82,10 @@ let _store: CaseRecord[] = loadStore();
 
 function generateId(): string {
   const max = _store.reduce((highest, record) => {
-    const numeric = Number(record.caseNumber.replace(/\D/g, ''));
+    const numeric = Number(record.caseNumber.replace(/\D/g, ""));
     return Number.isFinite(numeric) ? Math.max(highest, numeric) : highest;
   }, 0);
-  return `CAS-${String(max + 1).padStart(3, '0')}`;
+  return `CAS-${String(max + 1).padStart(3, "0")}`;
 }
 
 export const CaseService = {
@@ -90,11 +94,15 @@ export const CaseService = {
   },
 
   getById(id: string): Promise<CaseRecord | null> {
-    return Promise.resolve(_store.find(c => c.id === id || c.caseNumber === id) ?? null);
+    return Promise.resolve(
+      _store.find((c) => c.id === id || c.caseNumber === id) ?? null,
+    );
   },
 
-  add(data: Omit<CaseRecord, 'id' | 'caseNumber' | 'createdAt' | 'updatedAt'>): Promise<CaseRecord> {
-    const now = new Date().toISOString().split('T')[0];
+  add(
+    data: Omit<CaseRecord, "id" | "caseNumber" | "createdAt" | "updatedAt">,
+  ): Promise<CaseRecord> {
+    const now = new Date().toISOString().split("T")[0];
     const newId = generateId();
     const c: CaseRecord = {
       ...data,
@@ -109,16 +117,20 @@ export const CaseService = {
   },
 
   update(id: string, patch: Partial<CaseRecord>): Promise<CaseRecord | null> {
-    const idx = _store.findIndex(c => c.id === id || c.caseNumber === id);
+    const idx = _store.findIndex((c) => c.id === id || c.caseNumber === id);
     if (idx < 0) return Promise.resolve(null);
-    _store[idx] = { ..._store[idx], ...patch, updatedAt: new Date().toISOString().split('T')[0] };
+    _store[idx] = {
+      ..._store[idx],
+      ...patch,
+      updatedAt: new Date().toISOString().split("T")[0],
+    };
     persist();
     return Promise.resolve(_store[idx]);
   },
 
   delete(id: string): Promise<boolean> {
     const before = _store.length;
-    _store = _store.filter(c => c.id !== id && c.caseNumber !== id);
+    _store = _store.filter((c) => c.id !== id && c.caseNumber !== id);
     persist();
     return Promise.resolve(_store.length < before);
   },
@@ -127,15 +139,16 @@ export const CaseService = {
     const q = query.trim().toLowerCase();
     if (!q) return CaseService.getAll();
     return Promise.resolve(
-      _store.filter(c =>
-        c.caseNumber.toLowerCase().includes(q) ||
-        c.title.toLowerCase().includes(q) ||
-        (c.plNumber?.toLowerCase().includes(q) ?? false) ||
-        (c.type?.toLowerCase().includes(q) ?? false) ||
-        (c.vendorName?.toLowerCase().includes(q) ?? false) ||
-        (c.tenderNumber?.toLowerCase().includes(q) ?? false) ||
-        c.assignee.toLowerCase().includes(q)
-      )
+      _store.filter(
+        (c) =>
+          c.caseNumber.toLowerCase().includes(q) ||
+          c.title.toLowerCase().includes(q) ||
+          (c.plNumber?.toLowerCase().includes(q) ?? false) ||
+          (c.type?.toLowerCase().includes(q) ?? false) ||
+          (c.vendorName?.toLowerCase().includes(q) ?? false) ||
+          (c.tenderNumber?.toLowerCase().includes(q) ?? false) ||
+          c.assignee.toLowerCase().includes(q),
+      ),
     );
   },
 };

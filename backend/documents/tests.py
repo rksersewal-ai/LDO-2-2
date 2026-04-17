@@ -1,5 +1,4 @@
-import json
-from unittest.mock import patch, call, MagicMock
+from unittest.mock import patch, call
 
 from django.test import TestCase
 from django.contrib.auth.models import User
@@ -7,74 +6,88 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test.utils import override_settings
 from shared.permissions import PermissionService
 
-from documents.services import DocumentService, OcrApplicationService, DocumentOcrProcessingService
+from documents.models import HashBackfillJob
+from documents.services import (
+    DocumentService,
+    OcrApplicationService,
+    DocumentOcrProcessingService,
+    HashBackfillJobService,
+)
 from documents.indexing import DocumentIndexOrchestrator
 from documents.serializers import DocumentIngestSerializer
-from edms_api.models import Document, OcrJob
+from edms_api.models import Document
+
 
 class DocumentServiceTests(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='tester', password='password')
+        self.user = User.objects.create_user(username="tester", password="password")
 
-    @patch('documents.tasks.index_single_document.delay')
-    @patch.object(DocumentIndexOrchestrator, 'index_document')
-    def test_ingest_handles_task_delay_exception_and_falls_back_to_inline_indexing(self, mock_index_document, mock_delay):
+    @patch("documents.tasks.index_single_document.delay")
+    @patch.object(DocumentIndexOrchestrator, "index_document")
+    def test_ingest_handles_task_delay_exception_and_falls_back_to_inline_indexing(
+        self, mock_index_document, mock_delay
+    ):
         mock_delay.side_effect = Exception("Celery is down")
 
         def side_effect(document, force_hashes=False):
             return document
+
         mock_index_document.side_effect = side_effect
 
-        file_obj = SimpleUploadedFile('test.txt', b'test content')
+        file_obj = SimpleUploadedFile("test.txt", b"test content")
         validated_data = {
-            'file': file_obj,
-            'name': 'Fallback Test Document',
-            'category': 'Specification',
-            'resolved_file_type': 'TXT',
-            'normalized_revision': 1,
-            'doc_type': 'Specification',
-            'ocr_requested': False
+            "file": file_obj,
+            "name": "Fallback Test Document",
+            "category": "Specification",
+            "resolved_file_type": "TXT",
+            "normalized_revision": 1,
+            "doc_type": "Specification",
+            "ocr_requested": False,
         }
 
         class MockRequest:
             user = self.user
-            META = {'REMOTE_ADDR': '127.0.0.1'}
+            META = {"REMOTE_ADDR": "127.0.0.1"}
 
         request = MockRequest()
 
         result = DocumentService.ingest.__wrapped__(validated_data, self.user, request)
 
-        self.assertIn(call(result['document'], force_hashes=True), mock_index_document.mock_calls)
-        self.assertEqual(result['index_job_mode'], 'inline')
-        self.assertEqual(result['document'].name, 'Fallback Test Document')
+        self.assertIn(
+            call(result["document"], force_hashes=True), mock_index_document.mock_calls
+        )
+        self.assertEqual(result["index_job_mode"], "inline")
+        self.assertEqual(result["document"].name, "Fallback Test Document")
 
-    @patch('documents.tasks.index_single_document.delay')
-    @patch.object(DocumentIndexOrchestrator, 'index_document')
-    def test_create_version_handles_task_delay_exception_and_falls_back_to_inline_indexing(self, mock_index_document, mock_delay):
+    @patch("documents.tasks.index_single_document.delay")
+    @patch.object(DocumentIndexOrchestrator, "index_document")
+    def test_create_version_handles_task_delay_exception_and_falls_back_to_inline_indexing(
+        self, mock_index_document, mock_delay
+    ):
         mock_delay.side_effect = Exception("Celery is down")
 
         document = Document.objects.create(
-            id='DOC-VERSION-001',
-            name='Versioned Document',
-            type='TXT',
-            status='Approved',
+            id="DOC-VERSION-001",
+            name="Versioned Document",
+            type="TXT",
+            status="Approved",
             revision=1,
             author=self.user,
-            file=SimpleUploadedFile('v1.txt', b'v1 content'),
+            file=SimpleUploadedFile("v1.txt", b"v1 content"),
         )
         # Grant permissions to allow OcrApplicationService.start_job to find the document
         PermissionService.grant_default_object_permissions(document, self.user)
 
-        file_obj = SimpleUploadedFile('v2.txt', b'v2 content')
+        file_obj = SimpleUploadedFile("v2.txt", b"v2 content")
 
         class MockRequest:
             user = self.user
-            META = {'REMOTE_ADDR': '127.0.0.1'}
+            META = {"REMOTE_ADDR": "127.0.0.1"}
 
         request = MockRequest()
 
         # create_version is not wrapped with transaction.atomic, so we call it directly
-        result = DocumentService.create_version(document, file_obj, self.user, request)
+        DocumentService.create_version(document, file_obj, self.user, request)
 
         # Result is the document, let's verify index_document was called on the document
         self.assertIn(call(document, force_hashes=True), mock_index_document.mock_calls)
@@ -83,30 +96,34 @@ class DocumentServiceTests(TestCase):
 
 class OcrApplicationServiceTests(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='tester', password='password')
+        self.user = User.objects.create_user(username="tester", password="password")
         self.document = Document.objects.create(
-            id='DOC-OCR-001',
-            name='OCR Document',
-            type='TXT',
-            status='Approved',
+            id="DOC-OCR-001",
+            name="OCR Document",
+            type="TXT",
+            status="Approved",
             revision=1,
             author=self.user,
-            file=SimpleUploadedFile('test.txt', b'ocr content'),
+            file=SimpleUploadedFile("test.txt", b"ocr content"),
         )
         PermissionService.grant_default_object_permissions(self.document, self.user)
 
-    @patch('documents.tasks.run_ocr_job.delay')
-    @patch.object(DocumentOcrProcessingService, 'process_job')
-    def test_start_job_handles_task_delay_exception_and_falls_back_to_inline_processing(self, mock_process_job, mock_delay):
+    @patch("documents.tasks.run_ocr_job.delay")
+    @patch.object(DocumentOcrProcessingService, "process_job")
+    def test_start_job_handles_task_delay_exception_and_falls_back_to_inline_processing(
+        self, mock_process_job, mock_delay
+    ):
         mock_delay.side_effect = Exception("Celery is down")
 
         class MockRequest:
             user = self.user
-            META = {'REMOTE_ADDR': '127.0.0.1'}
+            META = {"REMOTE_ADDR": "127.0.0.1"}
 
         request = MockRequest()
 
-        job, created = OcrApplicationService.start_job(str(self.document.id), self.user, request)
+        job, created = OcrApplicationService.start_job(
+            str(self.document.id), self.user, request
+        )
 
         # Verify fallback occurred
         mock_process_job.assert_called_once_with(job)
@@ -115,26 +132,64 @@ class OcrApplicationServiceTests(TestCase):
 
 
 class DocumentIngestSerializerSecurityTests(TestCase):
-    @override_settings(EDMS_MAX_UPLOAD_SIZE_BYTES=10, EDMS_ALLOWED_UPLOAD_EXTENSIONS=['.pdf'])
+    @override_settings(
+        EDMS_MAX_UPLOAD_SIZE_BYTES=10, EDMS_ALLOWED_UPLOAD_EXTENSIONS=[".pdf"]
+    )
     def test_validate_rejects_oversized_upload(self):
         serializer = DocumentIngestSerializer(
             data={
-                'file': SimpleUploadedFile('secure.pdf', b'01234567890'),
-                'name': 'Secure File',
-                'category': 'spec',
+                "file": SimpleUploadedFile("secure.pdf", b"01234567890"),
+                "name": "Secure File",
+                "category": "spec",
             }
         )
         self.assertFalse(serializer.is_valid())
-        self.assertIn('File too large', str(serializer.errors))
+        self.assertIn("File too large", str(serializer.errors))
 
-    @override_settings(EDMS_ALLOWED_UPLOAD_EXTENSIONS=['.pdf'])
+    @override_settings(EDMS_ALLOWED_UPLOAD_EXTENSIONS=[".pdf"])
     def test_validate_rejects_disallowed_extension(self):
         serializer = DocumentIngestSerializer(
             data={
-                'file': SimpleUploadedFile('malicious.exe', b'content'),
-                'name': 'Not Allowed',
-                'category': 'spec',
+                "file": SimpleUploadedFile("malicious.exe", b"content"),
+                "name": "Not Allowed",
+                "category": "spec",
             }
         )
         self.assertFalse(serializer.is_valid())
-        self.assertIn('Unsupported file extension', str(serializer.errors))
+        self.assertIn("Unsupported file extension", str(serializer.errors))
+
+
+class HashBackfillJobServiceTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="hash-tester", password="password"
+        )
+
+    @patch.object(DocumentIndexOrchestrator, "index_document")
+    def test_force_full_hash_targets_documents_missing_full_hash(
+        self, mock_index_document
+    ):
+        mock_index_document.side_effect = lambda document, **_: document
+
+        Document.objects.create(
+            id="DOC-HASH-001",
+            name="Hash Gap",
+            type="TXT",
+            status="Approved",
+            revision=1,
+            author=self.user,
+            file=SimpleUploadedFile("hash-gap.txt", b"hash gap"),
+            fingerprint_3x64k="abc123",
+            file_hash="",
+        )
+        mock_index_document.reset_mock()
+
+        job = HashBackfillJob.objects.create(batch_size=10)
+        HashBackfillJobService.run_job(job, force_full_hash=True)
+
+        mock_index_document.assert_called_once()
+        _, kwargs = mock_index_document.call_args
+        self.assertTrue(kwargs["force_hashes"])
+        self.assertTrue(kwargs["force_full_hash"])
+        refreshed_job = HashBackfillJob.objects.get(pk=job.pk)
+        self.assertEqual(refreshed_job.documents_scanned, 1)

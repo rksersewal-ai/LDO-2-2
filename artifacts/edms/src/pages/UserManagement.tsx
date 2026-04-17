@@ -1,11 +1,36 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Mail, Pencil, Phone, Plus, Search, ShieldCheck, Trash2, UserCog, UserRound, Users } from 'lucide-react';
-import { toast } from 'sonner';
-import { Button, GlassCard, Input, PageHeader, Select, Badge } from '../components/ui/Shared';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../components/ui/dialog';
-import { Switch } from '../components/ui/switch';
-import { useAuth, type UserRole } from '../lib/auth';
-import { UserService, type ManagedUser } from '../services/UserService';
+import { useEffect, useMemo, useState } from "react";
+import {
+  Mail,
+  Pencil,
+  Phone,
+  Plus,
+  Search,
+  ShieldCheck,
+  Trash2,
+  UserCog,
+  UserRound,
+  Users,
+} from "lucide-react";
+import { toast } from "sonner";
+import {
+  Button,
+  GlassCard,
+  Input,
+  PageHeader,
+  Select,
+  Badge,
+} from "../components/ui/Shared";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../components/ui/dialog";
+import { Switch } from "../components/ui/switch";
+import { useAuth, type UserRole } from "../lib/auth";
+import { UserService, type ManagedUser } from "../services/UserService";
 
 interface UserFormState {
   username: string;
@@ -20,43 +45,43 @@ interface UserFormState {
 }
 
 const DEFAULT_FORM: UserFormState = {
-  username: '',
-  name: '',
-  email: '',
-  designation: '',
-  department: '',
-  role: 'viewer',
-  phone: '',
-  employeeId: '',
+  username: "",
+  name: "",
+  email: "",
+  designation: "",
+  department: "",
+  role: "viewer",
+  phone: "",
+  employeeId: "",
   isActive: true,
 };
 
 function roleVariant(role: UserRole) {
-  if (role === 'admin') return 'danger' as const;
-  if (role === 'supervisor') return 'warning' as const;
-  if (role === 'engineer') return 'info' as const;
-  if (role === 'reviewer') return 'success' as const;
-  return 'default' as const;
+  if (role === "admin") return "danger" as const;
+  if (role === "supervisor") return "warning" as const;
+  if (role === "engineer") return "info" as const;
+  if (role === "reviewer") return "success" as const;
+  return "default" as const;
 }
 
 function formatDateTime(value?: string) {
-  if (!value) return 'Never';
+  if (!value) return "Never";
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return value;
-  return parsed.toLocaleString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+  return parsed.toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
 export default function UserManagement() {
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<ManagedUser[]>([]);
-  const [query, setQuery] = useState('');
-  const [roleFilter, setRoleFilter] = useState<'all' | UserRole>('all');
+  const [query, setQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState<"all" | UserRole>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<ManagedUser | null>(null);
   const [form, setForm] = useState<UserFormState>(DEFAULT_FORM);
@@ -73,13 +98,14 @@ export default function UserManagement() {
   const filtered = useMemo(() => {
     const lower = query.trim().toLowerCase();
     return users.filter((entry) => {
-      const matchesRole = roleFilter === 'all' || entry.role === roleFilter;
-      const matchesQuery = !lower
-        || entry.name.toLowerCase().includes(lower)
-        || entry.username.toLowerCase().includes(lower)
-        || entry.email.toLowerCase().includes(lower)
-        || entry.department.toLowerCase().includes(lower)
-        || entry.designation.toLowerCase().includes(lower);
+      const matchesRole = roleFilter === "all" || entry.role === roleFilter;
+      const matchesQuery =
+        !lower ||
+        entry.name.toLowerCase().includes(lower) ||
+        entry.username.toLowerCase().includes(lower) ||
+        entry.email.toLowerCase().includes(lower) ||
+        entry.department.toLowerCase().includes(lower) ||
+        entry.designation.toLowerCase().includes(lower);
       return matchesRole && matchesQuery;
     });
   }, [query, roleFilter, users]);
@@ -105,8 +131,8 @@ export default function UserManagement() {
       designation: entry.designation,
       department: entry.department,
       role: entry.role,
-      phone: entry.phone ?? '',
-      employeeId: entry.employeeId ?? '',
+      phone: entry.phone ?? "",
+      employeeId: entry.employeeId ?? "",
       isActive: entry.isActive,
     });
     setDialogOpen(true);
@@ -114,7 +140,7 @@ export default function UserManagement() {
 
   const saveUser = async () => {
     if (!form.name.trim() || !form.username.trim() || !form.email.trim()) {
-      toast.error('Name, username, and email are required');
+      toast.error("Name, username, and email are required");
       return;
     }
 
@@ -124,7 +150,7 @@ export default function UserManagement() {
         ...form,
       });
       if (!updated) {
-        toast.error('User could not be updated');
+        toast.error("User could not be updated");
         return;
       }
       toast.success(`${updated.name} updated`);
@@ -141,19 +167,23 @@ export default function UserManagement() {
   };
 
   const toggleActive = async (entry: ManagedUser) => {
-    const updated = await UserService.update(entry.id, { isActive: !entry.isActive });
+    const updated = await UserService.update(entry.id, {
+      isActive: !entry.isActive,
+    });
     if (!updated) {
-      toast.error('User status could not be changed');
+      toast.error("User status could not be changed");
       return;
     }
     await loadUsers();
-    toast.success(`${updated.name} ${updated.isActive ? 'activated' : 'deactivated'}`);
+    toast.success(
+      `${updated.name} ${updated.isActive ? "activated" : "deactivated"}`,
+    );
   };
 
   const deleteUser = async () => {
     if (!pendingDelete) return;
     if (currentUser?.id === pendingDelete.id) {
-      toast.error('You cannot remove the currently signed-in user');
+      toast.error("You cannot remove the currently signed-in user");
       return;
     }
     await UserService.remove(pendingDelete.id);
@@ -169,23 +199,38 @@ export default function UserManagement() {
           title="User Administration"
           subtitle="Create, update, and retire user accounts for the EDMS workspace without leaving the admin shell."
           breadcrumb={<span>Admin / Identity & Access / Users</span>}
-          actions={(
+          actions={
             <Button onClick={openCreate}>
               <Plus className="w-4 h-4" /> New User
             </Button>
-          )}
+          }
         />
 
         <div className="grid gap-4 md:grid-cols-4">
           {[
-            { label: 'Total Users', value: users.length, accent: true },
-            { label: 'Active Accounts', value: users.filter((entry) => entry.isActive).length },
-            { label: 'Admins', value: users.filter((entry) => entry.role === 'admin').length },
-            { label: 'Engineers', value: users.filter((entry) => entry.role === 'engineer').length },
+            { label: "Total Users", value: users.length, accent: true },
+            {
+              label: "Active Accounts",
+              value: users.filter((entry) => entry.isActive).length,
+            },
+            {
+              label: "Admins",
+              value: users.filter((entry) => entry.role === "admin").length,
+            },
+            {
+              label: "Engineers",
+              value: users.filter((entry) => entry.role === "engineer").length,
+            },
           ].map((stat) => (
             <GlassCard key={stat.label} className="px-4 py-3">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">{stat.label}</p>
-              <p className={`mt-1 text-2xl font-bold ${stat.accent ? 'text-primary/90' : 'text-white'}`}>{stat.value}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                {stat.label}
+              </p>
+              <p
+                className={`mt-1 text-2xl font-bold ${stat.accent ? "text-primary/90" : "text-white"}`}
+              >
+                {stat.value}
+              </p>
             </GlassCard>
           ))}
         </div>
@@ -201,10 +246,18 @@ export default function UserManagement() {
                 placeholder="Search by name, username, email, department..."
               />
             </div>
-            <Select value={roleFilter} onChange={(event) => setRoleFilter(event.target.value as 'all' | UserRole)} className="w-[220px]">
+            <Select
+              value={roleFilter}
+              onChange={(event) =>
+                setRoleFilter(event.target.value as "all" | UserRole)
+              }
+              className="w-[220px]"
+            >
               <option value="all">All roles</option>
               {UserService.getRoleOptions().map((role) => (
-                <option key={role} value={role}>{role}</option>
+                <option key={role} value={role}>
+                  {role}
+                </option>
               ))}
             </Select>
           </div>
@@ -221,41 +274,79 @@ export default function UserManagement() {
           </div>
           <div className="divide-y divide-white/6">
             {filtered.map((entry) => (
-              <div key={entry.id} className="grid grid-cols-[1.3fr_1.1fr_1fr_0.8fr_0.7fr_1fr] gap-4 px-5 py-4">
+              <div
+                key={entry.id}
+                className="grid grid-cols-[1.3fr_1.1fr_1fr_0.8fr_0.7fr_1fr] gap-4 px-5 py-4"
+              >
                 <div className="min-w-0">
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-emerald-500 text-sm font-bold text-white">
                       {entry.initials}
                     </div>
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-white">{entry.name}</p>
-                      <p className="truncate text-xs font-mono text-primary/90">{entry.username} · {entry.employeeId ?? entry.id}</p>
+                      <p className="truncate text-sm font-semibold text-white">
+                        {entry.name}
+                      </p>
+                      <p className="truncate text-xs font-mono text-primary/90">
+                        {entry.username} · {entry.employeeId ?? entry.id}
+                      </p>
                     </div>
                   </div>
                 </div>
                 <div className="min-w-0">
-                  <Badge variant={roleVariant(entry.role)} className="mb-2 capitalize">{entry.role}</Badge>
-                  <p className="truncate text-sm text-foreground/90">{entry.designation}</p>
-                  <p className="truncate text-xs text-muted-foreground">{entry.department}</p>
+                  <Badge
+                    variant={roleVariant(entry.role)}
+                    className="mb-2 capitalize"
+                  >
+                    {entry.role}
+                  </Badge>
+                  <p className="truncate text-sm text-foreground/90">
+                    {entry.designation}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {entry.department}
+                  </p>
                 </div>
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2 text-sm text-foreground/90"><Mail className="w-3.5 h-3.5 text-muted-foreground" /> {entry.email}</div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground"><Phone className="w-3.5 h-3.5" /> {entry.phone ?? 'No phone set'}</div>
+                  <div className="flex items-center gap-2 text-sm text-foreground/90">
+                    <Mail className="w-3.5 h-3.5 text-muted-foreground" />{" "}
+                    {entry.email}
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Phone className="w-3.5 h-3.5" />{" "}
+                    {entry.phone ?? "No phone set"}
+                  </div>
                 </div>
                 <div className="flex items-center">
-                  <Badge variant={entry.isActive ? 'success' : 'default'}>{entry.isActive ? 'Active' : 'Inactive'}</Badge>
+                  <Badge variant={entry.isActive ? "success" : "default"}>
+                    {entry.isActive ? "Active" : "Inactive"}
+                  </Badge>
                 </div>
                 <div className="text-sm text-muted-foreground">
                   {formatDateTime(entry.lastLogin)}
                 </div>
                 <div className="flex items-center justify-end gap-2">
-                  <Button variant="secondary" size="sm" onClick={() => openEdit(entry)}>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => openEdit(entry)}
+                  >
                     <Pencil className="w-3.5 h-3.5" /> Edit
                   </Button>
-                  <Button variant="secondary" size="sm" onClick={() => toggleActive(entry)}>
-                    <ShieldCheck className="w-3.5 h-3.5" /> {entry.isActive ? 'Disable' : 'Enable'}
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => toggleActive(entry)}
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5" />{" "}
+                    {entry.isActive ? "Disable" : "Enable"}
                   </Button>
-                  <Button variant="danger" size="sm" onClick={() => setPendingDelete(entry)} disabled={currentUser?.id === entry.id}>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => setPendingDelete(entry)}
+                    disabled={currentUser?.id === entry.id}
+                  >
                     <Trash2 className="w-3.5 h-3.5" /> Remove
                   </Button>
                 </div>
@@ -273,80 +364,195 @@ export default function UserManagement() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="border border-border/60 bg-slate-950 text-foreground sm:max-w-[760px]">
           <DialogHeader>
-            <DialogTitle>{editingUser ? 'Update User' : 'Create User'}</DialogTitle>
+            <DialogTitle>
+              {editingUser ? "Update User" : "Create User"}
+            </DialogTitle>
             <DialogDescription className="text-muted-foreground">
-              Maintain account identity, responsibility, and role scope for the EDMS workspace.
+              Maintain account identity, responsibility, and role scope for the
+              EDMS workspace.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Full Name</label>
-              <Input value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} />
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                Full Name
+              </label>
+              <Input
+                value={form.name}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    name: event.target.value,
+                  }))
+                }
+              />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Username</label>
-              <Input value={form.username} onChange={(event) => setForm((current) => ({ ...current, username: event.target.value }))} />
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                Username
+              </label>
+              <Input
+                value={form.username}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    username: event.target.value,
+                  }))
+                }
+              />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Email</label>
-              <Input value={form.email} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} />
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                Email
+              </label>
+              <Input
+                value={form.email}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    email: event.target.value,
+                  }))
+                }
+              />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Role</label>
-              <Select value={form.role} onChange={(event) => setForm((current) => ({ ...current, role: event.target.value as UserRole }))}>
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                Role
+              </label>
+              <Select
+                value={form.role}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    role: event.target.value as UserRole,
+                  }))
+                }
+              >
                 {UserService.getRoleOptions().map((role) => (
-                  <option key={role} value={role}>{role}</option>
+                  <option key={role} value={role}>
+                    {role}
+                  </option>
                 ))}
               </Select>
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Designation</label>
-              <Input value={form.designation} onChange={(event) => setForm((current) => ({ ...current, designation: event.target.value }))} />
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                Designation
+              </label>
+              <Input
+                value={form.designation}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    designation: event.target.value,
+                  }))
+                }
+              />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Department</label>
-              <Input value={form.department} onChange={(event) => setForm((current) => ({ ...current, department: event.target.value }))} />
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                Department
+              </label>
+              <Input
+                value={form.department}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    department: event.target.value,
+                  }))
+                }
+              />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Phone</label>
-              <Input value={form.phone} onChange={(event) => setForm((current) => ({ ...current, phone: event.target.value }))} />
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                Phone
+              </label>
+              <Input
+                value={form.phone}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    phone: event.target.value,
+                  }))
+                }
+              />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Employee ID</label>
-              <Input value={form.employeeId} onChange={(event) => setForm((current) => ({ ...current, employeeId: event.target.value }))} />
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                Employee ID
+              </label>
+              <Input
+                value={form.employeeId}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    employeeId: event.target.value,
+                  }))
+                }
+              />
             </div>
             <div className="md:col-span-2 flex items-center justify-between rounded-xl border border-white/6 bg-card/40 px-4 py-3">
               <div>
-                <p className="text-sm font-medium text-foreground">Account Active</p>
-                <p className="text-xs text-muted-foreground">Inactive users remain visible in history but lose operational access.</p>
+                <p className="text-sm font-medium text-foreground">
+                  Account Active
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Inactive users remain visible in history but lose operational
+                  access.
+                </p>
               </div>
-              <Switch checked={form.isActive} onCheckedChange={(checked) => setForm((current) => ({ ...current, isActive: checked }))} />
+              <Switch
+                checked={form.isActive}
+                onCheckedChange={(checked) =>
+                  setForm((current) => ({ ...current, isActive: checked }))
+                }
+              />
             </div>
           </div>
           <DialogFooter className="gap-2">
-            <Button variant="secondary" onClick={resetDialog}>Cancel</Button>
+            <Button variant="secondary" onClick={resetDialog}>
+              Cancel
+            </Button>
             <Button onClick={saveUser}>
-              {editingUser ? <><UserCog className="w-4 h-4" /> Save User</> : <><Users className="w-4 h-4" /> Create User</>}
+              {editingUser ? (
+                <>
+                  <UserCog className="w-4 h-4" /> Save User
+                </>
+              ) : (
+                <>
+                  <Users className="w-4 h-4" /> Create User
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={Boolean(pendingDelete)} onOpenChange={(open) => !open && setPendingDelete(null)}>
+      <Dialog
+        open={Boolean(pendingDelete)}
+        onOpenChange={(open) => !open && setPendingDelete(null)}
+      >
         <DialogContent className="border border-rose-500/25 bg-slate-950 text-foreground sm:max-w-[460px]">
           <DialogHeader>
             <DialogTitle>Remove User</DialogTitle>
             <DialogDescription className="text-muted-foreground">
-              This removes the user from the local admin directory used by the current frontend workspace.
+              This removes the user from the local admin directory used by the
+              current frontend workspace.
             </DialogDescription>
           </DialogHeader>
           <div className="rounded-xl border border-white/6 bg-card/40 px-4 py-3 text-sm text-foreground/90">
             {pendingDelete ? (
-              <span>Remove <strong className="text-white">{pendingDelete.name}</strong> from the user registry?</span>
+              <span>
+                Remove{" "}
+                <strong className="text-white">{pendingDelete.name}</strong>{" "}
+                from the user registry?
+              </span>
             ) : null}
           </div>
           <DialogFooter className="gap-2">
-            <Button variant="secondary" onClick={() => setPendingDelete(null)}>Cancel</Button>
+            <Button variant="secondary" onClick={() => setPendingDelete(null)}>
+              Cancel
+            </Button>
             <Button variant="danger" onClick={deleteUser}>
               <Trash2 className="w-4 h-4" /> Remove User
             </Button>

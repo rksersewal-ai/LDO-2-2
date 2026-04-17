@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react';
-import { Check, ChevronsUpDown, Hash, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import type { PLNumber } from '@/lib/types';
-import { Badge } from './Shared';
-import { Button } from './button';
+import { useMemo, useState } from "react";
+import { Check, ChevronsUpDown, Hash, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { PLNumber } from "@/lib/types";
+import { Badge } from "./Shared";
+import { Button } from "./button";
 import {
   Command,
   CommandEmpty,
@@ -11,13 +11,13 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from './command';
-import { Popover, PopoverContent, PopoverTrigger } from './popover';
+} from "./command";
+import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
-function getStatusVariant(status: PLNumber['status']) {
-  if (status === 'ACTIVE') return 'success';
-  if (status === 'UNDER_REVIEW') return 'warning';
-  return 'danger';
+function getStatusVariant(status: PLNumber["status"]) {
+  if (status === "ACTIVE") return "success";
+  if (status === "UNDER_REVIEW") return "warning";
+  return "danger";
 }
 
 interface PLNumberMultiSelectProps {
@@ -35,25 +35,26 @@ export function PLNumberMultiSelect({
   onChange,
   plItems,
   loading = false,
-  placeholder = 'Search and select PL numbers...',
+  placeholder = "Search and select PL numbers...",
   helperText,
   className,
 }: PLNumberMultiSelectProps) {
   const [open, setOpen] = useState(false);
 
   const normalizedValues = useMemo(
-    () => values.map((value) => value.replace(/^PL-/, '')),
-    [values]
+    () => values.map((value) => value.replace(/^PL-/, "")),
+    [values],
   );
 
   const sortedItems = useMemo(
     () => [...plItems].sort((a, b) => a.plNumber.localeCompare(b.plNumber)),
-    [plItems]
+    [plItems],
   );
 
   const selectedItems = useMemo(
-    () => sortedItems.filter((item) => normalizedValues.includes(item.plNumber)),
-    [normalizedValues, sortedItems]
+    () =>
+      sortedItems.filter((item) => normalizedValues.includes(item.plNumber)),
+    [normalizedValues, sortedItems],
   );
 
   const toggleValue = (plNumber: string) => {
@@ -65,7 +66,7 @@ export function PLNumberMultiSelect({
   };
 
   return (
-    <div className={cn('space-y-2', className)} data-no-context-palette="true">
+    <div className={cn("space-y-2", className)} data-no-context-palette="true">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -79,7 +80,7 @@ export function PLNumberMultiSelect({
               <Hash className="h-4 w-4 shrink-0 text-primary" />
               <span className="truncate">
                 {selectedItems.length > 0
-                  ? `${selectedItems.length} PL ${selectedItems.length === 1 ? 'selected' : 'records selected'}`
+                  ? `${selectedItems.length} PL ${selectedItems.length === 1 ? "selected" : "records selected"}`
                   : placeholder}
               </span>
             </span>
@@ -96,10 +97,16 @@ export function PLNumberMultiSelect({
               className="text-foreground placeholder:text-muted-foreground"
             />
             <CommandList className="max-h-[320px]">
-              {loading && <div className="px-4 py-4 text-sm text-muted-foreground">Loading PL records...</div>}
+              {loading && (
+                <div className="px-4 py-4 text-sm text-muted-foreground">
+                  Loading PL records...
+                </div>
+              )}
               {!loading && (
                 <>
-                  <CommandEmpty className="text-muted-foreground">No PL records match this search.</CommandEmpty>
+                  <CommandEmpty className="text-muted-foreground">
+                    No PL records match this search.
+                  </CommandEmpty>
                   <CommandGroup>
                     {sortedItems.map((pl) => {
                       const isSelected = normalizedValues.includes(pl.plNumber);
@@ -110,22 +117,38 @@ export function PLNumberMultiSelect({
                           onSelect={() => toggleValue(pl.plNumber)}
                           className="items-start rounded-xl px-3 py-3 data-[selected=true]:bg-teal-500/10 data-[selected=true]:text-white"
                         >
-                          <div className={cn(
-                            'mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border text-primary/90',
-                            isSelected ? 'border-teal-300/35 bg-teal-500/18' : 'border-teal-400/20 bg-teal-500/10'
-                          )}>
-                            {isSelected ? <Check className="h-4 w-4" /> : <Hash className="h-4 w-4" />}
+                          <div
+                            className={cn(
+                              "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border text-primary/90",
+                              isSelected
+                                ? "border-teal-300/35 bg-teal-500/18"
+                                : "border-teal-400/20 bg-teal-500/10",
+                            )}
+                          >
+                            {isSelected ? (
+                              <Check className="h-4 w-4" />
+                            ) : (
+                              <Hash className="h-4 w-4" />
+                            )}
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="font-mono text-xs text-primary/90">{pl.plNumber}</span>
-                              <Badge size="sm" variant={getStatusVariant(pl.status)}>
+                              <span className="font-mono text-xs text-primary/90">
+                                {pl.plNumber}
+                              </span>
+                              <Badge
+                                size="sm"
+                                variant={getStatusVariant(pl.status)}
+                              >
                                 {pl.status}
                               </Badge>
                             </div>
-                            <p className="truncate text-sm text-foreground">{pl.name}</p>
+                            <p className="truncate text-sm text-foreground">
+                              {pl.name}
+                            </p>
                             <p className="truncate text-[11px] text-muted-foreground">
-                              {pl.category} · {pl.controllingAgency} · {pl.description}
+                              {pl.category} · {pl.controllingAgency} ·{" "}
+                              {pl.description}
                             </p>
                           </div>
                         </CommandItem>
@@ -139,7 +162,9 @@ export function PLNumberMultiSelect({
         </PopoverContent>
       </Popover>
 
-      {helperText && <p className="text-[11px] text-muted-foreground">{helperText}</p>}
+      {helperText && (
+        <p className="text-[11px] text-muted-foreground">{helperText}</p>
+      )}
 
       {selectedItems.length > 0 && (
         <div className="flex flex-wrap gap-2 rounded-2xl border border-teal-400/14 bg-teal-500/[0.05] px-3 py-3">

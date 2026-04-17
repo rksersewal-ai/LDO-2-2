@@ -1,0 +1,305 @@
+- generic [ref=e43]:
+  - complementary [ref=e44]:
+    - generic [ref=e46]:
+      - generic [ref=e47]:
+        - generic [ref=e49]: L2
+        - generic [ref=e50]:
+          - paragraph [ref=e51]: LDO-2 EDMS
+          - paragraph [ref=e52]: Enterprise
+      - button "Collapse navigation" [ref=e53]:
+        - img [ref=e54]
+    - navigation "Main navigation" [ref=e57]:
+      - generic [ref=e58]:
+        - generic [ref=e59]: Core
+        - link "Dashboard" [ref=e60] [cursor=pointer]:
+          - /url: /
+          - img [ref=e61]
+          - generic [ref=e66]: Dashboard
+        - link "Search Explorer" [ref=e67] [cursor=pointer]:
+          - /url: /search
+          - img [ref=e68]
+          - generic [ref=e76]: Search Explorer
+        - link "Document Hub" [ref=e77] [cursor=pointer]:
+          - /url: /documents
+          - img [ref=e78]
+          - generic [ref=e80]: Document Hub
+      - generic [ref=e81]:
+        - generic [ref=e82]: Engineering
+        - link "BOM Explorer" [active] [ref=e83] [cursor=pointer]:
+          - /url: /bom
+          - img [ref=e84]
+          - generic [ref=e89]: BOM Explorer
+        - link "PL Knowledge Hub" [ref=e90] [cursor=pointer]:
+          - /url: /pl
+          - img [ref=e92]
+          - generic [ref=e98]: PL Knowledge Hub
+      - generic [ref=e99]:
+        - generic [ref=e100]: Workflow
+        - link "Work Ledger" [ref=e101] [cursor=pointer]:
+          - /url: /ledger
+          - img [ref=e102]
+          - generic [ref=e105]: Work Ledger
+        - link "Cases" [ref=e106] [cursor=pointer]:
+          - /url: /cases
+          - img [ref=e107]
+          - generic [ref=e109]: Cases
+        - link "Approvals" [ref=e110] [cursor=pointer]:
+          - /url: /approvals
+          - img [ref=e111]
+          - generic [ref=e114]: Approvals
+      - generic [ref=e115]:
+        - generic [ref=e116]: Tools
+        - link "Alert Rules" [ref=e117] [cursor=pointer]:
+          - /url: /alerts
+          - img [ref=e118]
+          - generic [ref=e121]: Alert Rules
+        - link "Doc Templates" [ref=e122] [cursor=pointer]:
+          - /url: /templates
+          - img [ref=e123]
+          - generic [ref=e127]: Doc Templates
+      - generic [ref=e128]:
+        - generic [ref=e129]: Reports
+        - link "Reports" [ref=e130] [cursor=pointer]:
+          - /url: /reports
+          - img [ref=e131]
+          - generic [ref=e133]: Reports
+        - link "Ledger Reports" [ref=e134] [cursor=pointer]:
+          - /url: /ledger-reports
+          - img [ref=e135]
+          - generic [ref=e138]: Ledger Reports
+      - generic [ref=e139]:
+        - generic [ref=e140]: System
+        - link "Admin" [ref=e141] [cursor=pointer]:
+          - /url: /admin
+          - img [ref=e142]
+          - generic [ref=e153]: Admin
+        - link "Users" [ref=e154] [cursor=pointer]:
+          - /url: /admin/users
+          - img [ref=e155]
+          - generic [ref=e160]: Users
+        - link "Deduplication" [ref=e161] [cursor=pointer]:
+          - /url: /admin/deduplication
+          - img [ref=e162]
+          - generic [ref=e166]: Deduplication
+        - link "OCR Monitor" [ref=e167] [cursor=pointer]:
+          - /url: /ocr
+          - img [ref=e168]
+          - generic [ref=e170]: OCR Monitor
+        - link "System Health" [ref=e171] [cursor=pointer]:
+          - /url: /health
+          - img [ref=e172]
+          - generic [ref=e175]: System Health
+        - link "Audit Log" [ref=e176] [cursor=pointer]:
+          - /url: /audit
+          - img [ref=e177]
+          - generic [ref=e180]: Audit Log
+        - link "Banners" [ref=e181] [cursor=pointer]:
+          - /url: /banners
+          - img [ref=e182]
+          - generic [ref=e185]: Banners
+        - link "Settings" [ref=e186] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e187]
+          - generic [ref=e190]: Settings
+        - link "Design System" [ref=e191] [cursor=pointer]:
+          - /url: /design-system
+          - img [ref=e192]
+          - generic [ref=e194]: Design System
+  - main [ref=e195]:
+    - generic [ref=e196]:
+      - generic [ref=e197]:
+        - generic [ref=e198]:
+          - img [ref=e199]
+          - generic [ref=e201]: Maintenance
+          - generic [ref=e202]: OCR Engine restart at 03:00 UTC — minor processing delays expected.
+        - button "Dismiss banner" [ref=e203]:
+          - img [ref=e204]
+      - generic [ref=e207]:
+        - navigation "Breadcrumb" [ref=e208]:
+          - button "Home" [ref=e210]
+          - generic [ref=e211]:
+            - generic [ref=e212]: /
+            - generic [ref=e684]: BOM Explorer
+        - generic [ref=e217]:
+          - generic [ref=e218]: 04 Apr 2026, 20:02:00
+          - button "Open command palette" [ref=e219]:
+            - img [ref=e220]
+            - generic [ref=e223]: Search…
+            - generic [ref=e224]: ⌘K
+          - button "Switch to light mode" [ref=e225]:
+            - img [ref=e226]
+          - button "Text size controls" [ref=e233]:
+            - img [ref=e234]
+          - button "Notifications (6 unread)" [ref=e237]:
+            - img [ref=e238]
+            - generic [ref=e241]: "6"
+          - button "Profile menu" [ref=e244] [cursor=pointer]:
+            - generic [ref=e245]: SA
+            - generic [ref=e246]:
+              - generic [ref=e247]: System Administrator
+              - generic [ref=e248]: admin
+    - generic [ref=e686]:
+      - generic [ref=e688]:
+        - generic [ref=e689]:
+          - heading "BOM Explorer" [level=1] [ref=e690]
+          - paragraph [ref=e691]: Select a product to explore its full Bill of Materials hierarchy
+        - generic [ref=e693]:
+          - button "Export" [ref=e694] [cursor=pointer]:
+            - img
+            - text: Export
+          - button "New BOM" [ref=e695] [cursor=pointer]:
+            - img
+            - text: New BOM
+      - generic [ref=e696]:
+        - generic [ref=e697]:
+          - paragraph [ref=e698]: Products
+          - paragraph [ref=e699]: "4"
+        - generic [ref=e700]:
+          - paragraph [ref=e701]: Total Nodes
+          - paragraph [ref=e702]: "42"
+        - generic [ref=e703]:
+          - paragraph [ref=e704]: In Production
+          - paragraph [ref=e705]: "3"
+        - generic [ref=e706]:
+          - paragraph [ref=e707]: Total Parts
+          - paragraph [ref=e708]: "14"
+      - generic [ref=e710]:
+        - generic [ref=e711]:
+          - img [ref=e712]
+          - textbox "Search products, PL numbers..." [ref=e715]
+        - generic [ref=e716]:
+          - generic [ref=e717]:
+            - paragraph [ref=e718]: Category
+            - group "Filter options" [ref=e719]:
+              - button "All" [pressed] [ref=e720] [cursor=pointer]
+              - button "Passenger Locomotive" [ref=e721] [cursor=pointer]
+              - button "Freight Locomotive" [ref=e722] [cursor=pointer]
+              - button "EMU Rolling Stock" [ref=e723] [cursor=pointer]
+              - button "Electrical Component" [ref=e724] [cursor=pointer]
+          - generic [ref=e725]:
+            - paragraph [ref=e726]: Lifecycle
+            - group "Filter options" [ref=e727]:
+              - button "All" [pressed] [ref=e728] [cursor=pointer]
+              - button "Production" [ref=e729] [cursor=pointer]
+              - button "In Development" [ref=e730] [cursor=pointer]
+              - button "Prototyping" [ref=e731] [cursor=pointer]
+      - generic [ref=e732]:
+        - button "Production WAP-7 Electric Passenger Locomotive 25kV AC electric locomotive for Indian Railways mainline passenger service. 6120 HP with regenerative braking. 7 nodes 5 assy 0 parts Root PL 38100000 View BOM" [ref=e733] [cursor=pointer]:
+          - generic [ref=e734]:
+            - generic [ref=e735]:
+              - img [ref=e737]
+              - generic [ref=e742]: Production
+            - heading "WAP-7" [level=3] [ref=e743]
+            - paragraph [ref=e744]: Electric Passenger Locomotive
+            - paragraph [ref=e745]: 25kV AC electric locomotive for Indian Railways mainline passenger service. 6120 HP with regenerative braking.
+            - generic [ref=e746]:
+              - generic [ref=e747]:
+                - img [ref=e748]
+                - generic [ref=e752]: "7"
+                - generic [ref=e753]: nodes
+              - generic [ref=e755]: 5 assy
+              - generic [ref=e757]: 0 parts
+            - generic [ref=e758]:
+              - generic [ref=e759]:
+                - paragraph [ref=e760]: Root PL
+                - paragraph [ref=e761]: "38100000"
+              - generic [ref=e762]:
+                - generic [ref=e763]: View BOM
+                - img [ref=e764]
+        - button "Production WAG-9HC Electric Freight Locomotive 9000 HP 25kV AC freight locomotive with IGBT converters and regenerative braking for heavy haul. 14 nodes 10 assy 4 parts Root PL 46100000 View BOM" [ref=e766] [cursor=pointer]:
+          - generic [ref=e767]:
+            - generic [ref=e768]:
+              - img [ref=e770]
+              - generic [ref=e775]: Production
+            - heading "WAG-9HC" [level=3] [ref=e776]
+            - paragraph [ref=e777]: Electric Freight Locomotive
+            - paragraph [ref=e778]: 9000 HP 25kV AC freight locomotive with IGBT converters and regenerative braking for heavy haul.
+            - generic [ref=e779]:
+              - generic [ref=e780]:
+                - img [ref=e781]
+                - generic [ref=e785]: "14"
+                - generic [ref=e786]: nodes
+              - generic [ref=e788]: 10 assy
+              - generic [ref=e790]: 4 parts
+            - generic [ref=e791]:
+              - generic [ref=e792]:
+                - paragraph [ref=e793]: Root PL
+                - paragraph [ref=e794]: "46100000"
+              - generic [ref=e795]:
+                - generic [ref=e796]: View BOM
+                - img [ref=e797]
+        - button "In Development DETC Double-Deck EMU Motor Coach Double-deck electric multiple unit motor coach for high-capacity suburban and intercity corridors. 10 nodes 7 assy 3 parts Root PL 52000000 View BOM" [ref=e799] [cursor=pointer]:
+          - generic [ref=e800]:
+            - generic [ref=e801]:
+              - img [ref=e803]
+              - generic [ref=e808]: In Development
+            - heading "DETC" [level=3] [ref=e809]
+            - paragraph [ref=e810]: Double-Deck EMU Motor Coach
+            - paragraph [ref=e811]: Double-deck electric multiple unit motor coach for high-capacity suburban and intercity corridors.
+            - generic [ref=e812]:
+              - generic [ref=e813]:
+                - img [ref=e814]
+                - generic [ref=e818]: "10"
+                - generic [ref=e819]: nodes
+              - generic [ref=e821]: 7 assy
+              - generic [ref=e823]: 3 parts
+            - generic [ref=e824]:
+              - generic [ref=e825]:
+                - paragraph [ref=e826]: Root PL
+                - paragraph [ref=e827]: "52000000"
+              - generic [ref=e828]:
+                - generic [ref=e829]: View BOM
+                - img [ref=e830]
+        - button "Production Traction Motor HS-15250A Axle-Hung Motor Axle-hung, nose-suspended squirrel cage induction motor for WAP7 and WAG9 class locomotives. 11 nodes 4 assy 7 parts Root PL 60100000 View BOM" [ref=e832] [cursor=pointer]:
+          - generic [ref=e833]:
+            - generic [ref=e834]:
+              - img [ref=e836]
+              - generic [ref=e839]: Production
+            - heading "Traction Motor" [level=3] [ref=e840]
+            - paragraph [ref=e841]: HS-15250A Axle-Hung Motor
+            - paragraph [ref=e842]: Axle-hung, nose-suspended squirrel cage induction motor for WAP7 and WAG9 class locomotives.
+            - generic [ref=e843]:
+              - generic [ref=e844]:
+                - img [ref=e845]
+                - generic [ref=e849]: "11"
+                - generic [ref=e850]: nodes
+              - generic [ref=e852]: 4 assy
+              - generic [ref=e854]: 7 parts
+            - generic [ref=e855]:
+              - generic [ref=e856]:
+                - paragraph [ref=e857]: Root PL
+                - paragraph [ref=e858]: "60100000"
+              - generic [ref=e859]:
+                - generic [ref=e860]: View BOM
+                - img [ref=e861]
+        - button "Create New BOM Define a new product structure and start building your bill of materials" [ref=e863] [cursor=pointer]:
+          - generic [ref=e864]:
+            - img [ref=e866]
+            - paragraph [ref=e867]: Create New BOM
+            - paragraph [ref=e868]: Define a new product structure and start building your bill of materials
+      - generic [ref=e869]:
+        - generic [ref=e870]:
+          - img [ref=e871]
+          - heading "Recently Modified" [level=3] [ref=e874]
+        - generic [ref=e875]:
+          - button "WAP-7 Electric Passenger Locomotive 2026-03-20" [ref=e876] [cursor=pointer]:
+            - generic [ref=e877]:
+              - generic [ref=e879]: WAP-7
+              - generic [ref=e880]: Electric Passenger Locomotive
+            - generic [ref=e881]:
+              - generic [ref=e882]: 2026-03-20
+              - img [ref=e883]
+          - button "Traction Motor HS-15250A Axle-Hung Motor 2026-03-01" [ref=e885] [cursor=pointer]:
+            - generic [ref=e886]:
+              - generic [ref=e888]: Traction Motor
+              - generic [ref=e889]: HS-15250A Axle-Hung Motor
+            - generic [ref=e890]:
+              - generic [ref=e891]: 2026-03-01
+              - img [ref=e892]
+          - button "WAG-9HC Electric Freight Locomotive 2026-02-15" [ref=e894] [cursor=pointer]:
+            - generic [ref=e895]:
+              - generic [ref=e897]: WAG-9HC
+              - generic [ref=e898]: Electric Freight Locomotive
+            - generic [ref=e899]:
+              - generic [ref=e900]: 2026-02-15
+              - img [ref=e901]

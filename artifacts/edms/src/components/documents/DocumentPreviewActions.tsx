@@ -1,12 +1,15 @@
-import { Eye, ExternalLink } from 'lucide-react';
-import { useNavigate } from 'react-router';
-import { Button } from '../ui/Shared';
-import { resolveDocumentPreviewPath } from '../../lib/documentPreview';
+import { Eye, ExternalLink } from "lucide-react";
+import { useNavigate } from "react-router";
+import { Button } from "../ui/Shared";
+import { resolveDocumentPreviewPath } from "../../lib/documentPreview";
 
-export function getDocumentContextAttributes(documentId: string, title?: string) {
+export function getDocumentContextAttributes(
+  documentId: string,
+  title?: string,
+) {
   return {
-    'data-document-id': documentId,
-    'data-document-title': title ?? documentId,
+    "data-document-id": documentId,
+    "data-document-title": title ?? documentId,
   } as const;
 }
 
@@ -15,8 +18,8 @@ interface DocumentPreviewButtonProps {
   title?: string;
   className?: string;
   label?: string;
-  size?: 'sm' | 'md' | 'lg';
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'teal-outline';
+  size?: "sm" | "md" | "lg";
+  variant?: "primary" | "secondary" | "ghost" | "danger" | "teal-outline";
   iconOnly?: boolean;
   stopPropagation?: boolean;
 }
@@ -25,9 +28,9 @@ export function DocumentPreviewButton({
   documentId,
   title,
   className,
-  label = 'Preview',
-  size = 'sm',
-  variant = 'ghost',
+  label = "Preview",
+  size = "sm",
+  variant = "ghost",
   iconOnly = false,
   stopPropagation = true,
 }: DocumentPreviewButtonProps) {
@@ -39,7 +42,7 @@ export function DocumentPreviewButton({
       size={size}
       variant={variant}
       className={className}
-      title={title ? `Preview ${title}` : 'Preview document'}
+      title={title ? `Preview ${title}` : "Preview document"}
       onClick={(event) => {
         if (stopPropagation) {
           event.stopPropagation();
@@ -57,8 +60,8 @@ interface DocumentDetailsButtonProps {
   documentId: string;
   className?: string;
   label?: string;
-  size?: 'sm' | 'md' | 'lg';
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'teal-outline';
+  size?: "sm" | "md" | "lg";
+  variant?: "primary" | "secondary" | "ghost" | "danger" | "teal-outline";
   iconOnly?: boolean;
   stopPropagation?: boolean;
 }
@@ -66,9 +69,9 @@ interface DocumentDetailsButtonProps {
 export function DocumentDetailsButton({
   documentId,
   className,
-  label = 'Open',
-  size = 'sm',
-  variant = 'ghost',
+  label = "Open",
+  size = "sm",
+  variant = "ghost",
   iconOnly = false,
   stopPropagation = true,
 }: DocumentDetailsButtonProps) {

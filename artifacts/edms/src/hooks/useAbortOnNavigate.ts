@@ -1,21 +1,21 @@
 /**
  * useAbortOnNavigate Hook
- * 
+ *
  * Automatically cancels in-flight API requests when user navigates away from page.
  * Prevents race conditions where responses arrive after component unmounts or route changes.
- * 
+ *
  * Usage:
  *   const signal = useAbortOnNavigate();
  *   const docs = await apiClient.getDocuments({ ...params }, signal);
- * 
+ *
  * The signal is automatically aborted when:
  * - Component unmounts
  * - Route changes (useLocation dependency)
  * - Filter/search state changes significantly
  */
 
-import { useEffect, useRef, useCallback } from 'react';
-import { useLocation } from 'react-router';
+import { useEffect, useRef, useCallback } from "react";
+import { useLocation } from "react-router";
 
 /**
  * Create and manage AbortController for API requests
@@ -52,7 +52,7 @@ export function useAbortOnNavigate() {
 /**
  * Create an abort controller for a specific operation
  * Use when you have multiple async operations in a page and want granular control
- * 
+ *
  * Usage:
  *   const abortDocSearch = useAbortController();
  *   const abortFilterChange = useAbortController();
@@ -78,7 +78,7 @@ export function useAbortController() {
     if (!controllerRef.current.signal.aborted) {
       controllerRef.current.abort();
     }
-    
+
     controllerRef.current = new AbortController();
     return controllerRef.current.signal;
   }, []);
@@ -93,7 +93,7 @@ export function useAbortController() {
 /**
  * Debounced abort controller for rapid filter changes
  * Aborts previous request, starts fresh on each filter change
- * 
+ *
  * Usage:
  *   const getAbortSignal = useDebouncedAbort(300); // 300ms delay
  *   useEffect(() => {

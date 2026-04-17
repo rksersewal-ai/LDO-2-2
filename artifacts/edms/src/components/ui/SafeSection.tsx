@@ -1,16 +1,16 @@
 /**
  * SafeSection Component
- * 
+ *
  * Wraps a section with error boundary + loading/error states.
  * Safe wrapper for charts, viewers, analytics, and risky third-party widgets.
- * 
+ *
  * Features:
  * - Catches render errors automatically
  * - Shows loading state while data loads
  * - Shows error state if loading fails
  * - Shows error fallback if component crashes
  * - Retry button for all error types
- * 
+ *
  * Usage:
  * <SafeSection
  *   name="Dashboard Analytics"
@@ -22,11 +22,11 @@
  * </SafeSection>
  */
 
-import React, { ReactNode } from 'react';
-import { ErrorBoundary } from './ErrorBoundary';
-import { LoadingState } from './LoadingState';
-import { ErrorState } from './ErrorState';
-import { AlertTriangle } from 'lucide-react';
+import React, { ReactNode } from "react";
+import { ErrorBoundary } from "./ErrorBoundary";
+import { LoadingState } from "./LoadingState";
+import { ErrorState } from "./ErrorState";
+import { AlertTriangle } from "lucide-react";
 
 interface SafeSectionProps {
   children: ReactNode;
@@ -48,13 +48,15 @@ export function SafeSection({
   isLoading = false,
   error = null,
   onRetry,
-  className = '',
-  minHeight = 'min-h-[200px]',
+  className = "",
+  minHeight = "min-h-[200px]",
 }: SafeSectionProps) {
   // Show loading state
   if (isLoading) {
     return (
-      <div className={`flex items-center justify-center ${minHeight} ${className}`}>
+      <div
+        className={`flex items-center justify-center ${minHeight} ${className}`}
+      >
         <LoadingState />
       </div>
     );
@@ -83,9 +85,13 @@ export function SafeSection({
         console.error(`${name} crashed:`, error);
       }}
       fallback={(error) => (
-        <div className={`flex flex-col items-center justify-center ${minHeight} px-4 bg-rose-900/10 border border-rose-500/20 rounded-lg ${className}`}>
+        <div
+          className={`flex flex-col items-center justify-center ${minHeight} px-4 bg-rose-900/10 border border-rose-500/20 rounded-lg ${className}`}
+        >
           <AlertTriangle className="w-6 h-6 text-rose-400 mb-2" />
-          <p className="text-sm font-semibold text-rose-300 mb-1">{name} Error</p>
+          <p className="text-sm font-semibold text-rose-300 mb-1">
+            {name} Error
+          </p>
           <p className="text-xs text-rose-300/70 text-center mb-4 max-w-sm">
             {error.message}
           </p>

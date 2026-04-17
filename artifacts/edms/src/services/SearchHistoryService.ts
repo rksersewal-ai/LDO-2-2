@@ -1,4 +1,4 @@
-const SEARCH_HISTORY_KEY = 'edms_search_history';
+const SEARCH_HISTORY_KEY = "edms_search_history";
 const MAX_HISTORY = 50;
 
 export interface SearchHistoryItem {
@@ -11,10 +11,15 @@ export interface SearchHistoryItem {
 export class SearchHistoryService {
   static addSearch(query: string, scope: string, count: number = 0) {
     if (!query.trim()) return;
-    
+
     const history = this.getHistory();
-    const filtered = history.filter(h => !(h.query === query && h.scope === scope));
-    const updated = [{ query, scope, timestamp: Date.now(), count }, ...filtered].slice(0, MAX_HISTORY);
+    const filtered = history.filter(
+      (h) => !(h.query === query && h.scope === scope),
+    );
+    const updated = [
+      { query, scope, timestamp: Date.now(), count },
+      ...filtered,
+    ].slice(0, MAX_HISTORY);
     localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(updated));
   }
 
@@ -31,13 +36,20 @@ export class SearchHistoryService {
     return this.getHistory().slice(0, limit);
   }
 
-  static getSuggestions(query: string, scope: string = 'ALL'): SearchHistoryItem[] {
+  static getSuggestions(
+    query: string,
+    scope: string = "ALL",
+  ): SearchHistoryItem[] {
     if (!query.trim()) return this.getRecentSearches(5);
-    
+
     const history = this.getHistory();
     const q = query.toLowerCase();
     return history
-      .filter(h => h.query.toLowerCase().includes(q) && (scope === 'ALL' || h.scope === scope))
+      .filter(
+        (h) =>
+          h.query.toLowerCase().includes(q) &&
+          (scope === "ALL" || h.scope === scope),
+      )
       .slice(0, 5);
   }
 
@@ -47,7 +59,9 @@ export class SearchHistoryService {
 
   static removeItem(query: string, scope: string) {
     const history = this.getHistory();
-    const filtered = history.filter(h => !(h.query === query && h.scope === scope));
+    const filtered = history.filter(
+      (h) => !(h.query === query && h.scope === scope),
+    );
     localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(filtered));
   }
 }

@@ -6,7 +6,7 @@ Lightweight extractors first → Tesseract for scanned PDFs → Error handling
 from pathlib import Path
 import logging
 import os
-from typing import Dict, Optional, Tuple
+from typing import Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -95,16 +95,6 @@ class PlainTextEngine(OcrEngine):
                     engine=self.name(),
                     is_scanned=False,
                 )
-        except Exception as exc:
-            logger.error(f"Plain text extraction error: {exc}")
-            return OcrResult("", confidence=0.0, engine=self.name(), error=str(exc))
-
-            return OcrResult(
-                text=text,
-                confidence=1.0,
-                engine=self.name(),
-                is_scanned=False,
-            )
         except Exception as exc:
             logger.error(f"Plain text extraction error: {exc}")
             return OcrResult("", confidence=0.0, engine=self.name(), error=str(exc))
@@ -211,10 +201,6 @@ class EasyOcrEngine(OcrEngine):
         if not self.is_available():
             return OcrResult("", confidence=0.0, engine=self.name(),
                            error="easyocr not available")
-
-        images, error = self._get_images_for_file(file_path)
-        if error:
-            return OcrResult("", confidence=0.0, engine=self.name(), error=error)
         
         try:
             images, error_result = self._get_images_from_file(file_path)
@@ -277,25 +263,6 @@ class TesseractEngine(OcrEngine):
     
     def name(self) -> str:
         return "tesseract"
-
-    def _extract_from_image(self, image) -> Tuple[str, list]:
-        """Extract text and confidences from a single image"""
-        page_text = self.pytesseract.image_to_string(image)
-        data = self.pytesseract.image_to_data(image)
-        lines = data.split('\n')[1:]  # Skip header
-
-        confidences = []
-        for line in lines:
-            parts = line.split('\t')
-            if len(parts) > 10:
-                try:
-                    conf = float(parts[10])
-                    if conf > 0:
-                        confidences.append(conf / 100.0)
-                except (ValueError, IndexError):
-                    pass
-
-        return page_text, confidences
     
     def _extract_confidences(self, data: str) -> list[float]:
         """Parse Tesseract data string to extract confidence values"""
@@ -322,10 +289,6 @@ class TesseractEngine(OcrEngine):
         if not self.is_available():
             return OcrResult("", confidence=0.0, engine=self.name(),
                            error="Tesseract not available")
-
-        images, error = self._get_images_for_file(file_path)
-        if error:
-            return OcrResult("", confidence=0.0, engine=self.name(), error=error)
         
         try:
             images, error_result = self._get_images_from_file(file_path)
@@ -337,7 +300,7 @@ class TesseractEngine(OcrEngine):
             for image in images:
                 page_text, image_confidences = self._extract_from_image(image)
                 page_texts.append(page_text)
-                confidences.extend(image_confidences)
+                all_confidences.extend(image_confidences)
 
             text = "\n\f\n".join(page_text for page_text in page_texts if page_text)
             avg_confidence = sum(all_confidences) / len(all_confidences) if all_confidences else 0.5

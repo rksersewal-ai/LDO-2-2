@@ -750,6 +750,7 @@ class ChangeRequestService:
     @transaction.atomic
     def submit(change_request, request):
         PermissionService.require_permission(request.user, change_request, 'change_changerequest')
+        change_request = ChangeRequest.objects.select_for_update().get(pk=change_request.pk)
         _run_transition(change_request, 'submit')
         change_request.reviewed_by = request.user
         change_request.reviewed_at = timezone.now()
@@ -768,6 +769,7 @@ class ChangeRequestService:
     @transaction.atomic
     def approve(change_request, request, notes=''):
         PermissionService.require_permission(request.user, change_request, 'change_changerequest')
+        change_request = ChangeRequest.objects.select_for_update().get(pk=change_request.pk)
         _run_transition(change_request, 'approve')
         change_request.reviewed_by = request.user
         change_request.reviewed_at = timezone.now()
@@ -787,6 +789,7 @@ class ChangeRequestService:
     @transaction.atomic
     def reject(change_request, request, notes=''):
         PermissionService.require_permission(request.user, change_request, 'change_changerequest')
+        change_request = ChangeRequest.objects.select_for_update().get(pk=change_request.pk)
         _run_transition(change_request, 'reject')
         change_request.reviewed_by = request.user
         change_request.reviewed_at = timezone.now()
@@ -806,6 +809,7 @@ class ChangeRequestService:
     @transaction.atomic
     def implement(change_request, request):
         PermissionService.require_permission(request.user, change_request, 'change_changerequest')
+        change_request = ChangeRequest.objects.select_for_update().get(pk=change_request.pk)
         _run_transition(change_request, 'implement')
         change_request.reviewed_by = request.user
         change_request.reviewed_at = timezone.now()
@@ -870,6 +874,7 @@ class ChangeNoticeService:
     @transaction.atomic
     def approve(change_notice, request, notes=''):
         PermissionService.require_permission(request.user, change_notice, 'change_changenotice')
+        change_notice = ChangeNotice.objects.select_for_update().get(pk=change_notice.pk)
         _run_transition(change_notice, 'approve')
         change_notice.approved_by = request.user
         change_notice.approved_at = timezone.now()
@@ -889,6 +894,7 @@ class ChangeNoticeService:
     @transaction.atomic
     def release(change_notice, request, notes='', effectivity_date=None):
         PermissionService.require_permission(request.user, change_notice, 'change_changenotice')
+        change_notice = ChangeNotice.objects.select_for_update().get(pk=change_notice.pk)
         _run_transition(change_notice, 'release')
         change_notice.released_by = request.user
         change_notice.released_at = timezone.now()
@@ -911,6 +917,7 @@ class ChangeNoticeService:
     @transaction.atomic
     def close(change_notice, request, notes=''):
         PermissionService.require_permission(request.user, change_notice, 'change_changenotice')
+        change_notice = ChangeNotice.objects.select_for_update().get(pk=change_notice.pk)
         _run_transition(change_notice, 'close')
         change_notice.closed_by = request.user
         change_notice.closed_at = timezone.now()

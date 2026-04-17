@@ -1,5 +1,9 @@
+import logging
+
 from guardian.shortcuts import assign_perm, get_objects_for_user
 from rest_framework.exceptions import PermissionDenied
+
+logger = logging.getLogger(__name__)
 
 
 class PermissionService:
@@ -31,7 +35,7 @@ class PermissionService:
     def has_permission(cls, user, target, permission_codename: str | None):
         if not getattr(user, 'is_authenticated', False):
             return False
-        if user.is_superuser or user.is_staff:
+        if user.is_superuser:
             return True
         if not permission_codename:
             return True
@@ -70,7 +74,7 @@ class PermissionService:
     def scope_queryset(cls, queryset, user, permission_codename: str | None = None):
         if not getattr(user, 'is_authenticated', False):
             return queryset.none()
-        if user.is_superuser or user.is_staff:
+        if user.is_superuser:
             return queryset
         if not permission_codename:
             return queryset
@@ -87,4 +91,9 @@ class PermissionService:
                 accept_global_perms=True,
             )
         except Exception:
-            return queryset
+            logger.exception(
+                'scope_queryset failed for user=%s perm=%s — returning empty qs',
+                user,
+                permission_label,
+            )
+            return queryset.none()

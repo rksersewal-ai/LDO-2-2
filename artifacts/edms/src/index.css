@@ -1,93 +1,122 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
 
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @theme inline {
-  --font-sans: 'DM Sans', system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", "JetBrains Mono", monospace;
+
+  /* Semantic color tokens */
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  /* Radius tokens */
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 6px);
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   DARK THEME (default) — Precision Industrial Dark
+   Deep navy surfaces, electric teal accent, high-contrast typography
+   ═══════════════════════════════════════════════════════════════════════════ */
 :root {
-  --background: 222 47% 5%;
-  --foreground: 213 31% 87%;
-  --border: 215 28% 17%;
-  --card: 220 38% 8%;
-  --card-foreground: 213 31% 87%;
-  --card-border: 215 28% 15%;
-  --sidebar: 220 42% 7%;
-  --sidebar-foreground: 213 31% 87%;
-  --sidebar-border: 215 28% 15%;
-  --sidebar-primary: 172 76% 40%;
+  /* ── Surfaces ─────────────────────────────────────────────────────────── */
+  --background: 222 34% 5%; /* #080B14 — near-black navy          */
+  --foreground: 210 20% 91%; /* #DDE4EB — bright off-white          */
+  --border: 216 22% 17%; /* #1E2B3C — tight crisp edge          */
+  --card: 220 28% 8%; /* #0F1420 — elevated surface          */
+  --card-foreground: 210 20% 91%;
+  --card-border: 216 22% 15%;
+  --sidebar: 224 34% 6%; /* #0A0E18 — deepest surface           */
+  --sidebar-foreground: 210 20% 91%;
+  --sidebar-border: 220 22% 13%; /* #151F2D — subtle sidebar edge       */
+  --sidebar-primary: 174 78% 40%; /* #13BFA8 — electric teal             */
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 172 60% 20%;
-  --sidebar-accent-foreground: 172 76% 80%;
-  --sidebar-ring: 172 76% 50%;
-  --popover: 220 38% 8%;
-  --popover-foreground: 213 31% 87%;
-  --popover-border: 215 28% 15%;
-  --primary: 172 76% 40%;
+  --sidebar-accent: 174 55% 16%; /* #112B28 — teal tinted active bg     */
+  --sidebar-accent-foreground: 174 78% 78%; /* #8FE8DC — soft teal label    */
+  --sidebar-ring: 174 78% 50%;
+  --popover: 220 28% 8%;
+  --popover-foreground: 210 20% 91%;
+  --popover-border: 216 22% 15%;
+
+  /* ── Brand & semantic ─────────────────────────────────────────────────── */
+  --primary: 174 78% 40%; /* Electric teal                       */
   --primary-foreground: 0 0% 100%;
-  --secondary: 220 28% 14%;
-  --secondary-foreground: 213 31% 87%;
-  --muted: 220 28% 12%;
-  --muted-foreground: 215 20% 55%;
-  --accent: 172 60% 20%;
-  --accent-foreground: 172 76% 80%;
-  --destructive: 0 70% 55%;
+  --secondary: 220 24% 13%; /* #151D2A — subtle surface            */
+  --secondary-foreground: 210 20% 91%;
+  --muted: 220 24% 11%; /* #121825 — dimmer surface            */
+  --muted-foreground: 215 16% 56%; /* #7C8FA6 — readable metadata         */
+  --accent: 174 52% 17%; /* #0F2A27 — teal accent bg            */
+  --accent-foreground: 174 78% 76%; /* #8EE4D8 — teal accent label         */
+  --destructive: 0 68% 56%; /* #E04040 — rose red                  */
   --destructive-foreground: 0 0% 100%;
-  --input: 215 28% 17%;
-  --ring: 172 76% 40%;
-  --radius: 0.75rem;
+  --input: 216 22% 16%;
+  --ring: 174 78% 42%;
 
-  --color-teal-primary: #14b8a6;
-  --color-teal-glow: rgba(20, 184, 166, 0.15);
-  --color-glass: rgba(15, 23, 42, 0.6);
+  /* ── Radius ───────────────────────────────────────────────────────────── */
+  --radius: 0.375rem; /* 6px — enterprise restraint */
 
-  /* ─────────────────────────────────────────────────────────────────────────
-     Typography Scale — Normalized across all pages
-     ────────────────────────────────────────────────────────────────────────── */
-  
-  /* App/Page Title: Used on dashboard, main headings */
+  /* ── Raw color references ─────────────────────────────────────────────── */
+  --color-teal-primary: hsl(174, 78%, 40%);
+  --color-teal-dim: rgba(19, 191, 168, 0.12);
+
+  /* ── Typography Scale ─────────────────────────────────────────────────── */
   --font-size-app-title: 32px;
   --line-height-app-title: 40px;
-  
-  /* Page Title: Used on page headers (Work Ledger, DocumentHub, etc) */
-  --font-size-page-title: 28px;
-  --line-height-page-title: 36px;
-  
-  /* Section Title: Used for grouped content (KPI Stats, Recent Items, etc) */
-  --font-size-section-title: 20px;
-  --line-height-section-title: 28px;
-  
-  /* Subsection Title: Used for card headers, filter groups */
-  --font-size-subsection-title: 16px;
-  --line-height-subsection-title: 24px;
-  
-  /* Body: Default text, descriptions, table content */
+  --font-size-page-title: 26px;
+  --line-height-page-title: 34px;
+  --font-size-section-title: 18px;
+  --line-height-section-title: 26px;
+  --font-size-subsection-title: 15px;
+  --line-height-subsection-title: 22px;
   --font-size-body: 14px;
   --line-height-body: 20px;
-  
-  /* Label: Form labels, card metadata, small text */
   --font-size-label: 13px;
   --line-height-label: 18px;
-  
-  /* Caption: Timestamps, hints, fine print */
   --font-size-caption: 12px;
   --line-height-caption: 16px;
-  
-  /* Micro: Only for timestamps, tags, badges, helper text */
   --font-size-micro: 11px;
   --line-height-micro: 14px;
-  
-  /* Mono (Data): For IDs, code, tabular numbers */
   --font-size-mono-data: 13px;
   --line-height-mono-data: 18px;
 
-  /* ─────────────────────────────────────────────────────────────────────────
-     Spacing Scale — Consistent gap and padding across all pages
-     ────────────────────────────────────────────────────────────────────────── */
-  
+  /* ── Spacing Scale ────────────────────────────────────────────────────── */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 12px;
@@ -97,132 +126,339 @@
   --spacing-3xl: 32px;
   --spacing-4xl: 40px;
   --spacing-5xl: 48px;
-  
-  /* ─────────────────────────────────────────────────────────────────────────
-     Component Sizing — Consistent control heights and densities
-     ────────────────────────────────────────────────────────────────────────── */
-  
-  /* Dense table rows (e.g., WorkLedger, AuditLog) */
+
+  /* ── Component Sizing ─────────────────────────────────────────────────── */
   --height-table-row-dense: 36px;
-  
-  /* Normal table rows (e.g., DocumentHub grid items) */
   --height-table-row: 44px;
-  
-  /* Form controls (buttons, inputs, selects) */
   --height-control: 36px;
-  
-  /* Prominent action button (primary actions) */
   --height-action-button: 40px;
-  
-  /* Control padding (horizontal) */
   --padding-control-h: 12px;
   --padding-control-v: 8px;
 }
 
-/* Light theme overrides */
+/* ═══════════════════════════════════════════════════════════════════════════
+   LIGHT THEME — WCAG AA Compliant, ERP-optimised
+   All text tokens verified ≥ 4.5:1 contrast on their target surface
+   ═══════════════════════════════════════════════════════════════════════════ */
 .light-theme {
-  --background: 210 20% 97%;
-  --foreground: 220 40% 12%;
-  --border: 210 20% 82%;
-  --card: 0 0% 100%;
-  --card-foreground: 220 40% 12%;
-  --card-border: 210 20% 85%;
-  --sidebar: 210 20% 93%;
-  --sidebar-foreground: 220 40% 12%;
-  --sidebar-border: 210 20% 80%;
-  --sidebar-primary: 172 76% 35%;
+  /* ── Surfaces ──────────────────────────────────────────────────────────── */
+  --background: 215 25% 96.5%; /* #F1F4F9 — cool grey canvas        */
+  --foreground: 222 47% 11%; /* #0F172A — near-black ink (14.8:1)  */
+  --border: 215 20% 82%; /* #C8D1DD — visible edge             */
+  --card: 0 0% 100%; /* #FFFFFF — pure white surface       */
+  --card-foreground: 222 47% 11%;
+  --card-border: 215 18% 85%; /* #D3DAE3                            */
+
+  /* ── Sidebar ──────────────────────────────────────────────────────────── */
+  --sidebar: 215 28% 93%; /* #E8ECF3 — light-grey panel         */
+  --sidebar-foreground: 222 47% 11%;
+  --sidebar-border: 215 20% 80%; /* #C2CCDA                            */
+  --sidebar-primary: 174 78% 25%; /* #0E7264 — AA teal on white (5.3:1) */
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 172 40% 88%;
-  --sidebar-accent-foreground: 172 60% 25%;
-  --primary: 172 76% 36%;
+  --sidebar-accent: 174 30% 92%; /* #E0F5F1 — light teal wash          */
+  --sidebar-accent-foreground: 174 78% 22%; /* #0C6357 — dark teal text       */
+  --sidebar-ring: 174 78% 28%;
+
+  /* ── Brand & semantic ─────────────────────────────────────────────────── */
+  --primary: 174 78% 25%; /* #0E7264 — darkened teal (5.3:1 on white) */
   --primary-foreground: 0 0% 100%;
-  --secondary: 210 20% 90%;
-  --secondary-foreground: 220 40% 20%;
-  --muted: 210 20% 93%;
-  --muted-foreground: 215 20% 45%;
-  --input: 210 20% 82%;
-  --ring: 172 76% 40%;
-  --color-glass: rgba(255, 255, 255, 0.65);
+  --secondary: 215 22% 91%; /* #E2E7F0                            */
+  --secondary-foreground: 222 38% 18%; /* #1C2942                            */
+  --muted: 215 22% 94%; /* #EDF0F5                            */
+  --muted-foreground: 215 20% 40%; /* #526380 (4.9:1 on white)           */
+  --accent: 174 26% 91%; /* #DFF2EE                            */
+  --accent-foreground: 174 78% 22%; /* #0C6357                            */
+  --destructive: 0 72% 42%; /* #B91C1C (6.0:1 on white)           */
+  --destructive-foreground: 0 0% 100%;
+  --input: 215 20% 82%;
+  --ring: 174 78% 28%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --popover-border: 215 18% 85%;
+  --color-teal-primary: hsl(174, 78%, 25%);
+  --color-teal-dim: rgba(14, 114, 100, 0.08);
 }
 
 .light-theme body {
-  background-color: hsl(210, 20%, 96%);
-  color: hsl(220, 40%, 12%);
+  background-color: hsl(215, 25%, 96.5%);
+  color: hsl(222, 47%, 11%);
 }
 
+/* ── Light-theme scrollbar ───────────────────────────────────────────────── */
+.light-theme ::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+}
+.light-theme ::-webkit-scrollbar-thumb {
+  background: rgba(14, 114, 100, 0.22);
+}
+
+/* ── Glass card light overrides ──────────────────────────────────────────── */
 .light-theme .glass-card {
-  background: rgba(255, 255, 255, 0.65);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid hsl(215, 20%, 82%);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
-
 .light-theme .glass-card-teal {
-  background: rgba(255, 255, 255, 0.65);
-  border: 1px solid rgba(20, 184, 166, 0.3);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(14, 114, 100, 0.3);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
-/* Light theme text color overrides using data-attribute */
+/* ── Light-theme status color remapping (Tailwind 400→700 for AA) ─────── */
+.light-theme .text-amber-400,
+.light-theme .text-amber-300 {
+  color: #b45309 !important;
+} /* amber-700 (5.0:1) */
+.light-theme .text-amber-200 {
+  color: #92400e !important;
+} /* amber-800 (7.1:1) */
+.light-theme .text-rose-400,
+.light-theme .text-rose-300 {
+  color: #be123c !important;
+} /* rose-700  (5.6:1) */
+.light-theme .text-blue-400,
+.light-theme .text-blue-300 {
+  color: #1d4ed8 !important;
+} /* blue-700  (5.9:1) */
+.light-theme .text-emerald-400,
+.light-theme .text-emerald-300 {
+  color: #047857 !important;
+} /* emerald-700 (5.4:1) */
+.light-theme .text-indigo-400,
+.light-theme .text-indigo-300 {
+  color: #4338ca !important;
+} /* indigo-700 (6.2:1) */
+.light-theme .text-violet-400,
+.light-theme .text-violet-300 {
+  color: #6d28d9 !important;
+} /* violet-700 (5.1:1) */
+.light-theme .text-cyan-400,
+.light-theme .text-cyan-300 {
+  color: #0e7490 !important;
+} /* cyan-700  (4.6:1) */
+.light-theme .text-orange-400,
+.light-theme .text-orange-300 {
+  color: #c2410c !important;
+} /* orange-700 (5.2:1) */
+.light-theme .text-teal-400,
+.light-theme .text-teal-300 {
+  color: #0f766e !important;
+} /* teal-700  (5.0:1) */
+
+/* Backgrounds: lighten dark-theme bg-[color]-900/950 to pastel equivalents */
+.light-theme [class*="bg-amber-900"],
+.light-theme [class*="bg-amber-950"] {
+  background-color: #fffbeb !important;
+}
+.light-theme [class*="bg-rose-900"],
+.light-theme [class*="bg-rose-950"] {
+  background-color: #fff1f2 !important;
+}
+.light-theme [class*="bg-blue-900"],
+.light-theme [class*="bg-blue-950"] {
+  background-color: #eff6ff !important;
+}
+.light-theme [class*="bg-emerald-900"],
+.light-theme [class*="bg-emerald-950"] {
+  background-color: #ecfdf5 !important;
+}
+
+/* ── Light-theme ERP status chips ────────────────────────────────────────── */
+.light-theme .erp-chip-success {
+  color: #15803d; /* green-700  */
+  background: #f0fdf4; /* green-50   */
+  border-color: #bbf7d0; /* green-200  */
+}
+.light-theme .erp-chip-warning {
+  color: #a16207; /* yellow-700 */
+  background: #fffbeb; /* amber-50   */
+  border-color: #fde68a; /* amber-200  */
+}
+.light-theme .erp-chip-danger {
+  color: #be123c; /* rose-700   */
+  background: #fff1f2; /* rose-50    */
+  border-color: #fecdd3; /* rose-200   */
+}
+.light-theme .erp-chip-info {
+  color: #1d4ed8; /* blue-700   */
+  background: #eff6ff; /* blue-50    */
+  border-color: #bfdbfe; /* blue-200   */
+}
+.light-theme .erp-chip-neutral {
+  color: hsl(215, 20%, 40%);
+  background: hsl(215, 22%, 94%);
+  border-color: hsl(215, 20%, 82%);
+}
+
+/* ── Light-theme stat card hover ─────────────────────────────────────────── */
+.light-theme .stat-card:hover {
+  border-color: hsl(174, 40%, 60%);
+  box-shadow:
+    0 0 0 1px hsl(174, 40%, 80%),
+    0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Light-theme shimmer ─────────────────────────────────────────────────── */
+.light-theme .animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.03) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+}
+
+/* ── Light-theme pill filter ──────────────────────────────────────────────── */
+.light-theme .pill-filter-active {
+  border-color: hsl(174, 60%, 38%);
+  background-color: hsl(174, 40%, 92%);
+  color: hsl(174, 78%, 22%);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LIGHT-THEME GLOBAL CLASS REMAPPING
+   Remap hardcoded dark-theme utility classes for AA compliance
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* text-white → near-black on light surfaces */
+.light-theme .text-white {
+  color: hsl(222, 47%, 11%) !important;
+}
+.light-theme .hover\:text-white:hover {
+  color: hsl(222, 47%, 11%) !important;
+}
+.light-theme .group-hover\:text-white:is(:where(.group):hover *) {
+  color: hsl(222, 47%, 11%) !important;
+}
+
+/* bg-slate-950/950 → white or near-white on light surfaces */
+.light-theme [class*="bg-slate-950"] {
+  background-color: rgba(255, 255, 255, 0.75) !important;
+}
+.light-theme [class*="bg-slate-900"] {
+  background-color: rgba(255, 255, 255, 0.65) !important;
+}
+.light-theme [class*="bg-slate-800"] {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+.light-theme [class*="bg-slate-700"] {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* text-slate-* → proper foreground values */
 .light-theme [class*="text-slate-100"],
-.light-theme [class*="text-slate-200"],
-.light-theme [class*="text-white"] { color: hsl(220, 40%, 12%); }
+.light-theme [class*="text-slate-200"] {
+  color: hsl(222, 47%, 11%) !important;
+}
 .light-theme [class*="text-slate-300"],
-.light-theme [class*="text-slate-400"] { color: hsl(220, 20%, 35%); }
-.light-theme [class*="text-slate-500"],
-.light-theme [class*="text-slate-600"] { color: hsl(220, 15%, 55%); }
+.light-theme [class*="text-slate-400"] {
+  color: hsl(215, 20%, 36%) !important;
+}
+.light-theme [class*="text-slate-500"] {
+  color: hsl(215, 16%, 46%) !important;
+}
+.light-theme [class*="text-slate-600"] {
+  color: hsl(215, 16%, 46%) !important;
+}
 
-.light-theme [class*="bg-slate-950"],
-.light-theme [class*="bg-slate-900"] { background-color: rgba(255,255,255,0.6) !important; }
-.light-theme [class*="bg-slate-800"] { background-color: rgba(0,0,0,0.05) !important; }
-
-.light-theme ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); }
-.light-theme ::-webkit-scrollbar-thumb { background: rgba(20, 184, 166, 0.3); }
-
+/* ═══════════════════════════════════════════════════════════════════════════
+   APP SHELL BACKGROUND — subtle grid + radial depth
+   ═══════════════════════════════════════════════════════════════════════════ */
 .app-shell-bg {
   position: relative;
   background:
-    radial-gradient(circle at 14% 16%, rgba(56, 189, 248, 0.12), transparent 26%),
-    radial-gradient(circle at 86% 18%, rgba(45, 212, 191, 0.1), transparent 24%),
-    radial-gradient(circle at 72% 80%, rgba(96, 165, 250, 0.08), transparent 22%),
-    linear-gradient(135deg, #06111a 0%, #091520 34%, #0c1822 56%, #08121b 100%);
+    radial-gradient(
+      ellipse at 8% 14%,
+      rgba(19, 191, 168, 0.08),
+      transparent 30%
+    ),
+    radial-gradient(
+      ellipse at 92% 12%,
+      rgba(56, 189, 248, 0.06),
+      transparent 28%
+    ),
+    radial-gradient(
+      ellipse at 70% 82%,
+      rgba(19, 191, 168, 0.05),
+      transparent 24%
+    ),
+    linear-gradient(160deg, #06090f 0%, #080c14 38%, #090d16 62%, #070a12 100%);
 }
 
-.app-shell-bg::before,
-.app-shell-bg::after {
+/* Tight grid overlay */
+.app-shell-bg::before {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-}
-
-.app-shell-bg::before {
   background:
-    linear-gradient(rgba(148, 163, 184, 0.055) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.055) 1px, transparent 1px),
-    linear-gradient(rgba(34, 211, 238, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(34, 211, 238, 0.03) 1px, transparent 1px);
-  background-size: 32px 32px, 32px 32px, 160px 160px, 160px 160px;
-  opacity: 0.66;
+    linear-gradient(rgba(148, 163, 184, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.04) 1px, transparent 1px);
+  background-size: 28px 28px;
 }
 
-.app-shell-bg::after {
+/* ── Light-theme app shell background ────────────────────────────────────── */
+.light-theme .app-shell-bg {
   background:
-    radial-gradient(circle at 22% 72%, rgba(45, 212, 191, 0.14) 0 1.5px, transparent 2.5px),
-    radial-gradient(circle at 74% 34%, rgba(56, 189, 248, 0.14) 0 1.5px, transparent 2.5px),
-    radial-gradient(circle at 58% 22%, rgba(148, 163, 184, 0.14) 0 1.25px, transparent 2.5px),
-    radial-gradient(circle at 40% 54%, rgba(20, 184, 166, 0.09) 0 1px, transparent 2.2px),
-    linear-gradient(rgba(34, 211, 238, 0.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(34, 211, 238, 0.018) 1px, transparent 1px);
-  background-size: auto, auto, auto, auto, 224px 224px, 224px 224px;
-  background-position: center, center, center, center, 48px 48px, 48px 48px;
-  opacity: 0.26;
+    radial-gradient(
+      ellipse at 8% 14%,
+      rgba(14, 114, 100, 0.04),
+      transparent 30%
+    ),
+    radial-gradient(
+      ellipse at 92% 12%,
+      rgba(56, 140, 200, 0.03),
+      transparent 28%
+    ),
+    radial-gradient(
+      ellipse at 70% 82%,
+      rgba(14, 114, 100, 0.03),
+      transparent 24%
+    ),
+    linear-gradient(160deg, #f1f4f9 0%, #edf0f5 38%, #f1f4f9 62%, #edf0f5 100%);
+}
+.light-theme .app-shell-bg::before {
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.025) 1px, transparent 1px);
+  background-size: 28px 28px;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   DATA VISUALIZATION CHART PALETTE — 8 accessible colours, both themes
+   Usage: var(--chart-1) through var(--chart-8)
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+  --chart-1: hsl(174, 78%, 40%); /* teal    */
+  --chart-2: hsl(210, 80%, 55%); /* blue    */
+  --chart-3: hsl(38, 95%, 52%); /* amber   */
+  --chart-4: hsl(0, 68%, 56%); /* rose    */
+  --chart-5: hsl(265, 70%, 60%); /* violet  */
+  --chart-6: hsl(152, 60%, 42%); /* emerald */
+  --chart-7: hsl(24, 88%, 56%); /* orange  */
+  --chart-8: hsl(192, 75%, 48%); /* cyan    */
+}
+.light-theme {
+  --chart-1: hsl(174, 78%, 28%); /* teal    */
+  --chart-2: hsl(210, 80%, 38%); /* blue    */
+  --chart-3: hsl(38, 80%, 38%); /* amber   */
+  --chart-4: hsl(0, 68%, 42%); /* rose    */
+  --chart-5: hsl(265, 60%, 42%); /* violet  */
+  --chart-6: hsl(152, 55%, 30%); /* emerald */
+  --chart-7: hsl(24, 75%, 40%); /* orange  */
+  --chart-8: hsl(192, 70%, 32%); /* cyan    */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BASE LAYER
+   ═══════════════════════════════════════════════════════════════════════════ */
 @layer base {
   * {
     border-color: hsl(var(--border));
     box-sizing: border-box;
   }
+
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
@@ -231,21 +467,41 @@
     -moz-osx-font-smoothing: grayscale;
     font-size: var(--app-font-size, 14px);
     line-height: 1.5;
+    letter-spacing: 0.01em;
   }
+
   :focus-visible {
-    outline: 2px solid rgba(20, 184, 166, 0.6);
+    outline: 2px solid hsl(var(--primary) / 0.7);
     outline-offset: 2px;
     border-radius: 4px;
   }
-  code, .font-mono, [class*="font-mono"] {
+
+  code,
+  .font-mono,
+  [class*="font-mono"] {
     font-family: var(--font-mono);
+    letter-spacing: 0;
   }
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
-  ::-webkit-scrollbar-thumb { background: rgba(20, 184, 166, 0.2); border-radius: 4px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(20, 184, 166, 0.4); }
+
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.4);
+  }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   REDUCED MOTION
+   ═══════════════════════════════════════════════════════════════════════════ */
 .reduce-motion *,
 .reduce-motion *::before,
 .reduce-motion *::after {
@@ -255,168 +511,316 @@
   scroll-behavior: auto !important;
 }
 
-@layer utilities {
-  .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
-  .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(20, 184, 166, 0.2); border-radius: 4px; }
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   UTILITIES
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer utilities {
+  /* ── Scrollbar helpers ────────────────────────────────────────────────── */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 3px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.35);
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ── Legacy glass-card (kept for compatibility, now flat surface) ─────── */
   .glass-card {
-    background: linear-gradient(180deg, rgba(15, 23, 42, 0.74), rgba(12, 19, 32, 0.64));
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(148, 163, 184, 0.12);
-    box-shadow: 0 18px 50px rgba(5, 10, 20, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   }
 
   .glass-card-teal {
-    background: linear-gradient(180deg, rgba(15, 23, 42, 0.74), rgba(12, 19, 32, 0.64));
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(20, 184, 166, 0.2);
-    box-shadow: 0 18px 50px rgba(5, 10, 20, 0.34), 0 0 0 1px rgba(20, 184, 166, 0.06);
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--primary) / 0.28);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   }
 
+  /* ── Numeric columns ─────────────────────────────────────────────────── */
   .tabular-nums {
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
   }
 
+  /* ── Pill filters ────────────────────────────────────────────────────── */
   .pill-filter {
-    @apply inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold tracking-[0.01em] transition-all duration-150 cursor-pointer;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    @apply inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium tracking-[0.01em] transition-all duration-150 cursor-pointer;
   }
 
   .pill-filter-active {
-    @apply border-teal-400/45 bg-teal-500/15 text-teal-200;
-    box-shadow: 0 12px 28px rgba(20, 184, 166, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    border-color: hsl(var(--primary) / 0.5);
+    background-color: hsl(var(--primary) / 0.12);
+    color: hsl(var(--primary-foreground));
+    color: hsl(174, 78%, 74%);
   }
 
   .pill-filter-inactive {
-    @apply border-slate-700/60 bg-slate-900/55 text-slate-400 hover:border-slate-500/85 hover:bg-slate-800/70 hover:text-slate-200;
+    @apply border-border bg-card text-muted-foreground hover:border-border/80 hover:bg-secondary/60 hover:text-foreground;
   }
 
   .pill-filter:focus-visible {
-    outline: 2px solid rgba(45, 212, 191, 0.4);
+    outline: 2px solid hsl(var(--primary) / 0.5);
     outline-offset: 2px;
   }
 
-  /* ──────────────────────────────────────────────────────────────────────────
-     Typography Utilities — Replaces hardcoded text-xs, text-sm, etc.
-     ────────────────────────────────────────────────────────────────────────── */
-  
+  /* ── Typography utilities ─────────────────────────────────────────────── */
   .text-app-title {
     font-size: var(--font-size-app-title);
     line-height: var(--line-height-app-title);
   }
-  
   .text-page-title {
     font-size: var(--font-size-page-title);
     line-height: var(--line-height-page-title);
   }
-  
   .text-section-title {
     font-size: var(--font-size-section-title);
     line-height: var(--line-height-section-title);
   }
-  
   .text-subsection-title {
     font-size: var(--font-size-subsection-title);
     line-height: var(--line-height-subsection-title);
   }
-  
   .text-body {
     font-size: var(--font-size-body);
     line-height: var(--line-height-body);
   }
-  
   .text-label {
     font-size: var(--font-size-label);
     line-height: var(--line-height-label);
   }
-  
   .text-caption {
     font-size: var(--font-size-caption);
     line-height: var(--line-height-caption);
   }
-  
   .text-micro {
     font-size: var(--font-size-micro);
     line-height: var(--line-height-micro);
   }
-  
   .text-mono-data {
     font-size: var(--font-size-mono-data);
     line-height: var(--line-height-mono-data);
     font-family: var(--font-mono);
   }
 
-  /* ──────────────────────────────────────────────────────────────────────────
-     Spacing Utilities — Replaces hardcoded p-4, gap-2, etc.
-     ────────────────────────────────────────────────────────────────────────── */
-  
-  .gap-xs { gap: var(--spacing-xs); }
-  .gap-sm { gap: var(--spacing-sm); }
-  .gap-md { gap: var(--spacing-md); }
-  .gap-lg { gap: var(--spacing-lg); }
-  .gap-xl { gap: var(--spacing-xl); }
-  .gap-2xl { gap: var(--spacing-2xl); }
-  .gap-3xl { gap: var(--spacing-3xl); }
-  .gap-4xl { gap: var(--spacing-4xl); }
-  .gap-5xl { gap: var(--spacing-5xl); }
-  
-  .p-xs { padding: var(--spacing-xs); }
-  .p-sm { padding: var(--spacing-sm); }
-  .p-md { padding: var(--spacing-md); }
-  .p-lg { padding: var(--spacing-lg); }
-  .p-xl { padding: var(--spacing-xl); }
-  .p-2xl { padding: var(--spacing-2xl); }
-  .p-3xl { padding: var(--spacing-3xl); }
-  .p-4xl { padding: var(--spacing-4xl); }
-  .p-5xl { padding: var(--spacing-5xl); }
-  
-  .px-xs { padding-left: var(--spacing-xs); padding-right: var(--spacing-xs); }
-  .px-sm { padding-left: var(--spacing-sm); padding-right: var(--spacing-sm); }
-  .px-md { padding-left: var(--spacing-md); padding-right: var(--spacing-md); }
-  .px-lg { padding-left: var(--spacing-lg); padding-right: var(--spacing-lg); }
-  .px-xl { padding-left: var(--spacing-xl); padding-right: var(--spacing-xl); }
-  .px-2xl { padding-left: var(--spacing-2xl); padding-right: var(--spacing-2xl); }
-  .px-3xl { padding-left: var(--spacing-3xl); padding-right: var(--spacing-3xl); }
-  
-  .py-xs { padding-top: var(--spacing-xs); padding-bottom: var(--spacing-xs); }
-  .py-sm { padding-top: var(--spacing-sm); padding-bottom: var(--spacing-sm); }
-  .py-md { padding-top: var(--spacing-md); padding-bottom: var(--spacing-md); }
-  .py-lg { padding-top: var(--spacing-lg); padding-bottom: var(--spacing-lg); }
-  .py-xl { padding-top: var(--spacing-xl); padding-bottom: var(--spacing-xl); }
-  .py-2xl { padding-top: var(--spacing-2xl); padding-bottom: var(--spacing-2xl); }
-  .py-3xl { padding-top: var(--spacing-3xl); padding-bottom: var(--spacing-3xl); }
-  
-  .m-xs { margin: var(--spacing-xs); }
-  .m-sm { margin: var(--spacing-sm); }
-  .m-md { margin: var(--spacing-md); }
-  .m-lg { margin: var(--spacing-lg); }
-  .m-xl { margin: var(--spacing-xl); }
-  .m-2xl { margin: var(--spacing-2xl); }
-  .m-3xl { margin: var(--spacing-3xl); }
-  
-  .mb-xs { margin-bottom: var(--spacing-xs); }
-  .mb-sm { margin-bottom: var(--spacing-sm); }
-  .mb-md { margin-bottom: var(--spacing-md); }
-  .mb-lg { margin-bottom: var(--spacing-lg); }
-  .mb-xl { margin-bottom: var(--spacing-xl); }
-  .mb-2xl { margin-bottom: var(--spacing-2xl); }
-  .mb-3xl { margin-bottom: var(--spacing-3xl); }
-  
-  /* ──────────────────────────────────────────────────────────────────────────
-     Component Height Utilities
-     ────────────────────────────────────────────────────────────────────────── */
-  
-  .h-table-row-dense { height: var(--height-table-row-dense); }
-  .h-table-row { height: var(--height-table-row); }
-  .h-control { height: var(--height-control); }
-  .h-action-button { height: var(--height-action-button); }
+  /* ── Spacing utilities ───────────────────────────────────────────────── */
+  .gap-xs {
+    gap: var(--spacing-xs);
+  }
+  .gap-sm {
+    gap: var(--spacing-sm);
+  }
+  .gap-md {
+    gap: var(--spacing-md);
+  }
+  .gap-lg {
+    gap: var(--spacing-lg);
+  }
+  .gap-xl {
+    gap: var(--spacing-xl);
+  }
+  .gap-2xl {
+    gap: var(--spacing-2xl);
+  }
+  .gap-3xl {
+    gap: var(--spacing-3xl);
+  }
+  .gap-4xl {
+    gap: var(--spacing-4xl);
+  }
+  .gap-5xl {
+    gap: var(--spacing-5xl);
+  }
 
+  .p-xs {
+    padding: var(--spacing-xs);
+  }
+  .p-sm {
+    padding: var(--spacing-sm);
+  }
+  .p-md {
+    padding: var(--spacing-md);
+  }
+  .p-lg {
+    padding: var(--spacing-lg);
+  }
+  .p-xl {
+    padding: var(--spacing-xl);
+  }
+  .p-2xl {
+    padding: var(--spacing-2xl);
+  }
+  .p-3xl {
+    padding: var(--spacing-3xl);
+  }
+  .p-4xl {
+    padding: var(--spacing-4xl);
+  }
+  .p-5xl {
+    padding: var(--spacing-5xl);
+  }
+
+  .px-xs {
+    padding-left: var(--spacing-xs);
+    padding-right: var(--spacing-xs);
+  }
+  .px-sm {
+    padding-left: var(--spacing-sm);
+    padding-right: var(--spacing-sm);
+  }
+  .px-md {
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+  }
+  .px-lg {
+    padding-left: var(--spacing-lg);
+    padding-right: var(--spacing-lg);
+  }
+  .px-xl {
+    padding-left: var(--spacing-xl);
+    padding-right: var(--spacing-xl);
+  }
+  .px-2xl {
+    padding-left: var(--spacing-2xl);
+    padding-right: var(--spacing-2xl);
+  }
+  .px-3xl {
+    padding-left: var(--spacing-3xl);
+    padding-right: var(--spacing-3xl);
+  }
+
+  .py-xs {
+    padding-top: var(--spacing-xs);
+    padding-bottom: var(--spacing-xs);
+  }
+  .py-sm {
+    padding-top: var(--spacing-sm);
+    padding-bottom: var(--spacing-sm);
+  }
+  .py-md {
+    padding-top: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+  }
+  .py-lg {
+    padding-top: var(--spacing-lg);
+    padding-bottom: var(--spacing-lg);
+  }
+  .py-xl {
+    padding-top: var(--spacing-xl);
+    padding-bottom: var(--spacing-xl);
+  }
+  .py-2xl {
+    padding-top: var(--spacing-2xl);
+    padding-bottom: var(--spacing-2xl);
+  }
+  .py-3xl {
+    padding-top: var(--spacing-3xl);
+    padding-bottom: var(--spacing-3xl);
+  }
+
+  .m-xs {
+    margin: var(--spacing-xs);
+  }
+  .m-sm {
+    margin: var(--spacing-sm);
+  }
+  .m-md {
+    margin: var(--spacing-md);
+  }
+  .m-lg {
+    margin: var(--spacing-lg);
+  }
+  .m-xl {
+    margin: var(--spacing-xl);
+  }
+  .m-2xl {
+    margin: var(--spacing-2xl);
+  }
+  .m-3xl {
+    margin: var(--spacing-3xl);
+  }
+
+  .mb-xs {
+    margin-bottom: var(--spacing-xs);
+  }
+  .mb-sm {
+    margin-bottom: var(--spacing-sm);
+  }
+  .mb-md {
+    margin-bottom: var(--spacing-md);
+  }
+  .mb-lg {
+    margin-bottom: var(--spacing-lg);
+  }
+  .mb-xl {
+    margin-bottom: var(--spacing-xl);
+  }
+  .mb-2xl {
+    margin-bottom: var(--spacing-2xl);
+  }
+  .mb-3xl {
+    margin-bottom: var(--spacing-3xl);
+  }
+
+  /* ── Component height utilities ──────────────────────────────────────── */
+  .h-table-row-dense {
+    height: var(--height-table-row-dense);
+  }
+  .h-table-row {
+    height: var(--height-table-row);
+  }
+  .h-control {
+    height: var(--height-control);
+  }
+  .h-action-button {
+    height: var(--height-action-button);
+  }
+
+  /* ── Button sizing ───────────────────────────────────────────────────── */
+  .btn-size-sm {
+    @apply h-9  px-3 py-2   text-xs;
+  }
+  .btn-size-md {
+    @apply h-10 px-4 py-2.5 text-sm;
+  }
+  .btn-size-lg {
+    @apply h-12 px-5 py-3   text-sm;
+  }
+
+  /* ── Form control ────────────────────────────────────────────────────── */
+  .form-control {
+    @apply h-10 px-3 py-2.5 text-sm;
+  }
+
+  /* ── Marquee animation ───────────────────────────────────────────────── */
   @keyframes marquee {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
   }
   .animate-marquee {
     animation: marquee 24s linear infinite;
@@ -430,58 +834,562 @@
     overflow: hidden;
   }
 
+  /* ── Skeleton shimmer ────────────────────────────────────────────────── */
   @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
   }
   .animate-shimmer {
-    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0) 100%);
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.03) 50%,
+      transparent 100%
+    );
     background-size: 200% 100%;
-    animation: shimmer 2s infinite;
+    animation: shimmer 1.8s ease-in-out infinite;
   }
 
+  /* ── Slide in (toasts, drawers) ──────────────────────────────────────── */
   @keyframes slide-in-right {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
   }
   .slide-in-right {
-    animation: slide-in-right 0.2s ease-out forwards;
+    animation: slide-in-right 0.18s ease-out forwards;
   }
 
-  /* Button sizing utilities for consistent control heights per guidelines */
-  .btn-size-sm {
-    @apply h-9 px-3 py-2 text-xs;
-  }
-  .btn-size-md {
-    @apply h-10 px-4 py-2.5 text-sm;
-  }
-  .btn-size-lg {
-    @apply h-12 px-5 py-3 text-sm;
-  }
-
-  /* Form control sizing utilities */
-  .form-control {
-    @apply h-10 px-3 py-2.5 text-sm;
-  }
-
+  /* ── Work ledger select ─────────────────────────────────────────────── */
   .work-ledger-select {
-    background: linear-gradient(180deg, rgba(7, 23, 34, 0.95), rgba(9, 31, 42, 0.92));
-    border-color: rgba(45, 212, 191, 0.24);
-    color: rgb(226 232 240);
-    box-shadow: inset 0 1px 0 rgba(125, 211, 252, 0.06);
+    background: hsl(var(--card));
+    border-color: hsl(var(--primary) / 0.22);
+    color: hsl(var(--foreground));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
   }
-
   .work-ledger-select option {
-    background: #0c1d28;
-    color: rgb(226 232 240);
+    background: hsl(var(--card));
+    color: hsl(var(--foreground));
   }
 
-  /* Hide scrollbars while keeping functionality */
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  /* ═══════════════════════════════════════════════════════════════════════
+     ERP TABLE — Dense operational data table
+     40px std rows / 36px dense rows — sticky header — 12px cell padding
+     ═══════════════════════════════════════════════════════════════════════ */
+  .erp-table {
+    @apply w-full text-sm border-collapse;
   }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
+
+  .erp-table thead {
+    @apply sticky top-0 z-10;
+    background: hsl(var(--card));
+    box-shadow: 0 1px 0 hsl(var(--border));
+  }
+  .erp-table thead th {
+    @apply h-10 px-3 py-0 text-left text-xs font-semibold uppercase tracking-[0.06em] select-none;
+    color: hsl(var(--muted-foreground));
+    border-bottom: 1px solid hsl(var(--border));
+    letter-spacing: 0.06em;
+  }
+  .erp-table tbody td {
+    @apply px-3 py-0 align-middle text-sm;
+    border-bottom: 1px solid hsl(var(--border) / 0.5);
+    color: hsl(var(--foreground) / 0.88);
+  }
+  /* row heights */
+  .erp-table-dense tbody tr {
+    height: 36px;
+  }
+  .erp-table tbody tr {
+    height: 40px;
+  }
+
+  .erp-table tbody tr:hover {
+    background: hsl(var(--secondary) / 0.5);
+  }
+  .erp-table tbody tr[aria-selected="true"] {
+    background: hsl(var(--accent) / 0.6);
+  }
+  .erp-table td.numeric,
+  .erp-table th.numeric {
+    @apply text-right tabular-nums;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     ERP PAGE HEADER
+     ═══════════════════════════════════════════════════════════════════════ */
+  .erp-page-header {
+    @apply flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 pb-5;
+  }
+  .erp-page-title {
+    @apply text-2xl font-semibold text-foreground tracking-tight leading-tight;
+    letter-spacing: -0.01em;
+  }
+  .erp-page-subtitle {
+    @apply text-sm text-muted-foreground mt-0.5;
+  }
+  .erp-section-heading {
+    @apply text-[11px] font-semibold uppercase tracking-[0.08em];
+    color: hsl(var(--muted-foreground) / 0.75);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     ERP STATUS CHIP — compact status indicators
+     ═══════════════════════════════════════════════════════════════════════ */
+  .erp-chip,
+  .erp-chip-success,
+  .erp-chip-warning,
+  .erp-chip-danger,
+  .erp-chip-info,
+  .erp-chip-neutral {
+    @apply inline-flex items-center rounded px-2 py-0.5 text-[11px] font-semibold leading-none;
+    letter-spacing: 0.02em;
+  }
+  .erp-chip-success {
+    color: hsl(174, 65%, 62%);
+    background: hsl(174, 55%, 14%);
+    border: 1px solid hsl(174, 55%, 22%);
+  }
+  .erp-chip-warning {
+    color: hsl(38, 95%, 64%);
+    background: hsl(38, 80%, 12%);
+    border: 1px solid hsl(38, 70%, 22%);
+  }
+  .erp-chip-danger {
+    color: hsl(0, 72%, 66%);
+    background: hsl(0, 60%, 12%);
+    border: 1px solid hsl(0, 60%, 22%);
+  }
+  .erp-chip-info {
+    color: hsl(210, 80%, 65%);
+    background: hsl(210, 60%, 12%);
+    border: 1px solid hsl(210, 55%, 22%);
+  }
+  .erp-chip-neutral {
+    color: hsl(var(--muted-foreground));
+    background: hsl(var(--secondary));
+    border: 1px solid hsl(var(--border));
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     ERP CARD — operational surface
+     ═══════════════════════════════════════════════════════════════════════ */
+  .erp-card {
+    @apply rounded-md overflow-hidden;
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+  }
+  .erp-card-header {
+    @apply flex items-center justify-between px-4 py-3;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .erp-card-title {
+    @apply text-sm font-semibold text-foreground;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     ERP ACTION ROW (sticky selection bar)
+     ═══════════════════════════════════════════════════════════════════════ */
+  .erp-action-row {
+    @apply flex flex-wrap items-center gap-2 py-2 px-0;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     FOCUS RING — keyboard navigation
+     ═══════════════════════════════════════════════════════════════════════ */
+  .focus-ring:focus-visible {
+    outline: 2px solid hsl(var(--primary) / 0.65);
+    outline-offset: 2px;
+  }
+
+  /* ── Hover elevate (kept for backward compat — now flat) ─────────────── */
+  .hover-elevate {
+    box-shadow: none !important;
+  }
+  .active-elevate-2 {
+    box-shadow: none !important;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     SIDEBAR — precision nav styles
+     ═══════════════════════════════════════════════════════════════════════ */
+
+  /* Active nav item: solid teal left indicator + tinted bg */
+  .nav-item-active {
+    background: hsl(var(--sidebar-accent));
+    color: hsl(var(--sidebar-accent-foreground));
+    font-weight: 500;
+  }
+  .nav-item-active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 20px;
+    border-radius: 0 3px 3px 0;
+    background: hsl(var(--sidebar-primary));
+  }
+
+  /* Section label divider */
+  .nav-section-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: hsl(var(--sidebar-foreground) / 0.38);
+  }
+  .nav-section-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: hsl(var(--sidebar-border));
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     KPI STAT CARD — dashboard metric cards
+     ═══════════════════════════════════════════════════════════════════════ */
+  .stat-card {
+    @apply relative rounded-md overflow-hidden;
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    transition:
+      border-color 180ms ease,
+      box-shadow 180ms ease;
+  }
+  .stat-card:hover {
+    border-color: hsl(var(--primary) / 0.35);
+    box-shadow:
+      0 0 0 1px hsl(var(--primary) / 0.08),
+      0 4px 16px rgba(0, 0, 0, 0.25);
+  }
+  /* Colored top edge per category */
+  .stat-card-teal {
+    border-top: 2px solid hsl(174, 78%, 40%);
+  }
+  .stat-card-amber {
+    border-top: 2px solid hsl(38, 95%, 52%);
+  }
+  .stat-card-blue {
+    border-top: 2px solid hsl(210, 80%, 55%);
+  }
+  .stat-card-rose {
+    border-top: 2px solid hsl(0, 68%, 56%);
+  }
+  .stat-card-violet {
+    border-top: 2px solid hsl(265, 70%, 60%);
+  }
+  .stat-card-orange {
+    border-top: 2px solid hsl(24, 88%, 56%);
+  }
+
+  /* ── Pulse dot — active indicator ───────────────────────────────────── */
+  @keyframes pulse-dot {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.6;
+      transform: scale(0.85);
+    }
+  }
+  .pulse-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: hsl(var(--primary));
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  /* ── Fade-in utility ─────────────────────────────────────────────────── */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-fade-in {
+    animation: fade-in 0.18s ease-out both;
+  }
+
+  /* ── Number counter emphasis ─────────────────────────────────────────── */
+  .stat-number {
+    font-family: var(--font-mono);
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: hsl(var(--foreground));
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   INDUSTRIAL LIGHT REFRESH
+   Tightened light-theme tokens + workspace shell surfaces
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.light-theme {
+  --background: 212 33% 97%;
+  --foreground: 222 42% 13%;
+  --border: 214 25% 84%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 42% 13%;
+  --card-border: 214 23% 87%;
+
+  --sidebar: 212 30% 94%;
+  --sidebar-foreground: 222 42% 15%;
+  --sidebar-border: 214 22% 82%;
+  --sidebar-primary: 188 87% 25%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 188 33% 90%;
+  --sidebar-accent-foreground: 188 87% 21%;
+  --sidebar-ring: 188 87% 27%;
+
+  --primary: 188 87% 25%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 27% 93%;
+  --secondary-foreground: 220 24% 22%;
+  --muted: 210 24% 94%;
+  --muted-foreground: 217 17% 40%;
+  --accent: 188 34% 90%;
+  --accent-foreground: 188 87% 22%;
+  --destructive: 0 71% 42%;
+  --destructive-foreground: 0 0% 100%;
+  --input: 214 22% 82%;
+  --ring: 188 87% 30%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 42% 13%;
+  --popover-border: 214 23% 87%;
+  --radius: 0.875rem;
+
+  --color-teal-primary: hsl(188, 87%, 25%);
+  --color-teal-dim: rgba(9, 112, 120, 0.08);
+}
+
+@layer base {
+  .light-theme body {
+    background:
+      radial-gradient(
+        circle at 0% 0%,
+        rgba(151, 243, 247, 0.28) 0%,
+        transparent 28%
+      ),
+      radial-gradient(
+        circle at 100% 0%,
+        rgba(252, 211, 77, 0.16) 0%,
+        transparent 24%
+      ),
+      linear-gradient(180deg, hsl(212 33% 97%) 0%, hsl(210 26% 95%) 100%);
+    color: hsl(var(--foreground));
+  }
+}
+
+@layer utilities {
+  .workspace-shell {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .workspace-shell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        circle at top left,
+        hsl(var(--primary) / 0.08) 0%,
+        transparent 28%
+      ),
+      linear-gradient(180deg, transparent 0%, hsl(var(--background)) 100%);
+    z-index: 0;
+  }
+
+  .workspace-shell > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .workspace-main {
+    border: 1px solid hsl(var(--border) / 0.75);
+    border-radius: 30px;
+    background: hsl(var(--card) / 0.72);
+    box-shadow: 0 32px 72px rgba(2, 8, 23, 0.46);
+    backdrop-filter: blur(18px);
+  }
+
+  .workspace-rail {
+    border: 1px solid hsl(var(--sidebar-border) / 0.9);
+    border-radius: 28px;
+    background: linear-gradient(
+      180deg,
+      hsl(var(--sidebar)) 0%,
+      hsl(var(--sidebar) / 0.96) 100%
+    );
+    box-shadow: 0 32px 72px rgba(2, 8, 23, 0.34);
+    backdrop-filter: blur(18px);
+  }
+
+  .workspace-topbar {
+    background: linear-gradient(
+      180deg,
+      hsl(var(--card) / 0.88) 0%,
+      hsl(var(--card) / 0.72) 100%
+    );
+    backdrop-filter: blur(18px);
+  }
+
+  .workspace-search-trigger {
+    background: hsl(var(--background) / 0.55);
+  }
+
+  .industrial-panel {
+    border: 1px solid hsl(var(--border) / 0.78);
+    border-radius: 28px;
+    background: linear-gradient(
+      180deg,
+      hsl(var(--card) / 0.92) 0%,
+      hsl(var(--card) / 0.78) 100%
+    );
+    box-shadow: 0 26px 56px rgba(2, 8, 23, 0.18);
+    backdrop-filter: blur(18px);
+  }
+
+  .industrial-subpanel {
+    background: linear-gradient(
+      180deg,
+      hsl(var(--card) / 0.88) 0%,
+      hsl(var(--background) / 0.72) 100%
+    );
+  }
+
+  .section-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: hsl(var(--primary));
+  }
+
+  .metric-emphasis {
+    font-family: var(--font-mono);
+    font-size: clamp(28px, 4vw, 42px);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: hsl(var(--foreground));
+    font-variant-numeric: tabular-nums;
+  }
+
+  .nav-section-label {
+    padding: 0.625rem 1rem 0.375rem;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .light-theme .workspace-shell::before {
+    background:
+      radial-gradient(
+        circle at top left,
+        rgba(151, 243, 247, 0.22) 0%,
+        transparent 28%
+      ),
+      radial-gradient(
+        circle at 100% 100%,
+        rgba(14, 116, 144, 0.08) 0%,
+        transparent 22%
+      );
+  }
+
+  .light-theme .app-shell-bg {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.72) 0%,
+      rgba(241, 245, 249, 0.4) 100%
+    );
+  }
+
+  .light-theme .workspace-main {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.88) 0%,
+      rgba(255, 255, 255, 0.76) 100%
+    );
+    box-shadow:
+      0 28px 60px rgba(15, 23, 42, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  }
+
+  .light-theme .workspace-rail {
+    background: linear-gradient(
+      180deg,
+      rgba(250, 252, 255, 0.92) 0%,
+      rgba(241, 245, 249, 0.94) 100%
+    );
+    box-shadow:
+      0 24px 52px rgba(15, 23, 42, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  .light-theme .workspace-topbar {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.76) 0%,
+      rgba(255, 255, 255, 0.52) 100%
+    );
+  }
+
+  .light-theme .workspace-search-trigger {
+    background: rgba(255, 255, 255, 0.76);
+  }
+
+  .light-theme .industrial-panel {
+    box-shadow:
+      0 24px 56px rgba(15, 23, 42, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  }
+
+  .light-theme .industrial-subpanel {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.82) 0%,
+      rgba(248, 250, 252, 0.68) 100%
+    );
+  }
+
+  .light-theme [class*="shadow-slate-950"] {
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08) !important;
+  }
+
+  .light-theme [class*="border-white/6"],
+  .light-theme [class*="border-white/8"] {
+    border-color: rgba(148, 163, 184, 0.2) !important;
   }
 }

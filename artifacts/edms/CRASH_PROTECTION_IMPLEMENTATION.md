@@ -1,24 +1,29 @@
 # Crash Protection & Request Cancellation Implementation Guide
 
 ## Overview
+
 This guide documents the implementation of:
+
 1. **Request Cancellation (AbortSignal)** — prevents race conditions on rapid filter changes
 2. **Crash Protection (ErrorBoundary + SafeSection)** — prevents table/chart crashes from breaking entire page
 
 ## Files Created
 
 ### 1. `src/hooks/useAbortOnNavigate.ts` ✅
+
 Provides three hooks for abort signal management:
 
 - **`useAbortOnNavigate()`** — Auto-abort requests when route changes
+
   ```typescript
   const signal = useAbortOnNavigate();
   await apiClient.getDocuments({...}, signal);
   ```
 
 - **`useAbortController()`** — Manual abort control with reset
+
   ```typescript
-  const {signal, abort, reset} = useAbortController();
+  const { signal, abort, reset } = useAbortController();
   ```
 
 - **`useDebouncedAbort(delayMs)`** — Debounced abort for rapid filter changes
@@ -30,6 +35,7 @@ Provides three hooks for abort signal management:
   ```
 
 ### 2. `src/components/ui/TableSafeWrapper.tsx` ✅
+
 Drop-in wrapper for table sections with built-in crash protection:
 
 ```typescript
@@ -45,15 +51,18 @@ Drop-in wrapper for table sections with built-in crash protection:
 ```
 
 Features:
+
 - Auto-handles loading state
 - Error boundary isolation
 - Empty state with retry
 - Min height enforcement
 
 ### 3. Enhanced ApiClient ✅
+
 Import validation already added:
+
 ```typescript
-import { safeValidate } from '../lib/validation';
+import { safeValidate } from "../lib/validation";
 ```
 
 Ready for AbortSignal parameter on all methods.
@@ -65,52 +74,65 @@ Ready for AbortSignal parameter on all methods.
 ### Critical Pages (Apply Now)
 
 #### ✅ WorkLedger.tsx
+
 - [ ] Import `useAbortOnNavigate` and `TableSafeWrapper`
 - [ ] Wrap main table with `<TableSafeWrapper>`
 - [ ] Add abort signal to API calls
 
 #### ✅ DocumentHub.tsx
+
 - [ ] Wrap document grid with `<TableSafeWrapper>`
 - [ ] Add abort on filter changes
 
 #### ✅ SearchExplorer.tsx
+
 - [ ] Use `useDebouncedAbort` for search debouncing
 - [ ] Wrap results section with SafeSection
 - [ ] Pass abort signal to search API calls
 
 #### ✅ AuditLog.tsx
+
 - [ ] Wrap table with `<TableSafeWrapper>`
 - [ ] Add abort on filter/date changes
 
 ### High Priority Pages
 
 #### Cases.tsx
+
 - Wrap cases list with SafeSection
 
 #### Approvals.tsx
+
 - Wrap approvals list with SafeSection
 
 #### BOMExplorer.tsx, BOMProductView.tsx
+
 - Wrap BOM data with SafeSection
 
 #### PLKnowledgeHub.tsx
+
 - Wrap PL list with SafeSection
 
 #### OCRMonitor.tsx
+
 - Wrap OCR jobs table with SafeSection
 
 #### Reports.tsx
+
 - Wrap report sections with SafeSection
 
 ### Medium Priority Pages
 
 #### AdminWorkspace.tsx, Settings.tsx, BannerManagement.tsx
+
 - Wrap data sections with SafeSection
 
 #### DocumentDetail.tsx, PLDetail.tsx, DocumentIngestion.tsx
+
 - Add SafeSection to form sections
 
 #### DocumentTemplates.tsx
+
 - Wrap template gallery with SafeSection
 
 ---
@@ -130,6 +152,7 @@ async getList<T>(endpoint: string, params?: any, signal?: AbortSignal) {
 ```
 
 Then use in services:
+
 ```typescript
 // In DocumentService or other services
 async getDocuments(params?: any, signal?: AbortSignal) {
@@ -155,7 +178,7 @@ useEffect(() => {
 const getAbortSignal = useDebouncedAbort(300);
 
 useEffect(() => {
-  getAbortSignal().then(signal => {
+  getAbortSignal().then((signal) => {
     fetchResults(filters, signal); // Cancels previous request
   });
 }, [filters]);
@@ -166,6 +189,7 @@ useEffect(() => {
 ## Table Rendering Pattern
 
 Instead of:
+
 ```typescript
 {loading && <LoadingState />}
 {error && <ErrorState />}
@@ -173,6 +197,7 @@ Instead of:
 ```
 
 Use wrapper:
+
 ```typescript
 <TableSafeWrapper
   isLoading={loading}
@@ -186,6 +211,7 @@ Use wrapper:
 ```
 
 Benefits:
+
 - Automatic error isolation (table crash doesn't break page)
 - Consistent UX across all tables
 - Built-in retry mechanism
@@ -196,6 +222,7 @@ Benefits:
 ## Testing Checklist
 
 ### Crash Protection
+
 - [ ] Open WorkLedger
 - [ ] Rapidly click filters
 - [ ] Should not cause page crash
@@ -205,6 +232,7 @@ Benefits:
 - [ ] Table should show error state, not crash page
 
 ### Request Cancellation
+
 - [ ] Open SearchExplorer
 - [ ] Type rapidly in search box
 - [ ] DevTools Network tab should show old requests cancelled
@@ -220,16 +248,19 @@ Benefits:
 ## Rollout Strategy
 
 ### Phase 1 (Now) ✅
+
 - ✅ Create utilities (useAbortOnNavigate, TableSafeWrapper)
 - ✅ Create validation schemas
 - Apply to critical pages:
   - WorkLedger, DocumentHub, SearchExplorer, AuditLog
 
 ### Phase 2 (Next)
+
 - Apply to high-priority pages:
   - Cases, Approvals, BOM, PL, OCRMonitor
 
 ### Phase 3 (Polish)
+
 - Apply to all remaining pages
 - Add comprehensive error logging
 - Performance monitoring
@@ -239,6 +270,7 @@ Benefits:
 ## Code Examples
 
 ### WorkLedger Integration
+
 ```typescript
 import { useAbortOnNavigate } from '../hooks/useAbortOnNavigate';
 import { TableSafeWrapper } from '../components/ui/TableSafeWrapper';
@@ -250,7 +282,7 @@ export default function WorkLedger() {
   return (
     <div className="space-y-5">
       {/* ... filters, KPIs, etc ... */}
-      
+
       <TableSafeWrapper
         isLoading={loading}
         error={error}
@@ -262,7 +294,7 @@ export default function WorkLedger() {
           {/* table content */}
         </table>
       </TableSafeWrapper>
-      
+
       {/* ... pagination ... */}
     </div>
   );
@@ -270,6 +302,7 @@ export default function WorkLedger() {
 ```
 
 ### SearchExplorer Integration
+
 ```typescript
 import { useDebouncedAbort } from '../hooks/useAbortOnNavigate';
 
@@ -282,7 +315,7 @@ export default function SearchExplorer() {
 
   useEffect(() => {
     if (!query.trim()) return;
-    
+
     setLoading(true);
     setError(null);
 
@@ -322,11 +355,13 @@ export default function SearchExplorer() {
 ## Files Modified Summary
 
 ### Created
+
 - ✅ `src/hooks/useAbortOnNavigate.ts`
 - ✅ `src/components/ui/TableSafeWrapper.tsx`
 - ✅ `src/lib/validation.ts`
 
 ### To Modify (Priority Order)
+
 1. `src/pages/WorkLedger.tsx` — Add SafeSection + abort
 2. `src/pages/DocumentHub.tsx` — Add SafeSection + abort
 3. `src/pages/SearchExplorer.tsx` — Add debounced abort
@@ -337,6 +372,7 @@ export default function SearchExplorer() {
 ---
 
 ## References
+
 - React: useEffect cleanup, AbortController
 - Axios: AbortSignal support (native)
 - ErrorBoundary: Already implemented in `src/components/ui/ErrorBoundary.tsx`

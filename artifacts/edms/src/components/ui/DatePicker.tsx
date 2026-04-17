@@ -1,23 +1,40 @@
-import { useState, useRef, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Calendar, X } from 'lucide-react';
+import { useState, useRef, useEffect } from "react";
+import { ChevronLeft, ChevronRight, Calendar, X } from "lucide-react";
 
-const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-const DAYS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
 function parseDate(value: string): Date | null {
   if (!value) return null;
-  const d = new Date(value + 'T00:00:00');
+  const d = new Date(value + "T00:00:00");
   return isNaN(d.getTime()) ? null : d;
 }
 
 function formatDisplay(value: string): string {
   const d = parseDate(value);
-  if (!d) return '';
-  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  if (!d) return "";
+  return d.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 function toIsoDate(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
 interface DatePickerProps {
@@ -35,17 +52,19 @@ interface DatePickerProps {
 export function DatePicker({
   value,
   onChange,
-  placeholder = 'Select date',
+  placeholder = "Select date",
   label,
-  className = '',
+  className = "",
   minDate,
   maxDate,
   disabled = false,
   required = false,
 }: DatePickerProps) {
   const [open, setOpen] = useState(false);
-  const [view, setView] = useState<'day' | 'month' | 'year'>('day');
-  const [viewDate, setViewDate] = useState<Date>(() => parseDate(value) ?? new Date());
+  const [view, setView] = useState<"day" | "month" | "year">("day");
+  const [viewDate, setViewDate] = useState<Date>(
+    () => parseDate(value) ?? new Date(),
+  );
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -57,25 +76,28 @@ export function DatePicker({
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
       }
     }
-    if (open) document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    if (open) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
   useEffect(() => {
     if (!open) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         setOpen(false);
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open]);
 
   const selected = parseDate(value);
@@ -91,8 +113,10 @@ export function DatePicker({
     return false;
   };
 
-  const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
-  const getFirstDayOfMonth = (year: number, month: number) => new Date(year, month, 1).getDay();
+  const getDaysInMonth = (year: number, month: number) =>
+    new Date(year, month + 1, 0).getDate();
+  const getFirstDayOfMonth = (year: number, month: number) =>
+    new Date(year, month, 1).getDay();
 
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
@@ -128,25 +152,38 @@ export function DatePicker({
       <button
         type="button"
         disabled={disabled}
-        onClick={() => { if (!disabled) { setOpen(o => !o); setView('day'); } }}
+        onClick={() => {
+          if (!disabled) {
+            setOpen((o) => !o);
+            setView("day");
+          }
+        }}
         aria-expanded={open}
         aria-haspopup="dialog"
         className={`w-full flex items-center gap-2 rounded-xl border px-4 py-2.5 text-left text-sm tabular-nums transition-all ${
           disabled
-            ? 'bg-card/30 border-border/50 text-slate-600 cursor-not-allowed'
+            ? "bg-card/30 border-border/50 text-slate-600 cursor-not-allowed"
             : open
-              ? 'bg-slate-950/90 border-teal-400/60 ring-1 ring-teal-400/30 shadow-[0_18px_40px_rgba(13,148,136,0.16)] text-foreground'
-              : 'bg-slate-950/65 border-border/60 text-foreground hover:border-teal-400/35 hover:bg-slate-950/80'
+              ? "bg-slate-950/90 border-teal-400/60 ring-1 ring-teal-400/30 shadow-[0_18px_40px_rgba(13,148,136,0.16)] text-foreground"
+              : "bg-slate-950/65 border-border/60 text-foreground hover:border-teal-400/35 hover:bg-slate-950/80"
         }`}
       >
-        <Calendar className={`w-4 h-4 shrink-0 ${value ? 'text-primary/90' : 'text-muted-foreground'}`} />
-        <span className={`flex-1 ${value ? 'text-foreground' : 'text-muted-foreground'}`}>
+        <Calendar
+          className={`w-4 h-4 shrink-0 ${value ? "text-primary/90" : "text-muted-foreground"}`}
+        />
+        <span
+          className={`flex-1 ${value ? "text-foreground" : "text-muted-foreground"}`}
+        >
           {value ? formatDisplay(value) : placeholder}
         </span>
         {value && !disabled && (
           <X
             className="w-3.5 h-3.5 shrink-0 text-muted-foreground transition-colors hover:text-rose-400"
-            onClick={e => { e.stopPropagation(); onChange(''); setOpen(false); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onChange("");
+              setOpen(false);
+            }}
           />
         )}
       </button>
@@ -159,54 +196,89 @@ export function DatePicker({
         >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-border bg-gradient-to-r from-slate-950/40 via-slate-900/20 to-teal-500/5 px-4 py-3">
-            {view === 'day' && (
+            {view === "day" && (
               <>
-                <button onClick={prevMonth} className="rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-secondary/70 hover:text-primary/90">
+                <button
+                  onClick={prevMonth}
+                  className="rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-secondary/70 hover:text-primary/90"
+                >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 <div className="flex items-center gap-1">
                   <button
-                    onClick={() => setView('month')}
+                    onClick={() => setView("month")}
                     className="rounded-lg px-2 py-1 text-sm font-semibold text-foreground transition-colors hover:bg-secondary/70 hover:text-teal-200"
                   >
                     {MONTHS[month]}
                   </button>
                   <button
-                    onClick={() => setView('year')}
+                    onClick={() => setView("year")}
                     className="rounded-lg px-2 py-1 text-sm font-semibold text-foreground transition-colors hover:bg-secondary/70 hover:text-teal-200"
                   >
                     {year}
                   </button>
                 </div>
-                <button onClick={nextMonth} className="rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-secondary/70 hover:text-primary/90">
+                <button
+                  onClick={nextMonth}
+                  className="rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-secondary/70 hover:text-primary/90"
+                >
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </>
             )}
-            {view === 'month' && (
+            {view === "month" && (
               <>
-                <button onClick={prevYear} className="rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-secondary/70 hover:text-primary/90"><ChevronLeft className="w-4 h-4" /></button>
-                <button onClick={() => setView('year')} className="rounded-lg px-2 py-1 text-sm font-semibold text-foreground transition-colors hover:bg-secondary/70 hover:text-teal-200">{year}</button>
-                <button onClick={nextYear} className="rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-secondary/70 hover:text-primary/90"><ChevronRight className="w-4 h-4" /></button>
+                <button
+                  onClick={prevYear}
+                  className="rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-secondary/70 hover:text-primary/90"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setView("year")}
+                  className="rounded-lg px-2 py-1 text-sm font-semibold text-foreground transition-colors hover:bg-secondary/70 hover:text-teal-200"
+                >
+                  {year}
+                </button>
+                <button
+                  onClick={nextYear}
+                  className="rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-secondary/70 hover:text-primary/90"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
               </>
             )}
-            {view === 'year' && (
+            {view === "year" && (
               <>
-                <button onClick={() => setViewDate(new Date(year - 12, month, 1))} className="rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-secondary/70 hover:text-primary/90"><ChevronLeft className="w-4 h-4" /></button>
-                <span className="text-sm font-semibold text-foreground">{yearRange[0]} – {yearRange[11]}</span>
-                <button onClick={() => setViewDate(new Date(year + 12, month, 1))} className="rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-secondary/70 hover:text-primary/90"><ChevronRight className="w-4 h-4" /></button>
+                <button
+                  onClick={() => setViewDate(new Date(year - 12, month, 1))}
+                  className="rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-secondary/70 hover:text-primary/90"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span className="text-sm font-semibold text-foreground">
+                  {yearRange[0]} – {yearRange[11]}
+                </span>
+                <button
+                  onClick={() => setViewDate(new Date(year + 12, month, 1))}
+                  className="rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-secondary/70 hover:text-primary/90"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
               </>
             )}
           </div>
 
           {/* Day view */}
-          {view === 'day' && (
+          {view === "day" && (
             <div className="p-3.5">
               <div className="mb-2 flex items-center justify-between rounded-xl border border-border bg-slate-950/40 px-3 py-2">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Selected</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+                    Selected
+                  </p>
                   <p className="mt-0.5 text-sm font-semibold text-foreground">
-                    {value ? formatDisplay(value) : 'No date selected'}
+                    {value ? formatDisplay(value) : "No date selected"}
                   </p>
                 </div>
                 <div className="rounded-full border border-teal-400/20 bg-teal-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-teal-200">
@@ -214,8 +286,13 @@ export function DatePicker({
                 </div>
               </div>
               <div className="mb-1 grid grid-cols-7">
-                {DAYS.map(d => (
-                  <div key={d} className="py-1 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{d}</div>
+                {DAYS.map((d) => (
+                  <div
+                    key={d}
+                    className="py-1 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground"
+                  >
+                    {d}
+                  </div>
                 ))}
               </div>
               <div className="grid grid-cols-7 gap-1">
@@ -233,12 +310,12 @@ export function DatePicker({
                       disabled={isOff}
                       className={`h-9 w-full rounded-xl text-xs font-semibold tabular-nums transition-all ${
                         isSel
-                          ? 'bg-gradient-to-br from-teal-500 to-emerald-500 text-white shadow-[0_10px_24px_rgba(20,184,166,0.35)]'
+                          ? "bg-gradient-to-br from-teal-500 to-emerald-500 text-white shadow-[0_10px_24px_rgba(20,184,166,0.35)]"
                           : isToday
-                            ? 'border border-teal-400/40 bg-secondary/85 text-teal-200'
+                            ? "border border-teal-400/40 bg-secondary/85 text-teal-200"
                             : isOff
-                              ? 'text-slate-700 cursor-not-allowed'
-                              : 'text-foreground/90 hover:bg-secondary/85 hover:text-teal-200'
+                              ? "text-slate-700 cursor-not-allowed"
+                              : "text-foreground/90 hover:bg-secondary/85 hover:text-teal-200"
                       }`}
                     >
                       {day}
@@ -258,7 +335,10 @@ export function DatePicker({
                   Today
                 </button>
                 <button
-                  onClick={() => { onChange(''); setOpen(false); }}
+                  onClick={() => {
+                    onChange("");
+                    setOpen(false);
+                  }}
                   className="rounded-full border border-border/70 bg-card/70 px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-rose-400/30 hover:text-rose-300"
                 >
                   Clear
@@ -268,14 +348,19 @@ export function DatePicker({
           )}
 
           {/* Month view */}
-          {view === 'month' && (
+          {view === "month" && (
             <div className="grid grid-cols-3 gap-1.5 p-3.5">
               {MONTHS.map((m, i) => (
                 <button
                   key={m}
-                  onClick={() => { setViewDate(new Date(year, i, 1)); setView('day'); }}
+                  onClick={() => {
+                    setViewDate(new Date(year, i, 1));
+                    setView("day");
+                  }}
                   className={`rounded-xl py-2.5 text-xs font-semibold transition-all ${
-                    i === month ? 'bg-gradient-to-br from-teal-500 to-emerald-500 text-white shadow-[0_8px_20px_rgba(20,184,166,0.28)]' : 'text-foreground/90 hover:bg-secondary/85 hover:text-teal-200'
+                    i === month
+                      ? "bg-gradient-to-br from-teal-500 to-emerald-500 text-white shadow-[0_8px_20px_rgba(20,184,166,0.28)]"
+                      : "text-foreground/90 hover:bg-secondary/85 hover:text-teal-200"
                   }`}
                 >
                   {m.slice(0, 3)}
@@ -285,14 +370,19 @@ export function DatePicker({
           )}
 
           {/* Year view */}
-          {view === 'year' && (
+          {view === "year" && (
             <div className="grid grid-cols-3 gap-1.5 p-3.5">
-              {yearRange.map(y => (
+              {yearRange.map((y) => (
                 <button
                   key={y}
-                  onClick={() => { setViewDate(new Date(y, month, 1)); setView('month'); }}
+                  onClick={() => {
+                    setViewDate(new Date(y, month, 1));
+                    setView("month");
+                  }}
                   className={`rounded-xl py-2.5 text-xs font-semibold tabular-nums transition-all ${
-                    y === year ? 'bg-gradient-to-br from-teal-500 to-emerald-500 text-white shadow-[0_8px_20px_rgba(20,184,166,0.28)]' : 'text-foreground/90 hover:bg-secondary/85 hover:text-teal-200'
+                    y === year
+                      ? "bg-gradient-to-br from-teal-500 to-emerald-500 text-white shadow-[0_8px_20px_rgba(20,184,166,0.28)]"
+                      : "text-foreground/90 hover:bg-secondary/85 hover:text-teal-200"
                   }`}
                 >
                   {y}

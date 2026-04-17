@@ -4,6 +4,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from .views import (
     AuditLogViewSet,
+    CurrentUserView,
     DashboardStatsView,
     HealthStatusView,
     InboxView,
@@ -24,6 +25,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('auth/login/', LoginView.as_view(), name='login'),
     path('auth/logout/', LogoutView.as_view(), name='logout'),
+    path('auth/me/', CurrentUserView.as_view(), name='current_user'),
     path('auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('search/', SearchView.as_view(), name='search'),

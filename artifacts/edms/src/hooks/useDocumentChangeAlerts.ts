@@ -1,13 +1,18 @@
-import { useCallback, useEffect, useState } from 'react';
-import apiClient from '../services/ApiClient';
-import { DocumentChangeAlertService, type DocumentChangeAlert } from '../services/DocumentChangeAlertService';
+import { useCallback, useEffect, useState } from "react";
+import apiClient from "../services/ApiClient";
+import {
+  DocumentChangeAlertService,
+  type DocumentChangeAlert,
+} from "../services/DocumentChangeAlertService";
 
 interface UseDocumentChangeAlertsOptions {
   plItem?: string;
   document?: string;
 }
 
-export function useDocumentChangeAlerts(options: UseDocumentChangeAlertsOptions = {}) {
+export function useDocumentChangeAlerts(
+  options: UseDocumentChangeAlertsOptions = {},
+) {
   const [alerts, setAlerts] = useState<DocumentChangeAlert[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +28,11 @@ export function useDocumentChangeAlerts(options: UseDocumentChangeAlertsOptions 
       });
       setAlerts(response.items.map(DocumentChangeAlertService.mapApiReview));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load document change alerts');
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to load document change alerts",
+      );
       setAlerts([]);
     } finally {
       setLoading(false);
@@ -38,17 +47,28 @@ export function useDocumentChangeAlerts(options: UseDocumentChangeAlertsOptions 
   }, [load]);
 
   const approveAlert = useCallback(async (alertId: string, notes?: string) => {
-    await apiClient.approveSupervisorDocumentReview(alertId, notes ? { notes } : undefined);
+    await apiClient.approveSupervisorDocumentReview(
+      alertId,
+      notes ? { notes } : undefined,
+    );
     DocumentChangeAlertService.notifyUpdated();
   }, []);
 
-  const bypassAlert = useCallback(async (alertId: string, payload?: { notes?: string; bypassReason?: string }) => {
-    await apiClient.bypassSupervisorDocumentReview(alertId, {
-      ...(payload?.notes ? { notes: payload.notes } : {}),
-      ...(payload?.bypassReason ? { bypass_reason: payload.bypassReason } : {}),
-    });
-    DocumentChangeAlertService.notifyUpdated();
-  }, []);
+  const bypassAlert = useCallback(
+    async (
+      alertId: string,
+      payload?: { notes?: string; bypassReason?: string },
+    ) => {
+      await apiClient.bypassSupervisorDocumentReview(alertId, {
+        ...(payload?.notes ? { notes: payload.notes } : {}),
+        ...(payload?.bypassReason
+          ? { bypass_reason: payload.bypassReason }
+          : {}),
+      });
+      DocumentChangeAlertService.notifyUpdated();
+    },
+    [],
+  );
 
   return { alerts, loading, error, approveAlert, bypassAlert, refetch: load };
 }

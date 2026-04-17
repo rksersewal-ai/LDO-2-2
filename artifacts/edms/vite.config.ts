@@ -87,7 +87,9 @@ function mockApiPlugin(): Plugin {
     configureServer(server) {
       server.middlewares.use(
         async (req: IncomingMessage, res: ServerResponse, next: () => void) => {
-          const url = req.url ?? "";
+          const rawUrl = req.url ?? "";
+          // Strip query string for route matching
+          const url = rawUrl.split("?")[0];
 
           // Only handle /api/ routes
           if (!url.startsWith("/api/")) {
@@ -96,7 +98,13 @@ function mockApiPlugin(): Plugin {
 
           // Handle CORS preflight
           if (req.method === "OPTIONS") {
-            return jsonResponse(res, 204, {});
+            res.writeHead(204, {
+              "Access-Control-Allow-Origin": "*",
+              "Access-Control-Allow-Methods":
+                "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+              "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            });
+            return res.end();
           }
 
           // POST /api/auth/login/
@@ -128,7 +136,9 @@ function mockApiPlugin(): Plugin {
 
           // POST /api/auth/logout/
           if (url === "/api/auth/logout/" && req.method === "POST") {
-            return jsonResponse(res, 200, { message: "Logged out successfully" });
+            return jsonResponse(res, 200, {
+              message: "Logged out successfully",
+            });
           }
 
           // POST /api/auth/token/refresh/
@@ -147,7 +157,9 @@ function mockApiPlugin(): Plugin {
             const record = MOCK_USERS[username];
 
             if (!record) {
-              return jsonResponse(res, 401, { detail: "Invalid refresh token" });
+              return jsonResponse(res, 401, {
+                detail: "Invalid refresh token",
+              });
             }
 
             return jsonResponse(res, 200, {
@@ -159,7 +171,7 @@ function mockApiPlugin(): Plugin {
           // GET /api/auth/me/  (session refresh)
           if (url === "/api/auth/me/" && req.method === "GET") {
             const authHeader = req.headers["authorization"] ?? "";
-            const token = authHeader.replace("Bearer ", "");
+            const token = authHeader.replace(/^bearer\s+/i, "");
             const usernameMatch = token.match(/^mock_access_(.+?)_\d+$/);
             const username = usernameMatch?.[1] ?? "";
             const record = MOCK_USERS[username];
@@ -226,7 +238,12 @@ export default defineConfig(async ({ mode }) => {
     resolve: {
       alias: {
         "@": path.resolve(import.meta.dirname, "src"),
-        "@assets": path.resolve(import.meta.dirname, "..", "..", "attached_assets"),
+        "@assets": path.resolve(
+          import.meta.dirname,
+          "..",
+          "..",
+          "attached_assets",
+        ),
       },
       dedupe: ["react", "react-dom"],
     },
@@ -234,6 +251,28 @@ export default defineConfig(async ({ mode }) => {
     build: {
       outDir: path.resolve(import.meta.dirname, "dist/public"),
       emptyOutDir: true,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            "react-vendor": ["react", "react-dom", "react-router"],
+            "radix-vendor": [
+              "@radix-ui/react-dialog",
+              "@radix-ui/react-dropdown-menu",
+              "@radix-ui/react-popover",
+              "@radix-ui/react-select",
+              "@radix-ui/react-tabs",
+              "@radix-ui/react-tooltip",
+              "@radix-ui/react-scroll-area",
+              "@radix-ui/react-checkbox",
+              "@radix-ui/react-switch",
+              "@radix-ui/react-accordion",
+              "@radix-ui/react-collapsible",
+            ],
+            motion: ["framer-motion"],
+            charts: ["recharts"],
+          },
+        },
+      },
     },
     server: {
       port,

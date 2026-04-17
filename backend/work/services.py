@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from django.contrib.auth.models import User
 from django.db.models import Q
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
@@ -214,6 +213,8 @@ class ApprovalService:
     @staticmethod
     def approve(approval, request, comment=''):
         PermissionService.require_permission(request.user, approval, 'change_approval')
+        # Re-fetch with row lock to prevent concurrent state transitions
+        approval = Approval.objects.select_for_update().get(pk=approval.pk)
         if approval.status != 'Pending':
             raise ValidationError({'status': 'Only pending approvals can be approved.'})
         approval.status = 'Approved'
@@ -234,6 +235,8 @@ class ApprovalService:
     @staticmethod
     def reject(approval, request, reason=''):
         PermissionService.require_permission(request.user, approval, 'change_approval')
+        # Re-fetch with row lock to prevent concurrent state transitions
+        approval = Approval.objects.select_for_update().get(pk=approval.pk)
         if approval.status != 'Pending':
             raise ValidationError({'status': 'Only pending approvals can be rejected.'})
         approval.status = 'Rejected'
@@ -270,6 +273,8 @@ class CaseService:
     @staticmethod
     def close(case, request, resolution):
         PermissionService.require_permission(request.user, case, 'change_case')
+        # Re-fetch with row lock to prevent concurrent state transitions
+        case = Case.objects.select_for_update().get(pk=case.pk)
         if case.status in {'Closed', 'Resolved'}:
             raise ValidationError({'status': 'Only open cases can be closed.'})
         case.status = 'Closed'

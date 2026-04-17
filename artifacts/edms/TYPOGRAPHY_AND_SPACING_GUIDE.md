@@ -9,18 +9,21 @@ All typography sizes and spacing values are now standardized via CSS variables a
 ## Typography Utilities
 
 ### Page-Level Headings
+
 ```tsx
 <h1 className="text-app-title">Dashboard</h1>           {/* 32px, used on app main title */}
 <h1 className="text-page-title">Work Ledger</h1>        {/* 28px, used on page headers */}
 ```
 
 ### Section & Subsection Headings
+
 ```tsx
 <h2 className="text-section-title">Recent Items</h2>     {/* 20px, section headers */}
 <h3 className="text-subsection-title">Filters</h3>       {/* 16px, card headers */}
 ```
 
 ### Body & Label Text
+
 ```tsx
 <p className="text-body">Default paragraph text</p>      {/* 14px, main content */}
 <label className="text-label">Email Address</label>     {/* 13px, form labels */}
@@ -29,6 +32,7 @@ All typography sizes and spacing values are now standardized via CSS variables a
 ```
 
 ### Tabular/Data Text
+
 ```tsx
 <td className="text-mono-data font-mono">WR-2026-001</td> {/* 13px mono, for IDs & numbers */}
 <code className="text-mono-data">SELECT * FROM records</code>
@@ -39,6 +43,7 @@ All typography sizes and spacing values are now standardized via CSS variables a
 ## Spacing Utilities
 
 ### Gap Between Items
+
 ```tsx
 <div className="flex gap-md">          {/* 12px gap */}
   <Button>Save</Button>
@@ -51,6 +56,7 @@ All typography sizes and spacing values are now standardized via CSS variables a
 ```
 
 ### Padding
+
 ```tsx
 <GlassCard className="p-lg">           {/* 16px all sides */}
   Content
@@ -62,42 +68,54 @@ All typography sizes and spacing values are now standardized via CSS variables a
 ```
 
 ### Margin
+
 ```tsx
 <h2 className="text-section-title mb-lg">Section</h2>  {/* 16px bottom margin */}
 <p className="text-body mb-md">Paragraph</p>          {/* 12px bottom margin */}
 ```
 
 ### Spacing Scale Reference
-| Class | Value | Use Case |
-|-------|-------|----------|
-| `*-xs` | 4px | Tiny gaps (rarely used) |
-| `*-sm` | 8px | Small gaps between inline items |
-| `*-md` | 12px | Standard form field spacing |
-| `*-lg` | 16px | Section spacing, main padding |
-| `*-xl` | 20px | Large section gaps |
-| `*-2xl` | 24px | Large content gaps |
-| `*-3xl` | 32px | Extra large spacing |
-| `*-4xl` | 40px | Maximum spacing |
-| `*-5xl` | 48px | Page-level spacing |
+
+| Class   | Value | Use Case                        |
+| ------- | ----- | ------------------------------- |
+| `*-xs`  | 4px   | Tiny gaps (rarely used)         |
+| `*-sm`  | 8px   | Small gaps between inline items |
+| `*-md`  | 12px  | Standard form field spacing     |
+| `*-lg`  | 16px  | Section spacing, main padding   |
+| `*-xl`  | 20px  | Large section gaps              |
+| `*-2xl` | 24px  | Large content gaps              |
+| `*-3xl` | 32px  | Extra large spacing             |
+| `*-4xl` | 40px  | Maximum spacing                 |
+| `*-5xl` | 48px  | Page-level spacing              |
 
 ---
 
 ## Component Height Utilities
 
 ### Table Rows
-```tsx
-{/* Dense tables (WorkLedger, AuditLog) */}
-<tr className="h-table-row-dense">   {/* 36px */}
-  <td>WR-2026-001</td>
-</tr>
 
-{/* Normal tables (DocumentHub) */}
-<tr className="h-table-row">         {/* 44px */}
+```tsx
+{
+  /* Dense tables (WorkLedger, AuditLog) */
+}
+<tr className="h-table-row-dense">
+  {" "}
+  {/* 36px */}
+  <td>WR-2026-001</td>
+</tr>;
+
+{
+  /* Normal tables (DocumentHub) */
+}
+<tr className="h-table-row">
+  {" "}
+  {/* 44px */}
   <td>Document Name</td>
-</tr>
+</tr>;
 ```
 
 ### Form Controls
+
 ```tsx
 <Button className="h-control">Save</Button>           {/* 36px */}
 <Button className="h-action-button">Delete</Button>   {/* 40px */}
@@ -109,15 +127,20 @@ All typography sizes and spacing values are now standardized via CSS variables a
 ## Before & After Examples
 
 ### Before (Inconsistent)
+
 ```tsx
 export function WorkLedger() {
   return (
     <div>
-      <h1 className="text-3xl">Work Ledger</h1>            {/* 30px */}
-      <div className="gap-4">                              {/* 16px */}
-        {items.map(item => (
-          <div className="px-3 py-2">                     {/* Inconsistent */}
-            <span className="text-xs">{item.id}</span>     {/* 12px */}
+      <h1 className="text-3xl">Work Ledger</h1> {/* 30px */}
+      <div className="gap-4">
+        {" "}
+        {/* 16px */}
+        {items.map((item) => (
+          <div className="px-3 py-2">
+            {" "}
+            {/* Inconsistent */}
+            <span className="text-xs">{item.id}</span> {/* 12px */}
           </div>
         ))}
       </div>
@@ -127,14 +150,20 @@ export function WorkLedger() {
 ```
 
 ### After (Normalized)
+
 ```tsx
 export function WorkLedger() {
   return (
     <div>
-      <h1 className="text-page-title">Work Ledger</h1>    {/* 28px, standardized */}
-      <div className="gap-md">                            {/* 12px, standardized */}
-        {items.map(item => (
-          <div className="px-md py-sm">                  {/* Standardized */}
+      <h1 className="text-page-title">Work Ledger</h1>{" "}
+      {/* 28px, standardized */}
+      <div className="gap-md">
+        {" "}
+        {/* 12px, standardized */}
+        {items.map((item) => (
+          <div className="px-md py-sm">
+            {" "}
+            {/* Standardized */}
             <span className="text-mono-data">{item.id}</span> {/* 13px mono */}
           </div>
         ))}
@@ -149,6 +178,7 @@ export function WorkLedger() {
 ## Pages to Refactor (Priority Order)
 
 ### High Priority (Core Pages)
+
 1. **WorkLedger** — Densest table, most impact
    - Title: Change to `text-page-title`
    - Section headers: Change to `text-section-title`
@@ -170,11 +200,13 @@ export function WorkLedger() {
    - Headings: `text-section-title`
 
 ### Medium Priority
+
 5. **AuditLog** — Paginated table
 6. **LedgerReports** — Charts and reports
 7. **DocumentDetail** — Detail views
 
 ### Low Priority
+
 8. Login, Settings, etc.
 
 ---
@@ -201,15 +233,15 @@ If you need to use these in inline styles or CSS:
 
 ```css
 /* Typography */
-font-size: var(--font-size-page-title);      /* 28px */
-line-height: var(--line-height-page-title);  /* 36px */
+font-size: var(--font-size-page-title); /* 28px */
+line-height: var(--line-height-page-title); /* 36px */
 
 /* Spacing */
-gap: var(--spacing-md);                      /* 12px */
-padding: var(--spacing-lg);                  /* 16px */
+gap: var(--spacing-md); /* 12px */
+padding: var(--spacing-lg); /* 16px */
 
 /* Heights */
-height: var(--height-table-row);             /* 44px */
+height: var(--height-table-row); /* 44px */
 ```
 
 ---

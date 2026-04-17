@@ -1,23 +1,44 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Bell, Clock3, Eye, LayoutDashboard, Mail, MoonStar, Palette, Save, ShieldCheck, UserRound } from 'lucide-react';
-import { toast } from 'sonner';
-import { Badge, Button, GlassCard, Input, PageHeader, Select } from '../components/ui/Shared';
-import { Switch } from '../components/ui/switch';
-import { useAuth } from '../lib/auth';
-import { useTheme } from '../contexts/ThemeContext';
-import { PreferencesService, type UserPreferences } from '../services/PreferencesService';
-import { UserService } from '../services/UserService';
+import { useEffect, useMemo, useState } from "react";
+import {
+  Bell,
+  Clock3,
+  Eye,
+  LayoutDashboard,
+  Mail,
+  MoonStar,
+  Palette,
+  Save,
+  ShieldCheck,
+  UserRound,
+} from "lucide-react";
+import { toast } from "sonner";
+import {
+  Badge,
+  Button,
+  GlassCard,
+  Input,
+  PageHeader,
+  Select,
+} from "../components/ui/Shared";
+import { Switch } from "../components/ui/switch";
+import { useAuth } from "../lib/auth";
+import { useTheme } from "../contexts/ThemeContext";
+import {
+  PreferencesService,
+  type UserPreferences,
+} from "../services/PreferencesService";
+import { UserService } from "../services/UserService";
 
 function formatLastLogin(value?: string) {
-  if (!value) return 'Not available';
+  if (!value) return "Not available";
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return value;
-  return parsed.toLocaleString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+  return parsed.toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
@@ -25,44 +46,62 @@ export default function ProfilePage() {
   const { user, updateCurrentUser } = useAuth();
   const { theme, setTheme } = useTheme();
   const [profile, setProfile] = useState({
-    name: user?.name ?? '',
-    email: user?.email ?? '',
-    designation: user?.designation ?? '',
-    department: user?.department ?? '',
+    name: user?.name ?? "",
+    email: user?.email ?? "",
+    designation: user?.designation ?? "",
+    department: user?.department ?? "",
   });
-  const [prefs, setPrefs] = useState<UserPreferences>(() => PreferencesService.get());
+  const [prefs, setPrefs] = useState<UserPreferences>(() =>
+    PreferencesService.get(),
+  );
 
   useEffect(() => {
     setProfile({
-      name: user?.name ?? '',
-      email: user?.email ?? '',
-      designation: user?.designation ?? '',
-      department: user?.department ?? '',
+      name: user?.name ?? "",
+      email: user?.email ?? "",
+      designation: user?.designation ?? "",
+      department: user?.department ?? "",
     });
   }, [user]);
 
   useEffect(() => {
     const nextPrefs = PreferencesService.get();
     setPrefs(nextPrefs);
-    document.documentElement.style.setProperty('--app-font-size', `${nextPrefs.fontSize}px`);
-    document.documentElement.classList.toggle('reduce-motion', nextPrefs.reduceMotion);
+    document.documentElement.style.setProperty(
+      "--app-font-size",
+      `${nextPrefs.fontSize}px`,
+    );
+    document.documentElement.classList.toggle(
+      "reduce-motion",
+      nextPrefs.reduceMotion,
+    );
   }, []);
 
-  const roleLabel = useMemo(() => user?.role ?? 'viewer', [user]);
+  const roleLabel = useMemo(() => user?.role ?? "viewer", [user]);
 
   const saveProfile = async () => {
     if (!user) return;
-    updateCurrentUser(profile);
-    await UserService.update(user.id, profile);
-    toast.success('Profile updated');
+    try {
+      updateCurrentUser(profile);
+      toast.success("Profile updated");
+    } catch (err) {
+      console.error("[ProfilePage] Failed to save profile", err);
+      toast.error("Failed to update profile");
+    }
   };
 
   const savePreference = (patch: Partial<UserPreferences>) => {
     const updated = PreferencesService.set(patch);
     setPrefs(updated);
-    document.documentElement.style.setProperty('--app-font-size', `${updated.fontSize}px`);
-    document.documentElement.classList.toggle('reduce-motion', updated.reduceMotion);
-    toast.success('Personal settings updated');
+    document.documentElement.style.setProperty(
+      "--app-font-size",
+      `${updated.fontSize}px`,
+    );
+    document.documentElement.classList.toggle(
+      "reduce-motion",
+      updated.reduceMotion,
+    );
+    toast.success("Personal settings updated");
   };
 
   return (
@@ -78,23 +117,40 @@ export default function ProfilePage() {
           <GlassCard className="p-6">
             <div className="flex items-center gap-4">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-emerald-500 text-xl font-bold text-white">
-                {user?.name?.charAt(0) ?? 'U'}
+                {user?.name?.charAt(0) ?? "U"}
               </div>
               <div>
-                <p className="text-lg font-semibold text-white">{user?.name ?? 'User'}</p>
-                <p className="text-sm text-muted-foreground">{user?.designation ?? 'Workspace User'}</p>
-                <Badge variant="info" className="mt-2 capitalize">{roleLabel}</Badge>
+                <p className="text-lg font-semibold text-white">
+                  {user?.name ?? "User"}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {user?.designation ?? "Workspace User"}
+                </p>
+                <Badge variant="info" className="mt-2 capitalize">
+                  {roleLabel}
+                </Badge>
               </div>
             </div>
             <div className="mt-5 space-y-3 text-sm text-foreground/90">
-              <div className="flex items-center gap-2"><Mail className="w-4 h-4 text-muted-foreground" /> {user?.email ?? 'No email set'}</div>
-              <div className="flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-muted-foreground" /> Department: {user?.department ?? 'Not set'}</div>
-              <div className="flex items-center gap-2"><Clock3 className="w-4 h-4 text-muted-foreground" /> Last synced session: {formatLastLogin(new Date().toISOString())}</div>
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-muted-foreground" />{" "}
+                {user?.email ?? "No email set"}
+              </div>
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-muted-foreground" />{" "}
+                Department: {user?.department ?? "Not set"}
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock3 className="w-4 h-4 text-muted-foreground" /> Session
+                active
+              </div>
             </div>
           </GlassCard>
 
           <GlassCard className="p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Current Workspace Behavior</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              Current Workspace Behavior
+            </p>
             <div className="mt-4 space-y-3 text-sm">
               <div className="flex items-center justify-between text-foreground/90">
                 <span>Theme</span>
@@ -124,20 +180,60 @@ export default function ProfilePage() {
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Full Name</label>
-                <Input value={profile.name} onChange={(event) => setProfile((current) => ({ ...current, name: event.target.value }))} />
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  Full Name
+                </label>
+                <Input
+                  value={profile.name}
+                  onChange={(event) =>
+                    setProfile((current) => ({
+                      ...current,
+                      name: event.target.value,
+                    }))
+                  }
+                />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Email</label>
-                <Input value={profile.email} onChange={(event) => setProfile((current) => ({ ...current, email: event.target.value }))} />
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  Email
+                </label>
+                <Input
+                  value={profile.email}
+                  onChange={(event) =>
+                    setProfile((current) => ({
+                      ...current,
+                      email: event.target.value,
+                    }))
+                  }
+                />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Designation</label>
-                <Input value={profile.designation} onChange={(event) => setProfile((current) => ({ ...current, designation: event.target.value }))} />
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  Designation
+                </label>
+                <Input
+                  value={profile.designation}
+                  onChange={(event) =>
+                    setProfile((current) => ({
+                      ...current,
+                      designation: event.target.value,
+                    }))
+                  }
+                />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Department</label>
-                <Input value={profile.department} onChange={(event) => setProfile((current) => ({ ...current, department: event.target.value }))} />
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  Department
+                </label>
+                <Input
+                  value={profile.department}
+                  onChange={(event) =>
+                    setProfile((current) => ({
+                      ...current,
+                      department: event.target.value,
+                    }))
+                  }
+                />
               </div>
             </div>
             <div className="mt-5">
@@ -150,18 +246,22 @@ export default function ProfilePage() {
           <GlassCard className="p-6">
             <div className="mb-5 flex items-center gap-2">
               <Palette className="w-5 h-5 text-primary" />
-              <h2 className="text-lg font-semibold text-white">Personalized Settings</h2>
+              <h2 className="text-lg font-semibold text-white">
+                Personalized Settings
+              </h2>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Theme</label>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  Theme
+                </label>
                 <Select
                   value={theme}
                   onChange={(event) => {
-                    const next = event.target.value as 'dark' | 'light';
+                    const next = event.target.value as "dark" | "light";
                     setTheme(next);
                     setPrefs((current) => ({ ...current, theme: next }));
-                    toast.success('Personal settings updated');
+                    toast.success("Personal settings updated");
                   }}
                 >
                   <option value="dark">Dark</option>
@@ -169,16 +269,32 @@ export default function ProfilePage() {
                 </Select>
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Font Size</label>
-                <Select value={String(prefs.fontSize)} onChange={(event) => savePreference({ fontSize: Number(event.target.value) })}>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  Font Size
+                </label>
+                <Select
+                  value={String(prefs.fontSize)}
+                  onChange={(event) =>
+                    savePreference({ fontSize: Number(event.target.value) })
+                  }
+                >
                   {[12, 13, 14, 15, 16, 17, 18].map((size) => (
-                    <option key={size} value={size}>{size}px</option>
+                    <option key={size} value={size}>
+                      {size}px
+                    </option>
                   ))}
                 </Select>
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Default Landing Page</label>
-                <Select value={prefs.defaultView} onChange={(event) => savePreference({ defaultView: event.target.value })}>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  Default Landing Page
+                </label>
+                <Select
+                  value={prefs.defaultView}
+                  onChange={(event) =>
+                    savePreference({ defaultView: event.target.value })
+                  }
+                >
                   <option value="/">Dashboard</option>
                   <option value="/documents">Document Hub</option>
                   <option value="/bom">BOM Explorer</option>
@@ -187,8 +303,18 @@ export default function ProfilePage() {
                 </Select>
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Time Format</label>
-                <Select value={prefs.timeFormat} onChange={(event) => savePreference({ timeFormat: event.target.value as UserPreferences['timeFormat'] })}>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  Time Format
+                </label>
+                <Select
+                  value={prefs.timeFormat}
+                  onChange={(event) =>
+                    savePreference({
+                      timeFormat: event.target
+                        .value as UserPreferences["timeFormat"],
+                    })
+                  }
+                >
                   <option value="24h">24-hour</option>
                   <option value="12h">12-hour</option>
                 </Select>
@@ -199,44 +325,62 @@ export default function ProfilePage() {
               {[
                 {
                   icon: Clock3,
-                  title: 'Show live header clock',
-                  description: 'Display the current day and time in the top-right app chrome.',
+                  title: "Show live header clock",
+                  description:
+                    "Display the current day and time in the top-right app chrome.",
                   checked: prefs.showLiveClock,
-                  onChange: (checked: boolean) => savePreference({ showLiveClock: checked }),
+                  onChange: (checked: boolean) =>
+                    savePreference({ showLiveClock: checked }),
                 },
                 {
                   icon: Eye,
-                  title: 'Use compact tables',
-                  description: 'Tighten row density for scan-heavy lists and admin tables.',
+                  title: "Use compact tables",
+                  description:
+                    "Tighten row density for scan-heavy lists and admin tables.",
                   checked: prefs.compactTables,
-                  onChange: (checked: boolean) => savePreference({ compactTables: checked }),
+                  onChange: (checked: boolean) =>
+                    savePreference({ compactTables: checked }),
                 },
                 {
                   icon: MoonStar,
-                  title: 'Reduce motion',
-                  description: 'Tone down non-essential animation in the workspace shell.',
+                  title: "Reduce motion",
+                  description:
+                    "Tone down non-essential animation in the workspace shell.",
                   checked: prefs.reduceMotion,
-                  onChange: (checked: boolean) => savePreference({ reduceMotion: checked }),
+                  onChange: (checked: boolean) =>
+                    savePreference({ reduceMotion: checked }),
                 },
                 {
                   icon: Bell,
-                  title: 'Keep sidebar expanded on desktop',
-                  description: 'Preserve the wider navigation rail as your default desktop preference.',
+                  title: "Keep sidebar expanded on desktop",
+                  description:
+                    "Preserve the wider navigation rail as your default desktop preference.",
                   checked: prefs.sidebarExpanded,
-                  onChange: (checked: boolean) => savePreference({ sidebarExpanded: checked }),
+                  onChange: (checked: boolean) =>
+                    savePreference({ sidebarExpanded: checked }),
                 },
               ].map((setting) => (
-                <div key={setting.title} className="flex items-center justify-between rounded-xl border border-white/6 bg-card/35 px-4 py-3">
+                <div
+                  key={setting.title}
+                  className="flex items-center justify-between rounded-xl border border-white/6 bg-card/35 px-4 py-3"
+                >
                   <div className="flex items-start gap-3">
                     <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl bg-teal-500/12 text-primary/90">
                       <setting.icon className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-foreground">{setting.title}</p>
-                      <p className="text-xs text-muted-foreground">{setting.description}</p>
+                      <p className="text-sm font-medium text-foreground">
+                        {setting.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {setting.description}
+                      </p>
                     </div>
                   </div>
-                  <Switch checked={setting.checked} onCheckedChange={setting.onChange} />
+                  <Switch
+                    checked={setting.checked}
+                    onCheckedChange={setting.onChange}
+                  />
                 </div>
               ))}
             </div>
@@ -245,19 +389,47 @@ export default function ProfilePage() {
           <GlassCard className="p-6">
             <div className="mb-4 flex items-center gap-2">
               <LayoutDashboard className="w-5 h-5 text-primary" />
-              <h2 className="text-lg font-semibold text-white">Workspace Defaults</h2>
+              <h2 className="text-lg font-semibold text-white">
+                Workspace Defaults
+              </h2>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Document Page Size</label>
-                <Select value={String(prefs.documentHubPageSize)} onChange={(event) => savePreference({ documentHubPageSize: Number(event.target.value) })}>
-                  {[10, 20, 30, 50].map((size) => <option key={size} value={size}>{size} rows</option>)}
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  Document Page Size
+                </label>
+                <Select
+                  value={String(prefs.documentHubPageSize)}
+                  onChange={(event) =>
+                    savePreference({
+                      documentHubPageSize: Number(event.target.value),
+                    })
+                  }
+                >
+                  {[10, 20, 30, 50].map((size) => (
+                    <option key={size} value={size}>
+                      {size} rows
+                    </option>
+                  ))}
                 </Select>
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Work Ledger Page Size</label>
-                <Select value={String(prefs.workLedgerPageSize)} onChange={(event) => savePreference({ workLedgerPageSize: Number(event.target.value) })}>
-                  {[10, 20, 30, 50].map((size) => <option key={size} value={size}>{size} rows</option>)}
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  Work Ledger Page Size
+                </label>
+                <Select
+                  value={String(prefs.workLedgerPageSize)}
+                  onChange={(event) =>
+                    savePreference({
+                      workLedgerPageSize: Number(event.target.value),
+                    })
+                  }
+                >
+                  {[10, 20, 30, 50].map((size) => (
+                    <option key={size} value={size}>
+                      {size} rows
+                    </option>
+                  ))}
                 </Select>
               </div>
             </div>

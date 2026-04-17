@@ -1,66 +1,130 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
-import { Button as ShadcnButton, type ButtonProps as ShadcnButtonProps } from './button';
-import { Input as ShadcnInput } from './input';
+import React from "react";
+import { cn } from "@/lib/utils";
+import {
+  Button as ShadcnButton,
+  type ButtonProps as ShadcnButtonProps,
+} from "./button";
+import { Input as ShadcnInput } from "./input";
 
-export function GlassCard({ children, className = "", ...props }: React.HTMLAttributes<HTMLDivElement>) {
+/* ── Card surfaces ──────────────────────────────────────────────────────── */
+
+export function GlassCard({
+  children,
+  className = "",
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`bg-card border-border rounded-xl ${className}`} {...props}>
+    <div
+      className={cn("bg-card border border-border rounded-md", className)}
+      {...props}
+    >
       {children}
     </div>
   );
 }
 
-export function GlassCardTeal({ children, className = "", ...props }: React.HTMLAttributes<HTMLDivElement>) {
+export function GlassCardTeal({
+  children,
+  className = "",
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`bg-card border-border-teal rounded-xl ${className}`} {...props}>
+    <div
+      className={cn("bg-card rounded-md", className)}
+      style={{ border: "1px solid hsl(var(--primary) / 0.28)" }}
+      {...props}
+    >
       {children}
     </div>
   );
 }
+
+/* ── Status Badge ───────────────────────────────────────────────────────── */
+
+const BADGE_STYLES: Record<
+  string,
+  { text: string; bg: string; border: string }
+> = {
+  default: {
+    text: "hsl(var(--foreground) / 0.85)",
+    bg: "hsl(var(--secondary))",
+    border: "hsl(var(--border))",
+  },
+  success: {
+    text: "hsl(174, 65%, 60%)",
+    bg: "hsl(174, 55%, 13%)",
+    border: "hsl(174, 52%, 20%)",
+  },
+  warning: {
+    text: "hsl(38,  95%, 62%)",
+    bg: "hsl(38,  80%, 11%)",
+    border: "hsl(38,  70%, 21%)",
+  },
+  danger: {
+    text: "hsl(0,   70%, 64%)",
+    bg: "hsl(0,   58%, 11%)",
+    border: "hsl(0,   58%, 21%)",
+  },
+  processing: {
+    text: "hsl(210, 78%, 62%)",
+    bg: "hsl(210, 58%, 11%)",
+    border: "hsl(210, 52%, 21%)",
+  },
+  info: {
+    text: "hsl(240, 72%, 68%)",
+    bg: "hsl(240, 52%, 11%)",
+    border: "hsl(240, 48%, 21%)",
+  },
+};
 
 export function Badge({
   children,
   variant = "default",
   size = "md",
-  className = ""
+  className = "",
 }: {
   children: React.ReactNode;
-  variant?: "default" | "success" | "warning" | "danger" | "processing" | "info";
+  variant?:
+    | "default"
+    | "success"
+    | "warning"
+    | "danger"
+    | "processing"
+    | "info";
   size?: "sm" | "md";
   className?: string;
 }) {
-  const variants: Record<string, string> = {
-    default: "bg-secondary/80 text-foreground/90 border border-border/60",
-    success: "bg-teal-900/40 text-primary/90 border border-teal-500/30",
-    warning: "bg-amber-900/40 text-amber-300 border border-amber-500/30",
-    danger: "bg-rose-900/40 text-rose-300 border border-rose-500/30",
-    processing: "bg-blue-900/40 text-blue-300 border border-blue-500/30 animate-pulse",
-    info: "bg-indigo-900/40 text-indigo-300 border border-indigo-500/30",
-  };
-  const sizes: Record<string, string> = {
-    sm: "px-2 py-0.5 text-[10px]",
-    md: "px-2.5 py-0.5 text-xs",
-  };
+  const s = BADGE_STYLES[variant] ?? BADGE_STYLES.default;
+  const sizeClass =
+    size === "sm" ? "px-1.5 py-0.5 text-[10px]" : "px-2 py-0.5 text-[11px]";
+
   return (
-    <span className={`inline-flex items-center rounded-full font-medium tracking-wide ${sizes[size]} ${variants[variant]} ${className}`}>
+    <span
+      className={cn(
+        "inline-flex items-center rounded font-semibold tracking-[0.025em] leading-none",
+        variant === "processing" && "animate-pulse",
+        sizeClass,
+        className,
+      )}
+      style={{
+        color: s.text,
+        background: s.bg,
+        border: `1px solid ${s.border}`,
+      }}
+    >
       {children}
     </span>
   );
 }
 
+/* ── Button ─────────────────────────────────────────────────────────────── */
 /**
- * Button component with standardized sizing per guidelines:
- * - sm: 36px (9) — icon buttons, secondary actions, compact contexts
- * - md: 40px (10) — standard buttons (default)
- * - lg: 48px (12) — prominent actions, modals, hero buttons
- * 
- * Variants: primary, secondary, ghost, danger, teal-outline
- * 
- * @example
- * <Button size="md" variant="primary">Save</Button>
- * <Button size="sm" variant="secondary">Edit</Button>
- * <Button size="lg" variant="danger" onClick={handleDelete}>Delete</Button>
+ * Standardized Button:
+ * – primary: solid teal, no gradient
+ * – secondary: bordered ghost on dark surface
+ * – ghost: text-only, no border
+ * – danger: rose, reserved for destructive actions
+ * – teal-outline: teal border + bg tint
  */
 export function Button({
   children,
@@ -72,39 +136,48 @@ export function Button({
   variant?: "primary" | "secondary" | "ghost" | "danger" | "teal-outline";
   size?: "sm" | "md" | "lg";
 }) {
-  const variants: Record<string, ShadcnButtonProps["variant"]> = {
+  const variantMap: Record<string, ShadcnButtonProps["variant"]> = {
     primary: "default",
     secondary: "secondary",
     ghost: "ghost",
     danger: "destructive",
     "teal-outline": "outline",
   };
-  const sizes: Record<string, ShadcnButtonProps["size"]> = {
+  const sizeMap: Record<string, ShadcnButtonProps["size"]> = {
     sm: "sm",
     md: "default",
     lg: "lg",
   };
-  const variantClasses: Record<string, string> = {
-    primary: "rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-md shadow-teal-900/30 border border-teal-400/20 hover:from-teal-500 hover:to-emerald-500",
-    secondary: "rounded-xl bg-secondary/80 text-foreground border border-slate-600/60 hover:bg-slate-700/80 hover:border-slate-500",
-    ghost: "rounded-xl bg-transparent text-foreground/90 hover:bg-white/5 hover:text-foreground",
-    danger: "rounded-xl bg-rose-600/20 text-rose-400 border border-rose-500/30 hover:bg-rose-600/30 hover:border-rose-500/50",
-    "teal-outline": "rounded-xl bg-teal-500/10 text-primary/90 border border-teal-500/30 hover:bg-teal-500/20 hover:border-teal-400/50",
+
+  /* Exact style per variant — flat, no gradient */
+  const variantCls: Record<string, string> = {
+    primary:
+      "rounded-md font-semibold text-white border border-transparent transition-colors duration-150 cursor-pointer " +
+      "bg-[hsl(var(--primary))] hover:bg-[hsl(174,78%,34%)] active:bg-[hsl(174,78%,30%)]",
+    secondary:
+      "rounded-md border border-border bg-secondary text-foreground hover:bg-secondary/80 hover:border-border/70 transition-colors duration-150 cursor-pointer",
+    ghost:
+      "rounded-md border-transparent bg-transparent text-foreground/80 hover:bg-secondary hover:text-foreground transition-colors duration-150 cursor-pointer",
+    danger:
+      "rounded-md border border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/18 hover:border-rose-500/50 transition-colors duration-150 cursor-pointer",
+    "teal-outline":
+      "rounded-md border border-[hsl(var(--primary)/0.35)] bg-[hsl(var(--primary)/0.08)] text-[hsl(var(--accent-foreground))] hover:bg-[hsl(var(--primary)/0.14)] hover:border-[hsl(var(--primary)/0.55)] transition-colors duration-150 cursor-pointer",
   };
-  const sizeClasses: Record<string, string> = {
-    sm: "min-h-9 px-3 py-2 text-xs gap-1.5",
-    md: "min-h-10 px-4 py-2.5 text-sm gap-2",
-    lg: "min-h-12 px-5 py-3 text-sm gap-2",
+  const sizeCls: Record<string, string> = {
+    sm: "min-h-9  px-3 py-2   text-xs  gap-1.5",
+    md: "min-h-10 px-4 py-2.5 text-[13px] gap-2",
+    lg: "min-h-12 px-5 py-3   text-sm  gap-2",
   };
+
   return (
     <ShadcnButton
-      variant={variants[variant]}
-      size={sizes[size]}
+      variant={variantMap[variant]}
+      size={sizeMap[size]}
       className={cn(
-        "font-medium transition-all duration-150 cursor-pointer",
-        sizeClasses[size],
-        variantClasses[variant],
-        className
+        "font-medium transition-colors duration-150",
+        sizeCls[size],
+        variantCls[variant],
+        className,
       )}
       {...props}
     >
@@ -113,24 +186,40 @@ export function Button({
   );
 }
 
-export function Input({ className = "", ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
+/* ── Input ──────────────────────────────────────────────────────────────── */
+
+export function Input({
+  className = "",
+  ...props
+}: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <ShadcnInput
       className={cn(
-        "h-10 rounded-lg border-border bg-slate-950/60 px-3 py-2.5 text-sm text-foreground placeholder:text-slate-600 focus-visible:border-teal-500/50 focus-visible:ring-1 focus-visible:ring-teal-500/30 focus-visible:ring-offset-0",
-        className
+        "h-10 rounded-md border-border bg-secondary/50 px-3 py-2.5 text-sm text-foreground",
+        "placeholder:text-muted-foreground/50",
+        "focus-visible:border-[hsl(var(--primary)/0.55)] focus-visible:ring-1 focus-visible:ring-[hsl(var(--primary)/0.25)] focus-visible:ring-offset-0",
+        "transition-colors duration-150",
+        className,
       )}
       {...props}
     />
   );
 }
 
-export function Select({ className = "", children, ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) {
+/* ── Select ─────────────────────────────────────────────────────────────── */
+
+export function Select({
+  className = "",
+  children,
+  ...props
+}: React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <select
       className={cn(
-        "h-10 w-full cursor-pointer rounded-lg border border-border bg-slate-950/60 px-3 py-2.5 text-sm text-foreground transition-all focus:border-teal-500/50 focus:outline-none focus:ring-1 focus:ring-teal-500/30",
-        className
+        "h-10 w-full cursor-pointer rounded-md border border-border bg-secondary/50 px-3 py-2.5 text-sm text-foreground",
+        "transition-colors duration-150",
+        "focus:border-[hsl(var(--primary)/0.55)] focus:outline-none focus:ring-1 focus:ring-[hsl(var(--primary)/0.25)]",
+        className,
       )}
       {...props}
     >
@@ -139,37 +228,65 @@ export function Select({ className = "", children, ...props }: React.SelectHTMLA
   );
 }
 
-export function StatCard({ label, value, sub, accent = false }: { label: string; value: string | number; sub?: string; accent?: boolean }) {
+/* ── Stat Card ──────────────────────────────────────────────────────────── */
+
+/**
+ * KPI metric card with optional colour accent on the top border.
+ * Uses `stat-number` class for monospaced tabular figures.
+ *
+ * @example
+ * <StatCard label="Documents" value={1_824} sub="+12 today" colorVariant="teal" />
+ */
+export function StatCard({
+  label,
+  value,
+  sub,
+  accent = false,
+  colorVariant = "teal",
+}: {
+  label: string;
+  value: string | number;
+  sub?: string;
+  accent?: boolean;
+  colorVariant?: "teal" | "amber" | "blue" | "rose" | "violet" | "orange";
+}) {
+  const topBorder: Record<string, string> = {
+    teal: "stat-card-teal",
+    amber: "stat-card-amber",
+    blue: "stat-card-blue",
+    rose: "stat-card-rose",
+    violet: "stat-card-violet",
+    orange: "stat-card-orange",
+  };
+
   return (
-    <div className="bg-card border-border rounded-xl px-4 py-3 flex flex-col gap-0.5">
-      <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
-      <span className={`text-xl font-bold tabular-nums ${accent ? 'text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400' : 'text-foreground'}`}>
-        {value}
-      </span>
-      {sub && <span className="text-xs text-muted-foreground">{sub}</span>}
+    <div
+      className={cn("stat-card", topBorder[colorVariant] ?? "stat-card-teal")}
+    >
+      <div className="px-4 pt-4 pb-3.5 flex flex-col gap-1.5">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/80">
+          {label}
+        </span>
+        <span
+          className={cn("stat-number", accent && "text-[hsl(var(--primary))]")}
+        >
+          {typeof value === "number" ? value.toLocaleString() : value}
+        </span>
+        {sub && (
+          <span className="text-[11px] text-muted-foreground">{sub}</span>
+        )}
+      </div>
     </div>
   );
 }
 
-/**
- * PageHeader component for consistent page title and actions layout
- * 
- * @example
- * <PageHeader
- *   title="Documents"
- *   subtitle="Manage uploaded files and versions"
- *   primaryAction={{ label: 'Upload', onClick: ... }}
- *   secondaryActions={[
- *     { label: 'Export', icon: Download },
- *     { label: 'Settings', icon: Settings }
- *   ]}
- * />
- */
+/* ── Page Header ────────────────────────────────────────────────────────── */
+
 export interface PageHeaderAction {
   label: string;
   icon?: React.ReactNode;
   onClick?: () => void;
-  variant?: 'primary' | 'secondary' | 'ghost';
+  variant?: "primary" | "secondary" | "ghost";
 }
 
 export function PageHeader({
@@ -189,53 +306,71 @@ export function PageHeader({
   actions?: React.ReactNode;
   children?: React.ReactNode;
 }) {
-  const derivedActions = (primaryAction || secondaryActions) ? (
-    <div className="flex items-center gap-2 flex-shrink-0">
-      {secondaryActions?.map((action, i) => (
-        <Button
-          key={i}
-          variant={action.variant || 'secondary'}
-          size="md"
-          onClick={action.onClick}
-          className="flex items-center gap-2"
-        >
-          {action.icon && <span className="w-4 h-4">{action.icon}</span>}
-          {action.label}
-        </Button>
-      ))}
-
-      {primaryAction && (
-        <Button
-          variant={primaryAction.variant || 'primary'}
-          size="md"
-          onClick={primaryAction.onClick}
-          className="flex items-center gap-2"
-        >
-          {primaryAction.icon && <span className="w-4 h-4">{primaryAction.icon}</span>}
-          {primaryAction.label}
-        </Button>
-      )}
-    </div>
-  ) : null;
+  const derivedActions =
+    primaryAction || secondaryActions ? (
+      <div className="flex items-center gap-2 flex-shrink-0">
+        {secondaryActions?.map((action, i) => (
+          <Button
+            key={i}
+            variant={action.variant ?? "secondary"}
+            size="md"
+            onClick={action.onClick}
+          >
+            {action.icon && (
+              <span className="w-4 h-4" aria-hidden="true">
+                {action.icon}
+              </span>
+            )}
+            {action.label}
+          </Button>
+        ))}
+        {primaryAction && (
+          <Button
+            variant={primaryAction.variant ?? "primary"}
+            size="md"
+            onClick={primaryAction.onClick}
+          >
+            {primaryAction.icon && (
+              <span className="w-4 h-4" aria-hidden="true">
+                {primaryAction.icon}
+              </span>
+            )}
+            {primaryAction.label}
+          </Button>
+        )}
+      </div>
+    ) : null;
 
   const actionContent = actions ?? children ?? derivedActions;
 
   return (
     <div className="flex flex-col gap-4 mb-6">
-      {breadcrumb && <div className="text-sm text-muted-foreground">{breadcrumb}</div>}
-      
+      {breadcrumb && (
+        <div className="text-xs text-muted-foreground">{breadcrumb}</div>
+      )}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white tracking-tight mb-1">{title}</h1>
-          {subtitle && <p className="text-muted-foreground text-sm">{subtitle}</p>}
+          <h1
+            className="text-2xl font-semibold text-foreground tracking-tight leading-tight"
+            style={{ letterSpacing: "-0.01em" }}
+          >
+            {title}
+          </h1>
+          {subtitle && (
+            <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
+          )}
         </div>
-
-        {/* Actions */}
-        {actionContent && <div className="flex items-center gap-2 flex-shrink-0">{actionContent}</div>}
+        {actionContent && (
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {actionContent}
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
+/* ── Filter Pills ───────────────────────────────────────────────────────── */
 
 export function FilterPills({
   options,
@@ -247,14 +382,21 @@ export function FilterPills({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-1.5">
-      {options.map(opt => (
+    <div
+      className="flex flex-wrap gap-1.5"
+      role="group"
+      aria-label="Filter options"
+    >
+      {options.map((opt) => (
         <button
           type="button"
           key={opt}
           onClick={() => onChange(opt)}
           aria-pressed={value === opt}
-          className={`pill-filter ${value === opt ? 'pill-filter-active' : 'pill-filter-inactive'}`}
+          className={cn(
+            "pill-filter",
+            value === opt ? "pill-filter-active" : "pill-filter-inactive",
+          )}
         >
           {opt}
         </button>

@@ -1,13 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
-import type { PLNumber } from '../lib/types';
-import { PLService } from '../services/PLService';
+import { useState, useEffect, useCallback } from "react";
+import type { PLNumber } from "../lib/types";
+import { PLService } from "../services/PLService";
 
 interface UsePLItemsResult {
   data: PLNumber[];
   loading: boolean;
   error: string | null;
   refetch: () => void;
-  add: (pl: Omit<PLNumber, 'id' | 'createdAt' | 'updatedAt'>) => Promise<PLNumber>;
+  add: (
+    pl: Omit<PLNumber, "id" | "createdAt" | "updatedAt">,
+  ) => Promise<PLNumber>;
   update: (id: string, patch: Partial<PLNumber>) => Promise<PLNumber | null>;
   remove: (id: string) => Promise<boolean>;
 }
@@ -18,45 +20,58 @@ export function usePLItems(): UsePLItemsResult {
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
 
-  const refetch = useCallback(() => setTick(t => t + 1), []);
+  const refetch = useCallback(() => setTick((t) => t + 1), []);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setError(null);
     PLService.getAll()
-      .then(items => {
+      .then((items) => {
         if (!cancelled) {
           setData(items);
           setLoading(false);
         }
       })
-      .catch(err => {
+      .catch((err) => {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Failed to load PL items');
+          setError(
+            err instanceof Error ? err.message : "Failed to load PL items",
+          );
           setLoading(false);
         }
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [tick]);
 
-  const add = useCallback(async (pl: Omit<PLNumber, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const result = await PLService.add(pl);
-    refetch();
-    return result;
-  }, [refetch]);
+  const add = useCallback(
+    async (pl: Omit<PLNumber, "id" | "createdAt" | "updatedAt">) => {
+      const result = await PLService.add(pl);
+      refetch();
+      return result;
+    },
+    [refetch],
+  );
 
-  const update = useCallback(async (id: string, patch: Partial<PLNumber>) => {
-    const result = await PLService.update(id, patch);
-    refetch();
-    return result;
-  }, [refetch]);
+  const update = useCallback(
+    async (id: string, patch: Partial<PLNumber>) => {
+      const result = await PLService.update(id, patch);
+      refetch();
+      return result;
+    },
+    [refetch],
+  );
 
-  const remove = useCallback(async (id: string) => {
-    const result = await PLService.delete(id);
-    refetch();
-    return result;
-  }, [refetch]);
+  const remove = useCallback(
+    async (id: string) => {
+      const result = await PLService.delete(id);
+      refetch();
+      return result;
+    },
+    [refetch],
+  );
 
   return { data, loading, error, refetch, add, update, remove };
 }
@@ -67,7 +82,7 @@ export function usePLItem(id: string | undefined) {
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
 
-  const refetch = useCallback(() => setTick(t => t + 1), []);
+  const refetch = useCallback(() => setTick((t) => t + 1), []);
 
   useEffect(() => {
     if (!id) {
@@ -79,19 +94,23 @@ export function usePLItem(id: string | undefined) {
     setLoading(true);
     setError(null);
     PLService.getById(id)
-      .then(pl => {
+      .then((pl) => {
         if (!cancelled) {
           setData(pl);
           setLoading(false);
         }
       })
-      .catch(err => {
+      .catch((err) => {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Failed to load PL item');
+          setError(
+            err instanceof Error ? err.message : "Failed to load PL item",
+          );
           setLoading(false);
         }
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [id, tick]);
 
   return { data, loading, error, refetch };

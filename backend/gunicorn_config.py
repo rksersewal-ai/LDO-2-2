@@ -5,7 +5,6 @@ Production-ready settings with worker management and logging
 
 import multiprocessing
 import os
-from pathlib import Path
 
 # Server socket
 bind = "0.0.0.0:8420"

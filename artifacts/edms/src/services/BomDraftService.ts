@@ -1,6 +1,11 @@
-import { cloneTree, countNodes, type BOMNode, type Product } from '../lib/bomData';
+import {
+  cloneTree,
+  countNodes,
+  type BOMNode,
+  type Product,
+} from "../lib/bomData";
 
-const BOM_DRAFTS_KEY = 'ldo2_bom_drafts';
+const BOM_DRAFTS_KEY = "ldo2_bom_drafts";
 
 export interface BomDraftRecord {
   id: string;
@@ -11,11 +16,14 @@ export interface BomDraftRecord {
 }
 
 interface CreateBomDraftInput {
-  product: Omit<Product, 'assemblies' | 'parts' | 'total' | 'lastModified'>;
+  product: Omit<Product, "assemblies" | "parts" | "total" | "lastModified">;
   tree: BOMNode[];
 }
 
-type DraftProductBase = Omit<Product, 'assemblies' | 'parts' | 'total' | 'lastModified'>;
+type DraftProductBase = Omit<
+  Product,
+  "assemblies" | "parts" | "total" | "lastModified"
+>;
 
 function safeReadDrafts(): BomDraftRecord[] {
   try {
@@ -36,8 +44,8 @@ function slugifyProductName(name: string) {
   return name
     .toLowerCase()
     .trim()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
     .slice(0, 40);
 }
 
@@ -58,7 +66,9 @@ function buildProduct(product: DraftProductBase, tree: BOMNode[]): Product {
 
 export class BomDraftService {
   static getAll(): BomDraftRecord[] {
-    return safeReadDrafts().sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+    return safeReadDrafts().sort((a, b) =>
+      b.updatedAt.localeCompare(a.updatedAt),
+    );
   }
 
   static getById(id: string): BomDraftRecord | null {
@@ -67,7 +77,7 @@ export class BomDraftService {
 
   static create(input: CreateBomDraftInput): BomDraftRecord {
     const drafts = this.getAll();
-    const baseId = slugifyProductName(input.product.name) || 'custom-bom';
+    const baseId = slugifyProductName(input.product.name) || "custom-bom";
     let nextId = `draft-${baseId}`;
     let suffix = 2;
 

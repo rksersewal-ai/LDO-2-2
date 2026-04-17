@@ -49,6 +49,6 @@ export const router = createBrowserRouter([
       { path: "restricted", Component: RestrictedAccess },
       { path: "design-system", Component: DesignSystem },
       { path: "*", Component: Dashboard },
-    ]
-  }
+    ],
+  },
 ]);

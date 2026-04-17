@@ -1,0 +1,182 @@
+version: "3.9"
+
+# ─── LDO-2 EDMS — Local Development Stack ─────────────────────────────────────
+# Usage:
+#   cp .env.example .env           # configure environment
+#   docker-compose up -d           # start all services
+#   docker-compose exec backend python manage.py migrate
+#   docker-compose exec backend python manage.py seed_demo_users
+# ──────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── PostgreSQL Database ───────────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-edms}
+      POSTGRES_USER: ${POSTGRES_USER:-edms}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-edms}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # ports deliberately omitted — DB is only reachable from PgBouncer via Docker network
+
+  # ── PgBouncer (Connection Pool) ─────────────────────────────────────────
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-edms}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}@db:5432/${POSTGRES_DB:-edms}
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 200
+      DEFAULT_POOL_SIZE: 25
+      RESERVE_POOL_SIZE: 5
+      RESERVE_POOL_TIMEOUT: 3
+      SERVER_IDLE_TIMEOUT: 300
+      PGBOUNCER_LOG_DISCONNECTIONS: 0
+      PGBOUNCER_LOG_CONNECTIONS: 0
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "sh", "-c", "pg_isready -h 127.0.0.1 -p 5432"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Redis (Celery broker + cache) ─────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # ports deliberately omitted — Redis is only reachable from backend/celery via Docker network
+
+  # ── Django Backend API ────────────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-false}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-edms}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}@pgbouncer:5432/${POSTGRES_DB:-edms}
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,backend}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:80}
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - media_files:/app/media
+      - static_files:/app/staticfiles
+    ports:
+      - "8420:8420"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8420/api/v1/health/status/"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ── Celery Worker (async tasks: OCR, exports, notifications) ─────────────
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-edms}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}@pgbouncer:5432/${POSTGRES_DB:-edms}
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+    command: celery -A edms worker -l info --concurrency 2 -Q default,ocr,indexing,notifications
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - media_files:/app/media
+
+  # ── Celery Beat (scheduled tasks) ────────────────────────────────────────
+  celery_beat:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-edms}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}@pgbouncer:5432/${POSTGRES_DB:-edms}
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+    command: celery -A edms beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ── React Frontend (Dev with hot-reload) ──────────────────────────────────
+  frontend_dev:
+    image: node:20-alpine
+    working_dir: /app
+    env_file: .env
+    environment:
+      PORT: 5173
+      VITE_ENABLE_DEV_MOCK_API: "false"
+      VITE_API_PROXY_TARGET: http://backend:8420
+    command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install && pnpm --filter @workspace/edms dev"
+    volumes:
+      - .:/app
+      - node_modules_cache:/app/node_modules
+      - edms_node_modules:/app/artifacts/edms/node_modules
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "5173:5173"
+    profiles:
+      - dev
+
+  # ── Frontend Production Build + Nginx ────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "80:80"
+    profiles:
+      - prod
+
+volumes:
+  postgres_data:
+  redis_data:
+  media_files:
+  static_files:
+  node_modules_cache:
+  edms_node_modules:

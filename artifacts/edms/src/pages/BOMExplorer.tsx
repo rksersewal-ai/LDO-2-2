@@ -1,53 +1,92 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router';
-import { motion } from 'framer-motion';
+import { useState } from "react";
+import { useNavigate } from "react-router";
+import { motion } from "framer-motion";
 import {
-  Train, Layers, Zap, Package, Plus, ArrowRight,
-  ChevronRight, Search, Filter, Clock, GitBranch,
-} from 'lucide-react';
-import { PRODUCTS } from '../lib/bomData';
-import type { Product } from '../lib/bomData';
-import { GlassCard, Badge, Button, Input, FilterPills, PageHeader } from '../components/ui/Shared';
-import { BomDraftService } from '../services/BomDraftService';
+  Train,
+  Layers,
+  Zap,
+  Package,
+  Plus,
+  ArrowRight,
+  ChevronRight,
+  Search,
+  Filter,
+  Clock,
+  GitBranch,
+} from "lucide-react";
+import { PRODUCTS } from "../lib/bomData";
+import type { Product } from "../lib/bomData";
+import {
+  GlassCard,
+  Badge,
+  Button,
+  Input,
+  FilterPills,
+  PageHeader,
+} from "../components/ui/Shared";
+import { BomDraftService } from "../services/BomDraftService";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '../components/ui/dropdown-menu';
-import { ExportImportService } from '../services/ExportImportService';
+} from "../components/ui/dropdown-menu";
+import { ExportImportService } from "../services/ExportImportService";
 
 const PRODUCT_ICONS: Record<string, React.ElementType> = {
-  Train, Container: Package, Layers, Zap,
+  Train,
+  Container: Package,
+  Layers,
+  Zap,
 };
 
-function lifecycleBadgeVariant(lc: string): "success" | "warning" | "info" | "default" {
-  if (lc === 'Production') return 'success';
-  if (lc === 'In Development') return 'info';
-  if (lc === 'Prototyping') return 'warning';
-  return 'default';
+function lifecycleBadgeVariant(
+  lc: string,
+): "success" | "warning" | "info" | "default" {
+  if (lc === "Production") return "success";
+  if (lc === "In Development") return "info";
+  if (lc === "Prototyping") return "warning";
+  return "default";
 }
 
 function categoryColor(cat: string): string {
-  if (cat.includes('Passenger')) return 'from-blue-500/10 to-teal-500/10 border-blue-500/20';
-  if (cat.includes('Freight')) return 'from-amber-500/10 to-orange-500/10 border-amber-500/20';
-  if (cat.includes('EMU')) return 'from-purple-500/10 to-indigo-500/10 border-purple-500/20';
-  if (cat.includes('Electrical')) return 'from-emerald-500/10 to-teal-500/10 border-emerald-500/20';
-  return 'from-teal-500/10 to-slate-500/10 border-teal-500/20';
+  if (cat.includes("Passenger"))
+    return "from-blue-500/10 to-teal-500/10 border-blue-500/20";
+  if (cat.includes("Freight"))
+    return "from-amber-500/10 to-orange-500/10 border-amber-500/20";
+  if (cat.includes("EMU"))
+    return "from-purple-500/10 to-indigo-500/10 border-purple-500/20";
+  if (cat.includes("Electrical"))
+    return "from-emerald-500/10 to-teal-500/10 border-emerald-500/20";
+  return "from-teal-500/10 to-slate-500/10 border-teal-500/20";
 }
 
 function categoryIconColor(cat: string): string {
-  if (cat.includes('Passenger')) return 'text-blue-400';
-  if (cat.includes('Freight')) return 'text-amber-400';
-  if (cat.includes('EMU')) return 'text-purple-400';
-  if (cat.includes('Electrical')) return 'text-emerald-400';
-  return 'text-primary';
+  if (cat.includes("Passenger")) return "text-blue-400";
+  if (cat.includes("Freight")) return "text-amber-400";
+  if (cat.includes("EMU")) return "text-purple-400";
+  if (cat.includes("Electrical")) return "text-emerald-400";
+  return "text-primary";
 }
 
-const CATEGORIES = ['All', 'Passenger Locomotive', 'Freight Locomotive', 'EMU Rolling Stock', 'Electrical Component'];
-const LIFECYCLES = ['All', 'Production', 'In Development', 'Prototyping'];
+const CATEGORIES = [
+  "All",
+  "Passenger Locomotive",
+  "Freight Locomotive",
+  "EMU Rolling Stock",
+  "Electrical Component",
+];
+const LIFECYCLES = ["All", "Production", "In Development", "Prototyping"];
 
-function ProductCard({ product, index, isDraft = false }: { product: Product; index: number; isDraft?: boolean }) {
+function ProductCard({
+  product,
+  index,
+  isDraft = false,
+}: {
+  product: Product;
+  index: number;
+  isDraft?: boolean;
+}) {
   const navigate = useNavigate();
   const Icon = PRODUCT_ICONS[product.icon] || Package;
   const gradClass = categoryColor(product.category);
@@ -57,55 +96,75 @@ function ProductCard({ product, index, isDraft = false }: { product: Product; in
     <motion.div
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, delay: index * 0.06, ease: 'easeOut' }}
+      transition={{ duration: 0.25, delay: index * 0.06, ease: "easeOut" }}
       whileHover={{ y: -3, transition: { duration: 0.15 } }}
-      className={`relative group bg-card border-border rounded-2xl bg-gradient-to-br ${gradClass} border cursor-pointer overflow-hidden transition-shadow duration-200 hover:shadow-xl hover:shadow-teal-950/40`}
+      className={`relative group bg-card border-border rounded-2xl bg-gradient-to-br ${gradClass} border cursor-pointer overflow-hidden transition-shadow duration-200 hover:shadow-xl`}
       onClick={() => navigate(`/bom/${product.id}`)}
       role="button"
       tabIndex={0}
-      onKeyDown={e => e.key === 'Enter' && navigate(`/bom/${product.id}`)}
+      onKeyDown={(e) => e.key === "Enter" && navigate(`/bom/${product.id}`)}
     >
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-gradient-to-br from-teal-500/5 to-transparent pointer-events-none" />
 
       <div className="p-6">
         {/* Icon + Badge row */}
         <div className="flex items-start justify-between mb-4">
-          <div className={`w-11 h-11 rounded-xl bg-card border border-border flex items-center justify-center ${iconColor}`}>
+          <div
+            className={`w-11 h-11 rounded-xl bg-card border border-border flex items-center justify-center ${iconColor}`}
+          >
             <Icon className="w-5 h-5" />
           </div>
           <div className="flex items-center gap-2">
             {isDraft && <Badge variant="info">Draft</Badge>}
-            <Badge variant={lifecycleBadgeVariant(product.lifecycle)}>{product.lifecycle}</Badge>
+            <Badge variant={lifecycleBadgeVariant(product.lifecycle)}>
+              {product.lifecycle}
+            </Badge>
           </div>
         </div>
 
         {/* Name + subtitle */}
-        <h3 className="text-base font-bold text-white mb-0.5 tracking-tight">{product.name}</h3>
+        <h3 className="text-base font-bold text-foreground mb-0.5 tracking-tight">
+          {product.name}
+        </h3>
         <p className="text-xs text-muted-foreground mb-1">{product.subtitle}</p>
-        <p className="text-[11px] text-muted-foreground line-clamp-2 mb-4 leading-relaxed">{product.description}</p>
+        <p className="text-[11px] text-muted-foreground line-clamp-2 mb-4 leading-relaxed">
+          {product.description}
+        </p>
 
         {/* Stats row */}
         <div className="flex items-center gap-3 mb-4">
           <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
             <GitBranch className="w-3 h-3 text-primary" />
-            <span className="font-mono text-primary font-semibold">{product.total}</span>
+            <span className="font-mono text-primary font-semibold">
+              {product.total}
+            </span>
             <span>nodes</span>
           </div>
-          <span className="w-px h-3 bg-slate-700" />
+          <span className="w-px h-3 bg-border" />
           <div className="text-[11px] text-muted-foreground">
-            <span className="font-mono text-blue-400">{product.assemblies}</span> assy
+            <span className="font-mono text-blue-400">
+              {product.assemblies}
+            </span>{" "}
+            assy
           </div>
-          <span className="w-px h-3 bg-slate-700" />
+          <span className="w-px h-3 bg-border" />
           <div className="text-[11px] text-muted-foreground">
-            <span className="font-mono text-foreground/90">{product.parts}</span> parts
+            <span className="font-mono text-foreground/90">
+              {product.parts}
+            </span>{" "}
+            parts
           </div>
         </div>
 
         {/* Footer row */}
         <div className="flex items-center justify-between pt-3 border-t border-border">
           <div>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Root PL</p>
-            <p className="font-mono text-[11px] text-primary">{product.rootPL}</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+              Root PL
+            </p>
+            <p className="font-mono text-[11px] text-primary">
+              {product.rootPL}
+            </p>
           </div>
           <div className="flex items-center gap-1.5 text-xs font-medium text-primary group-hover:text-primary/90 transition-colors">
             <span>View BOM</span>
@@ -124,21 +183,26 @@ function CreateNewCard() {
     <motion.div
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, delay: 4 * 0.06, ease: 'easeOut' }}
+      transition={{ duration: 0.25, delay: 4 * 0.06, ease: "easeOut" }}
       whileHover={{ y: -3, transition: { duration: 0.15 } }}
       className="relative bg-card border-border rounded-2xl border-2 border-dashed border-teal-500/25 hover:border-teal-400/50 cursor-pointer group transition-all duration-200 overflow-hidden"
-      onClick={() => navigate('/bom/new')}
+      onClick={() => navigate("/bom/new")}
       role="button"
       tabIndex={0}
-      onKeyDown={event => event.key === 'Enter' && navigate('/bom/new')}
+      onKeyDown={(event) => event.key === "Enter" && navigate("/bom/new")}
     >
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-teal-500/5 pointer-events-none" />
       <div className="p-6 h-full flex flex-col items-center justify-center text-center min-h-[240px]">
         <div className="w-12 h-12 rounded-2xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center mb-3 group-hover:bg-teal-500/20 transition-colors">
           <Plus className="w-5 h-5 text-primary" />
         </div>
-        <p className="text-sm font-semibold text-primary mb-1 group-hover:text-primary/90 transition-colors">Create New BOM</p>
-        <p className="text-[11px] text-muted-foreground leading-relaxed">Define a new product structure and start building your bill of materials</p>
+        <p className="text-sm font-semibold text-primary mb-1 group-hover:text-primary/90 transition-colors">
+          Create New BOM
+        </p>
+        <p className="text-[11px] text-muted-foreground leading-relaxed">
+          Define a new product structure and start building your bill of
+          materials
+        </p>
       </div>
     </motion.div>
   );
@@ -146,20 +210,22 @@ function CreateNewCard() {
 
 export default function BOMExplorer() {
   const navigate = useNavigate();
-  const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('All');
-  const [lifecycleFilter, setLifecycleFilter] = useState('All');
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("All");
+  const [lifecycleFilter, setLifecycleFilter] = useState("All");
   const draftProducts = BomDraftService.getAll().map((draft) => draft.product);
   const allProducts = [...draftProducts, ...PRODUCTS];
 
-  const filtered = allProducts.filter(p => {
-    const matchSearch = !search ||
+  const filtered = allProducts.filter((p) => {
+    const matchSearch =
+      !search ||
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       p.subtitle.toLowerCase().includes(search.toLowerCase()) ||
       p.category.toLowerCase().includes(search.toLowerCase()) ||
       p.rootPL.includes(search);
-    const matchCat = categoryFilter === 'All' || p.category === categoryFilter;
-    const matchLife = lifecycleFilter === 'All' || p.lifecycle === lifecycleFilter;
+    const matchCat = categoryFilter === "All" || p.category === categoryFilter;
+    const matchLife =
+      lifecycleFilter === "All" || p.lifecycle === lifecycleFilter;
     return matchSearch && matchCat && matchLife;
   });
 
@@ -167,12 +233,14 @@ export default function BOMExplorer() {
   const totalParts = allProducts.reduce((s, p) => s + p.parts, 0);
 
   const exportSubtitle = [
-    categoryFilter !== 'All' ? `Category: ${categoryFilter}` : null,
-    lifecycleFilter !== 'All' ? `Lifecycle: ${lifecycleFilter}` : null,
+    categoryFilter !== "All" ? `Category: ${categoryFilter}` : null,
+    lifecycleFilter !== "All" ? `Lifecycle: ${lifecycleFilter}` : null,
     search ? `Search: ${search}` : null,
-  ].filter(Boolean).join(' • ');
+  ]
+    .filter(Boolean)
+    .join(" • ");
 
-  const exportRows = filtered.map((product) => ([
+  const exportRows = filtered.map((product) => [
     product.name,
     product.subtitle,
     product.category,
@@ -184,34 +252,50 @@ export default function BOMExplorer() {
     product.parts,
     product.lastModified,
     product.description,
-  ]));
+  ]);
 
   const exportHeaders = [
-    'Product',
-    'Subtitle',
-    'Category',
-    'Root PL',
-    'Revision',
-    'Lifecycle',
-    'Total Nodes',
-    'Assemblies',
-    'Parts',
-    'Last Modified',
-    'Description',
+    "Product",
+    "Subtitle",
+    "Category",
+    "Root PL",
+    "Revision",
+    "Lifecycle",
+    "Total Nodes",
+    "Assemblies",
+    "Parts",
+    "Last Modified",
+    "Description",
   ];
 
-  const exportProducts = (format: 'excel' | 'word' | 'pdf') => {
-    if (format === 'excel') {
-      ExportImportService.exportGenericTableExcel('BOM Explorer', exportHeaders, exportRows, 'bom-explorer');
+  const exportProducts = (format: "excel" | "word" | "pdf") => {
+    if (format === "excel") {
+      ExportImportService.exportGenericTableExcel(
+        "BOM Explorer",
+        exportHeaders,
+        exportRows,
+        "bom-explorer",
+      );
       return;
     }
 
-    if (format === 'word') {
-      ExportImportService.exportGenericTableWord('BOM Explorer Snapshot', exportHeaders, exportRows, 'bom-explorer', exportSubtitle || undefined);
+    if (format === "word") {
+      ExportImportService.exportGenericTableWord(
+        "BOM Explorer Snapshot",
+        exportHeaders,
+        exportRows,
+        "bom-explorer",
+        exportSubtitle || undefined,
+      );
       return;
     }
 
-    ExportImportService.exportGenericTablePdf('BOM Explorer Snapshot', exportHeaders, exportRows, exportSubtitle || undefined);
+    ExportImportService.exportGenericTablePdf(
+      "BOM Explorer Snapshot",
+      exportHeaders,
+      exportRows,
+      exportSubtitle || undefined,
+    );
   };
 
   return (
@@ -227,19 +311,31 @@ export default function BOMExplorer() {
                   <Filter className="w-3.5 h-3.5" /> Export
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52 border border-border/60 bg-slate-950 text-foreground">
-                <DropdownMenuItem className="focus:bg-secondary" onSelect={() => exportProducts('excel')}>
+              <DropdownMenuContent
+                align="end"
+                className="w-52 border border-border/60 bg-slate-950 text-foreground"
+              >
+                <DropdownMenuItem
+                  className="focus:bg-secondary"
+                  onSelect={() => exportProducts("excel")}
+                >
                   Export filtered list to Excel
                 </DropdownMenuItem>
-                <DropdownMenuItem className="focus:bg-secondary" onSelect={() => exportProducts('word')}>
+                <DropdownMenuItem
+                  className="focus:bg-secondary"
+                  onSelect={() => exportProducts("word")}
+                >
                   Export filtered list to Word
                 </DropdownMenuItem>
-                <DropdownMenuItem className="focus:bg-secondary" onSelect={() => exportProducts('pdf')}>
+                <DropdownMenuItem
+                  className="focus:bg-secondary"
+                  onSelect={() => exportProducts("pdf")}
+                >
                   Export filtered list to PDF
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button size="sm" onClick={() => navigate('/bom/new')}>
+            <Button size="sm" onClick={() => navigate("/bom/new")}>
               <Plus className="w-3.5 h-3.5" /> New BOM
             </Button>
           </div>
@@ -249,14 +345,23 @@ export default function BOMExplorer() {
       {/* Summary stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Products', value: allProducts.length, accent: true },
-          { label: 'Total Nodes', value: totalNodes, accent: false },
-          { label: 'In Production', value: allProducts.filter(p => p.lifecycle === 'Production').length, accent: false },
-          { label: 'Total Parts', value: totalParts, accent: false },
-        ].map(s => (
+          { label: "Products", value: allProducts.length, accent: true },
+          { label: "Total Nodes", value: totalNodes, accent: false },
+          {
+            label: "In Production",
+            value: allProducts.filter((p) => p.lifecycle === "Production")
+              .length,
+            accent: false,
+          },
+          { label: "Total Parts", value: totalParts, accent: false },
+        ].map((s) => (
           <GlassCard key={s.label} className="px-4 py-3">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-0.5">{s.label}</p>
-            <p className={`text-2xl font-bold ${s.accent ? 'text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400' : 'text-foreground'}`}>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-0.5">
+              {s.label}
+            </p>
+            <p
+              className={`text-2xl font-bold ${s.accent ? "text-primary" : "text-foreground"}`}
+            >
               {s.value}
             </p>
           </GlassCard>
@@ -272,25 +377,47 @@ export default function BOMExplorer() {
               placeholder="Search products, PL numbers..."
               className="pl-9 w-full"
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
           <div className="flex flex-wrap gap-4 items-center">
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5 font-semibold">Category</p>
-              <FilterPills options={CATEGORIES} value={categoryFilter} onChange={setCategoryFilter} />
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5 font-semibold">
+                Category
+              </p>
+              <FilterPills
+                options={CATEGORIES}
+                value={categoryFilter}
+                onChange={setCategoryFilter}
+              />
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5 font-semibold">Lifecycle</p>
-              <FilterPills options={LIFECYCLES} value={lifecycleFilter} onChange={setLifecycleFilter} />
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5 font-semibold">
+                Lifecycle
+              </p>
+              <FilterPills
+                options={LIFECYCLES}
+                value={lifecycleFilter}
+                onChange={setLifecycleFilter}
+              />
             </div>
           </div>
         </div>
-        {(categoryFilter !== 'All' || lifecycleFilter !== 'All' || search) && (
+        {(categoryFilter !== "All" || lifecycleFilter !== "All" || search) && (
           <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
-            <span className="text-xs text-muted-foreground">Showing <span className="text-primary font-semibold">{filtered.length}</span> of {allProducts.length} products</span>
+            <span className="text-xs text-muted-foreground">
+              Showing{" "}
+              <span className="text-primary font-semibold">
+                {filtered.length}
+              </span>{" "}
+              of {allProducts.length} products
+            </span>
             <button
-              onClick={() => { setSearch(''); setCategoryFilter('All'); setLifecycleFilter('All'); }}
+              onClick={() => {
+                setSearch("");
+                setCategoryFilter("All");
+                setLifecycleFilter("All");
+              }}
               className="text-xs text-muted-foreground hover:text-foreground/90 underline transition-colors"
             >
               Clear filters
@@ -303,7 +430,12 @@ export default function BOMExplorer() {
       {filtered.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filtered.map((product, i) => (
-            <ProductCard key={product.id} product={product} index={i} isDraft={product.id.startsWith('draft-')} />
+            <ProductCard
+              key={product.id}
+              product={product}
+              index={i}
+              isDraft={product.id.startsWith("draft-")}
+            />
           ))}
           <CreateNewCard />
         </div>
@@ -312,9 +444,21 @@ export default function BOMExplorer() {
           <div className="w-14 h-14 rounded-2xl bg-secondary/60 border border-border flex items-center justify-center mx-auto mb-4">
             <Search className="w-6 h-6 text-muted-foreground" />
           </div>
-          <p className="text-foreground/90 font-medium mb-1">No products found</p>
-          <p className="text-muted-foreground text-sm mb-4">Try adjusting your search or filter criteria</p>
-          <Button variant="ghost" size="sm" onClick={() => { setSearch(''); setCategoryFilter('All'); setLifecycleFilter('All'); }}>
+          <p className="text-foreground/90 font-medium mb-1">
+            No products found
+          </p>
+          <p className="text-muted-foreground text-sm mb-4">
+            Try adjusting your search or filter criteria
+          </p>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setSearch("");
+              setCategoryFilter("All");
+              setLifecycleFilter("All");
+            }}
+          >
             Clear filters
           </Button>
         </GlassCard>
@@ -324,27 +468,38 @@ export default function BOMExplorer() {
       <GlassCard className="p-4">
         <div className="flex items-center gap-2 mb-3">
           <Clock className="w-4 h-4 text-muted-foreground" />
-          <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Recently Modified</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            Recently Modified
+          </h3>
         </div>
         <div className="space-y-2">
-          {[...allProducts].sort((a, b) => b.lastModified.localeCompare(a.lastModified)).slice(0, 3).map(p => (
-            <button
-              type="button"
-              key={p.id}
-              onClick={() => navigate(`/bom/${p.id}`)}
-              className="w-full flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-secondary/40 transition-colors cursor-pointer group text-left"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-teal-500" />
-                <span className="text-sm text-foreground/90 group-hover:text-white transition-colors">{p.name}</span>
-                <span className="text-xs text-muted-foreground">{p.subtitle}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-muted-foreground">{p.lastModified}</span>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-primary transition-colors" />
-              </div>
-            </button>
-          ))}
+          {[...allProducts]
+            .sort((a, b) => b.lastModified.localeCompare(a.lastModified))
+            .slice(0, 3)
+            .map((p) => (
+              <button
+                type="button"
+                key={p.id}
+                onClick={() => navigate(`/bom/${p.id}`)}
+                className="w-full flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-secondary/40 transition-colors cursor-pointer group text-left"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-1.5 h-1.5 rounded-full bg-teal-500" />
+                  <span className="text-sm text-foreground/90 group-hover:text-white transition-colors">
+                    {p.name}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {p.subtitle}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-muted-foreground">
+                    {p.lastModified}
+                  </span>
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-primary transition-colors" />
+                </div>
+              </button>
+            ))}
         </div>
       </GlassCard>
     </div>

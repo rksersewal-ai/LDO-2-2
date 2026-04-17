@@ -1,0 +1,317 @@
+- generic [ref=e43]:
+  - complementary [ref=e44]:
+    - generic [ref=e46]:
+      - generic [ref=e47]:
+        - generic [ref=e49]: L2
+        - generic [ref=e50]:
+          - paragraph [ref=e51]: LDO-2 EDMS
+          - paragraph [ref=e52]: Enterprise
+      - button "Collapse navigation" [ref=e53]:
+        - img [ref=e54]
+    - navigation "Main navigation" [ref=e57]:
+      - generic [ref=e58]:
+        - generic [ref=e59]: Core
+        - link "Dashboard" [ref=e60] [cursor=pointer]:
+          - /url: /
+          - img [ref=e61]
+          - generic [ref=e66]: Dashboard
+        - link "Search Explorer" [ref=e67] [cursor=pointer]:
+          - /url: /search
+          - img [ref=e68]
+          - generic [ref=e76]: Search Explorer
+        - link "Document Hub" [ref=e77] [cursor=pointer]:
+          - /url: /documents
+          - img [ref=e78]
+          - generic [ref=e80]: Document Hub
+      - generic [ref=e81]:
+        - generic [ref=e82]: Engineering
+        - link "BOM Explorer" [ref=e83] [cursor=pointer]:
+          - /url: /bom
+          - img [ref=e84]
+          - generic [ref=e89]: BOM Explorer
+        - link "PL Knowledge Hub" [ref=e90] [cursor=pointer]:
+          - /url: /pl
+          - img [ref=e92]
+          - generic [ref=e98]: PL Knowledge Hub
+      - generic [ref=e99]:
+        - generic [ref=e100]: Workflow
+        - link "Work Ledger" [ref=e101] [cursor=pointer]:
+          - /url: /ledger
+          - img [ref=e102]
+          - generic [ref=e105]: Work Ledger
+        - link "Cases" [ref=e106] [cursor=pointer]:
+          - /url: /cases
+          - img [ref=e107]
+          - generic [ref=e109]: Cases
+        - link "Approvals" [ref=e110] [cursor=pointer]:
+          - /url: /approvals
+          - img [ref=e111]
+          - generic [ref=e114]: Approvals
+      - generic [ref=e115]:
+        - generic [ref=e116]: Tools
+        - link "Alert Rules" [ref=e117] [cursor=pointer]:
+          - /url: /alerts
+          - img [ref=e118]
+          - generic [ref=e121]: Alert Rules
+        - link "Doc Templates" [ref=e122] [cursor=pointer]:
+          - /url: /templates
+          - img [ref=e123]
+          - generic [ref=e127]: Doc Templates
+      - generic [ref=e128]:
+        - generic [ref=e129]: Reports
+        - link "Reports" [ref=e130] [cursor=pointer]:
+          - /url: /reports
+          - img [ref=e131]
+          - generic [ref=e133]: Reports
+        - link "Ledger Reports" [ref=e134] [cursor=pointer]:
+          - /url: /ledger-reports
+          - img [ref=e135]
+          - generic [ref=e138]: Ledger Reports
+      - generic [ref=e139]:
+        - generic [ref=e140]: System
+        - link "Admin" [ref=e141] [cursor=pointer]:
+          - /url: /admin
+          - img [ref=e142]
+          - generic [ref=e153]: Admin
+        - link "Users" [ref=e154] [cursor=pointer]:
+          - /url: /admin/users
+          - img [ref=e155]
+          - generic [ref=e160]: Users
+        - link "Deduplication" [ref=e161] [cursor=pointer]:
+          - /url: /admin/deduplication
+          - img [ref=e162]
+          - generic [ref=e166]: Deduplication
+        - link "OCR Monitor" [ref=e167] [cursor=pointer]:
+          - /url: /ocr
+          - img [ref=e168]
+          - generic [ref=e170]: OCR Monitor
+        - link "System Health" [ref=e171] [cursor=pointer]:
+          - /url: /health
+          - img [ref=e172]
+          - generic [ref=e175]: System Health
+        - link "Audit Log" [ref=e176] [cursor=pointer]:
+          - /url: /audit
+          - img [ref=e177]
+          - generic [ref=e180]: Audit Log
+        - link "Banners" [ref=e181] [cursor=pointer]:
+          - /url: /banners
+          - img [ref=e182]
+          - generic [ref=e185]: Banners
+        - link "Settings" [ref=e186] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e187]
+          - generic [ref=e190]: Settings
+        - link "Design System" [ref=e191] [cursor=pointer]:
+          - /url: /design-system
+          - img [ref=e192]
+          - generic [ref=e194]: Design System
+  - main [ref=e195]:
+    - generic [ref=e196]:
+      - generic [ref=e197]:
+        - generic [ref=e198]:
+          - img [ref=e199]
+          - generic [ref=e201]: Maintenance
+          - generic [ref=e202]: OCR Engine restart at 03:00 UTC — minor processing delays expected.
+        - button "Dismiss banner" [ref=e203]:
+          - img [ref=e204]
+      - generic [ref=e207]:
+        - navigation "Breadcrumb" [ref=e208]:
+          - button "Home" [ref=e210]
+          - generic [ref=e211]:
+            - generic [ref=e212]: /
+            - button "BOM Explorer" [ref=e903]
+          - generic [ref=e904]:
+            - generic [ref=e905]: /
+            - generic [ref=e906]: Wap7
+        - generic [ref=e217]:
+          - generic [ref=e218]: 04 Apr 2026, 20:02:15
+          - button "Open command palette" [ref=e219]:
+            - img [ref=e220]
+            - generic [ref=e223]: Search…
+            - generic [ref=e224]: ⌘K
+          - button "Switch to light mode" [ref=e225]:
+            - img [ref=e226]
+          - button "Text size controls" [ref=e233]:
+            - img [ref=e234]
+          - button "Notifications (6 unread)" [ref=e237]:
+            - img [ref=e238]
+            - generic [ref=e241]: "6"
+          - button "Profile menu" [ref=e244] [cursor=pointer]:
+            - generic [ref=e245]: SA
+            - generic [ref=e246]:
+              - generic [ref=e247]: System Administrator
+              - generic [ref=e248]: admin
+    - generic [ref=e908]:
+      - generic [ref=e909]:
+        - generic [ref=e910]:
+          - navigation [ref=e911]:
+            - button "BOM Explorer" [ref=e912]:
+              - img [ref=e913]
+              - text: BOM Explorer
+            - img [ref=e917]
+          - heading "WAP-7" [level=1] [ref=e919]
+          - generic [ref=e920]: Production
+        - generic [ref=e921]:
+          - generic [ref=e922]:
+            - generic [ref=e923]:
+              - text: Nodes
+              - strong [ref=e924]: "7"
+            - generic [ref=e925]:
+              - text: Asm
+              - strong [ref=e926]: "7"
+            - generic [ref=e927]:
+              - text: Parts
+              - strong [ref=e928]: "0"
+          - button [ref=e929]:
+            - img [ref=e930]
+          - button "All Products" [ref=e933] [cursor=pointer]:
+            - img
+            - text: All Products
+          - button "PL Hub" [ref=e934] [cursor=pointer]:
+            - img
+            - text: PL Hub
+          - button "Add Node" [ref=e935] [cursor=pointer]:
+            - img
+            - text: Add Node
+      - generic [ref=e937]:
+        - generic [ref=e939]:
+          - generic [ref=e940]:
+            - img [ref=e941]
+            - textbox "Search by name, PL number, or tag..." [ref=e944]
+          - button "Expand All" [ref=e945]
+          - button "Collapse" [ref=e946]
+        - generic [ref=e947]:
+          - img [ref=e948]
+          - generic [ref=e951]: Drag a PL above, below, or into another node. Drop hints snap into place.
+        - generic [ref=e952]:
+          - generic [ref=e953]:
+            - generic [ref=e954]:
+              - img [ref=e955]
+              - generic [ref=e959]: Top-level drop lane
+            - paragraph [ref=e960]: Drop here to promote any dragged PL back to the root of the BOM.
+          - generic [ref=e961]:
+            - generic [ref=e962]:
+              - generic [ref=e963]:
+                - generic "Drag to restructure the hierarchy" [ref=e964]:
+                  - img [ref=e965]
+                - generic [ref=e972]:
+                  - button "Move up" [disabled] [ref=e973]:
+                    - img [ref=e974]
+                  - button "Move down" [disabled] [ref=e976]:
+                    - img [ref=e977]
+              - button [ref=e980]:
+                - img [ref=e981]
+              - img [ref=e983]
+              - generic [ref=e986]:
+                - generic [ref=e987]:
+                  - generic [ref=e988]: WAP7 Locomotive
+                  - img "Safety Vital" [ref=e989]
+                - generic [ref=e991]:
+                  - generic [ref=e992]: "38100000"
+                  - generic [ref=e993]: ·
+                  - generic [ref=e994]: Rev D
+                  - generic [ref=e995]: ·
+                  - generic [ref=e996]: "Qty: 1"
+              - generic [ref=e997]: Railway
+              - button "Remove WAP7 Locomotive from BOM" [ref=e998]:
+                - img [ref=e999]
+            - generic [ref=e1001]:
+              - generic [ref=e1003]:
+                - generic [ref=e1004]:
+                  - generic "Drag to restructure the hierarchy" [ref=e1005]:
+                    - img [ref=e1006]
+                  - generic [ref=e1013]:
+                    - button "Move up" [disabled] [ref=e1014]:
+                      - img [ref=e1015]
+                    - button "Move down" [ref=e1017]:
+                      - img [ref=e1018]
+                - button [ref=e1021]:
+                  - img [ref=e1022]
+                - img [ref=e1024]
+                - generic [ref=e1028]:
+                  - generic [ref=e1029]:
+                    - generic [ref=e1030]: Bogie Assembly
+                    - img "Safety Vital" [ref=e1031]
+                  - generic [ref=e1033]:
+                    - generic [ref=e1034]: "38110000"
+                    - generic [ref=e1035]: ·
+                    - generic [ref=e1036]: Rev C
+                    - generic [ref=e1037]: ·
+                    - generic [ref=e1038]: "Qty: 2"
+                - generic [ref=e1039]: Structural
+                - button "Remove Bogie Assembly from BOM" [ref=e1040]:
+                  - img [ref=e1041]
+              - generic [ref=e1044]:
+                - generic [ref=e1045]:
+                  - generic "Drag to restructure the hierarchy" [ref=e1046]:
+                    - img [ref=e1047]
+                  - generic [ref=e1054]:
+                    - button "Move up" [ref=e1055]:
+                      - img [ref=e1056]
+                    - button "Move down" [ref=e1058]:
+                      - img [ref=e1059]
+                - img [ref=e1063]
+                - generic [ref=e1067]:
+                  - generic [ref=e1068]:
+                    - generic [ref=e1069]: Main Transformer
+                    - img "Safety Vital" [ref=e1070]
+                  - generic [ref=e1072]:
+                    - generic [ref=e1073]: "38130000"
+                    - generic [ref=e1074]: ·
+                    - generic [ref=e1075]: Rev C
+                    - generic [ref=e1076]: ·
+                    - generic [ref=e1077]: "Qty: 1"
+                - generic [ref=e1078]: Electrical
+                - button "Remove Main Transformer from BOM" [ref=e1079]:
+                  - img [ref=e1080]
+              - generic [ref=e1083]:
+                - generic [ref=e1084]:
+                  - generic "Drag to restructure the hierarchy" [ref=e1085]:
+                    - img [ref=e1086]
+                  - generic [ref=e1093]:
+                    - button "Move up" [ref=e1094]:
+                      - img [ref=e1095]
+                    - button "Move down" [ref=e1097]:
+                      - img [ref=e1098]
+                - img [ref=e1102]
+                - generic [ref=e1106]:
+                  - generic [ref=e1107]:
+                    - generic [ref=e1108]: Control Electronics Cabinet
+                    - img "Safety Vital" [ref=e1109]
+                  - generic [ref=e1111]:
+                    - generic [ref=e1112]: "38140000"
+                    - generic [ref=e1113]: ·
+                    - generic [ref=e1114]: Rev B.3
+                    - generic [ref=e1115]: ·
+                    - generic [ref=e1116]: "Qty: 1"
+                - generic [ref=e1117]: Electronics
+                - button "Remove Control Electronics Cabinet from BOM" [ref=e1118]:
+                  - img [ref=e1119]
+              - generic [ref=e1122]:
+                - generic [ref=e1123]:
+                  - generic "Drag to restructure the hierarchy" [ref=e1124]:
+                    - img [ref=e1125]
+                  - generic [ref=e1132]:
+                    - button "Move up" [ref=e1133]:
+                      - img [ref=e1134]
+                    - button "Move down" [disabled] [ref=e1136]:
+                      - img [ref=e1137]
+                - img [ref=e1141]
+                - generic [ref=e1145]:
+                  - generic [ref=e1146]:
+                    - generic [ref=e1147]: Pantograph & Current Collection
+                    - img "Safety Vital" [ref=e1148]
+                  - generic [ref=e1150]:
+                    - generic [ref=e1151]: "38150000"
+                    - generic [ref=e1152]: ·
+                    - generic [ref=e1153]: Rev A.5
+                    - generic [ref=e1154]: ·
+                    - generic [ref=e1155]: "Qty: 2"
+                - generic [ref=e1156]: High Voltage
+                - button "Remove Pantograph & Current Collection from BOM" [ref=e1157]:
+                  - img [ref=e1158]
+          - generic [ref=e1160]:
+            - generic [ref=e1161]:
+              - img [ref=e1162]
+              - generic [ref=e1166]: Promote here
+            - paragraph [ref=e1167]: Useful when downgrading a child was a mistake and the PL belongs at the top level instead.

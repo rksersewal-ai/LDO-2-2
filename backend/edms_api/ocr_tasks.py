@@ -84,29 +84,9 @@ def process_ocr_job(job_id: str) -> bool:
         try:
             job = OcrJob.objects.get(id=job_id)
             _handle_ocr_failure(job, "unknown", str(e))
-        except:
-            pass
+        except Exception as inner_exc:
+            logger.error(f"Failed to update OCR job {job_id} after error: {inner_exc}")
         return False
-
-
-# Celery task wrapper (optional, if using Celery for async jobs)
-def setup_celery_tasks():
-    """
-    Setup Celery tasks if available
-    This is optional - OCR can run synchronously without Celery
-    """
-    try:
-        from celery import shared_task
-        
-        @shared_task
-        def async_process_ocr_job(job_id: str):
-            """Async OCR task for Celery"""
-            return process_ocr_job(job_id)
-        
-        return async_process_ocr_job
-    except ImportError:
-        logger.debug("Celery not installed, OCR will run synchronously")
-        return None
 
 
 # Convenience function to start OCR
@@ -136,13 +116,13 @@ def start_ocr_for_document(document_id: str, user=None) -> OcrJob:
     logger.info(f"Created OCR job {job.id} for document {document_id}")
     
     # Try async first (Celery), fall back to sync
-    async_task = setup_celery_tasks()
-    if async_task:
-        async_task.delay(job.id)
+    try:
+        from .tasks import async_process_ocr_job
+        async_process_ocr_job.delay(job.id)
         logger.info(f"Queued OCR job {job.id} for async processing")
-    else:
-        # Process synchronously
-        logger.info(f"Processing OCR job {job.id} synchronously")
+    except Exception:
+        # Celery unavailable — process synchronously
+        logger.info(f"Processing OCR job {job.id} synchronously (Celery unavailable)")
         process_ocr_job(job.id)
     
     return job

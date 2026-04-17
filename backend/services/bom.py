@@ -1,4 +1,3 @@
-import sys
 
 # Mock BomChangeSet if it isn't available
 try:

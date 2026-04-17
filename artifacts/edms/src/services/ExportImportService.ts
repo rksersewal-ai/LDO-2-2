@@ -1,13 +1,23 @@
-import * as XLSX from 'xlsx';
-import type { WorkRecord } from '../lib/types';
-import { MOCK_DOCUMENTS } from '../lib/mock';
+import * as XLSX from "xlsx";
+import type { WorkRecord } from "../lib/types";
+import { MOCK_DOCUMENTS } from "../lib/mock";
 
 export class ExportImportService {
-  private static buildTableHtml(title: string, headers: string[], rows: Array<Array<string | number>>, subtitle?: string) {
-    const head = headers.map((header) => `<th>${this.escapeHtml(header)}</th>`).join('');
+  private static buildTableHtml(
+    title: string,
+    headers: string[],
+    rows: Array<Array<string | number>>,
+    subtitle?: string,
+  ) {
+    const head = headers
+      .map((header) => `<th>${this.escapeHtml(header)}</th>`)
+      .join("");
     const body = rows
-      .map((row) => `<tr>${row.map((cell) => `<td>${this.escapeHtml(String(cell ?? ''))}</td>`).join('')}</tr>`)
-      .join('');
+      .map(
+        (row) =>
+          `<tr>${row.map((cell) => `<td>${this.escapeHtml(String(cell ?? ""))}</td>`).join("")}</tr>`,
+      )
+      .join("");
 
     return `<!doctype html>
 <html>
@@ -26,7 +36,7 @@ export class ExportImportService {
   </head>
   <body>
     <h1>${this.escapeHtml(title)}</h1>
-    ${subtitle ? `<p>${this.escapeHtml(subtitle)}</p>` : ''}
+    ${subtitle ? `<p>${this.escapeHtml(subtitle)}</p>` : ""}
     <table>
       <thead><tr>${head}</tr></thead>
       <tbody>${body}</tbody>
@@ -37,14 +47,14 @@ export class ExportImportService {
 
   private static escapeHtml(value: string) {
     return value
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 
-  private static getDaysTaken(record: WorkRecord): number | '' {
+  private static getDaysTaken(record: WorkRecord): number | "" {
     if (record.daysTaken != null) {
       return record.daysTaken;
     }
@@ -57,48 +67,144 @@ export class ExportImportService {
       }
     }
 
-    return '';
+    return "";
   }
 
   // ─── Work Records ─────────────────────────────────────────────────────────
 
   static exportWorkRecordsCSV(records: WorkRecord[]): Blob {
-    const headers = ['ID', 'Description', 'Category', 'Type', 'Status', 'Start Date', 'Closing Date', 'Days Taken', 'PL Number', 'eOffice Case', 'Target Days', 'Assignee', 'Verified By', 'Remarks'];
-    const rows = records.map(r => [r.id, r.description, r.workCategory, r.workType, r.status, r.date, r.closingDate || r.completionDate || '', this.getDaysTaken(r), r.plNumber || '', r.eOfficeNumber || '', r.targetDays ?? '', r.userName, r.verifiedBy || '', r.remarks || '']);
+    const headers = [
+      "ID",
+      "Description",
+      "Category",
+      "Type",
+      "Status",
+      "Start Date",
+      "Closing Date",
+      "Days Taken",
+      "PL Number",
+      "eOffice Case",
+      "Target Days",
+      "Assignee",
+      "Verified By",
+      "Remarks",
+    ];
+    const rows = records.map((r) => [
+      r.id,
+      r.description,
+      r.workCategory,
+      r.workType,
+      r.status,
+      r.date,
+      r.closingDate || r.completionDate || "",
+      this.getDaysTaken(r),
+      r.plNumber || "",
+      r.eOfficeNumber || "",
+      r.targetDays ?? "",
+      r.userName,
+      r.verifiedBy || "",
+      r.remarks || "",
+    ]);
     const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
     const csv = XLSX.utils.sheet_to_csv(ws);
-    return new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    return new Blob([csv], { type: "text/csv;charset=utf-8;" });
   }
 
   static exportWorkRecordsExcel(records: WorkRecord[]) {
-    const headers = ['ID', 'Description', 'Category', 'Type', 'Status', 'Start Date', 'Closing Date', 'Days Taken', 'PL Number', 'eOffice Case', 'Target Days', 'Assignee', 'Verified By', 'Remarks'];
-    const rows = records.map(r => [r.id, r.description, r.workCategory, r.workType, r.status, r.date, r.closingDate || r.completionDate || '', this.getDaysTaken(r), r.plNumber || '', r.eOfficeNumber || '', r.targetDays ?? '', r.userName, r.verifiedBy || '', r.remarks || '']);
+    const headers = [
+      "ID",
+      "Description",
+      "Category",
+      "Type",
+      "Status",
+      "Start Date",
+      "Closing Date",
+      "Days Taken",
+      "PL Number",
+      "eOffice Case",
+      "Target Days",
+      "Assignee",
+      "Verified By",
+      "Remarks",
+    ];
+    const rows = records.map((r) => [
+      r.id,
+      r.description,
+      r.workCategory,
+      r.workType,
+      r.status,
+      r.date,
+      r.closingDate || r.completionDate || "",
+      this.getDaysTaken(r),
+      r.plNumber || "",
+      r.eOfficeNumber || "",
+      r.targetDays ?? "",
+      r.userName,
+      r.verifiedBy || "",
+      r.remarks || "",
+    ]);
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-    ws['!cols'] = headers.map((_, i) => ({ wch: i === 1 ? 40 : 18 }));
-    XLSX.utils.book_append_sheet(wb, ws, 'Work Records');
-    const date = new Date().toISOString().split('T')[0];
+    ws["!cols"] = headers.map((_, i) => ({ wch: i === 1 ? 40 : 18 }));
+    XLSX.utils.book_append_sheet(wb, ws, "Work Records");
+    const date = new Date().toISOString().split("T")[0];
     XLSX.writeFile(wb, `work-records-${date}.xlsx`);
   }
 
   // ─── Documents ────────────────────────────────────────────────────────────
 
   static exportDocumentsCSV(): Blob {
-    const headers = ['ID', 'Name', 'Type', 'Status', 'Revision', 'Size', 'OCR Status', 'OCR Confidence'];
-    const rows = MOCK_DOCUMENTS.map(d => [d.id, d.name, d.type, d.status, d.revision, d.size, d.ocrStatus || 'Pending', d.ocrConfidence ?? '']);
+    const headers = [
+      "ID",
+      "Name",
+      "Type",
+      "Status",
+      "Revision",
+      "Size",
+      "OCR Status",
+      "OCR Confidence",
+    ];
+    const rows = MOCK_DOCUMENTS.map((d) => [
+      d.id,
+      d.name,
+      d.type,
+      d.status,
+      d.revision,
+      d.size,
+      d.ocrStatus || "Pending",
+      d.ocrConfidence ?? "",
+    ]);
     const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
     const csv = XLSX.utils.sheet_to_csv(ws);
-    return new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    return new Blob([csv], { type: "text/csv;charset=utf-8;" });
   }
 
   static exportDocumentsExcel() {
-    const headers = ['ID', 'Name', 'Type', 'Status', 'Revision', 'Size', 'OCR Status', 'OCR Confidence'];
-    const rows = MOCK_DOCUMENTS.map(d => [d.id, d.name, d.type, d.status, d.revision, d.size, d.ocrStatus || 'Pending', d.ocrConfidence ?? '']);
+    const headers = [
+      "ID",
+      "Name",
+      "Type",
+      "Status",
+      "Revision",
+      "Size",
+      "OCR Status",
+      "OCR Confidence",
+    ];
+    const rows = MOCK_DOCUMENTS.map((d) => [
+      d.id,
+      d.name,
+      d.type,
+      d.status,
+      d.revision,
+      d.size,
+      d.ocrStatus || "Pending",
+      d.ocrConfidence ?? "",
+    ]);
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-    ws['!cols'] = headers.map((_, i) => ({ wch: i === 1 ? 45 : 16 }));
-    XLSX.utils.book_append_sheet(wb, ws, 'Documents');
-    const date = new Date().toISOString().split('T')[0];
+    ws["!cols"] = headers.map((_, i) => ({ wch: i === 1 ? 45 : 16 }));
+    XLSX.utils.book_append_sheet(wb, ws, "Documents");
+    const date = new Date().toISOString().split("T")[0];
     XLSX.writeFile(wb, `documents-${date}.xlsx`);
   }
 
@@ -110,35 +216,52 @@ export class ExportImportService {
       reader.onload = (e) => {
         try {
           const data = new Uint8Array(e.target?.result as ArrayBuffer);
-          const wb = XLSX.read(data, { type: 'array' });
+          const wb = XLSX.read(data, { type: "array" });
           const ws = wb.Sheets[wb.SheetNames[0]];
-          const rows = XLSX.utils.sheet_to_json<Record<string, string>>(ws, { defval: '' });
+          const rows = XLSX.utils.sheet_to_json<Record<string, string>>(ws, {
+            defval: "",
+          });
           resolve(rows);
-        } catch (err) { reject(err); }
+        } catch (err) {
+          reject(err);
+        }
       };
       reader.onerror = reject;
       reader.readAsArrayBuffer(file);
     });
   }
 
-  static mapRowToWorkRecord(row: Record<string, string>, userId: string, userName: string): Partial<WorkRecord> {
-    const startDate = row['Start Date'] || row['Date'] || row['date'] || new Date().toISOString().split('T')[0];
-    const closingDate = row['Closing Date'] || row['closingDate'] || '';
-    const parsedDays = Number(row['Days Taken'] || row['daysTaken'] || '');
+  static mapRowToWorkRecord(
+    row: Record<string, string>,
+    userId: string,
+    userName: string,
+  ): Partial<WorkRecord> {
+    const startDate =
+      row["Start Date"] ||
+      row["Date"] ||
+      row["date"] ||
+      new Date().toISOString().split("T")[0];
+    const closingDate = row["Closing Date"] || row["closingDate"] || "";
+    const parsedDays = Number(row["Days Taken"] || row["daysTaken"] || "");
 
     return {
-      description: row['Description'] || row['description'] || '',
-      workCategory: (row['Category'] || row['category'] || 'GENERAL') as WorkRecord['workCategory'],
-      workType: row['Type'] || row['type'] || '',
-      status: (row['Status'] || row['status'] || 'OPEN') as WorkRecord['status'],
+      description: row["Description"] || row["description"] || "",
+      workCategory: (row["Category"] ||
+        row["category"] ||
+        "GENERAL") as WorkRecord["workCategory"],
+      workType: row["Type"] || row["type"] || "",
+      status: (row["Status"] ||
+        row["status"] ||
+        "OPEN") as WorkRecord["status"],
       date: startDate,
       closingDate: closingDate || undefined,
       completionDate: closingDate || undefined,
-      plNumber: row['PL Number'] || row['plNumber'] || '',
-      eOfficeNumber: row['eOffice Case'] || row['eOfficeNumber'] || '',
+      plNumber: row["PL Number"] || row["plNumber"] || "",
+      eOfficeNumber: row["eOffice Case"] || row["eOfficeNumber"] || "",
       daysTaken: Number.isFinite(parsedDays) ? parsedDays : undefined,
-      targetDays: Number(row['Target Days'] || row['targetDays'] || '') || undefined,
-      remarks: row['Remarks'] || row['remarks'] || '',
+      targetDays:
+        Number(row["Target Days"] || row["targetDays"] || "") || undefined,
+      remarks: row["Remarks"] || row["remarks"] || "",
       userId,
       userName,
     };
@@ -148,7 +271,7 @@ export class ExportImportService {
 
   static downloadBlob(blob: Blob, filename: string) {
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = filename;
     document.body.appendChild(a);
@@ -158,34 +281,55 @@ export class ExportImportService {
   }
 
   static downloadWorkRecordsCSV(records: WorkRecord[]) {
-    const date = new Date().toISOString().split('T')[0];
-    this.downloadBlob(this.exportWorkRecordsCSV(records), `work-records-${date}.csv`);
+    const date = new Date().toISOString().split("T")[0];
+    this.downloadBlob(
+      this.exportWorkRecordsCSV(records),
+      `work-records-${date}.csv`,
+    );
   }
 
   static downloadDocumentsCSV() {
-    const date = new Date().toISOString().split('T')[0];
+    const date = new Date().toISOString().split("T")[0];
     this.downloadBlob(this.exportDocumentsCSV(), `documents-${date}.csv`);
   }
 
-  static exportGenericTableExcel(sheetName: string, headers: string[], rows: Array<Array<string | number>>, filenamePrefix: string) {
+  static exportGenericTableExcel(
+    sheetName: string,
+    headers: string[],
+    rows: Array<Array<string | number>>,
+    filenamePrefix: string,
+  ) {
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-    ws['!cols'] = headers.map((header) => ({ wch: Math.max(16, Math.min(42, header.length + 8)) }));
-    XLSX.utils.book_append_sheet(wb, ws, sheetName.slice(0, 31) || 'Report');
-    const date = new Date().toISOString().split('T')[0];
+    ws["!cols"] = headers.map((header) => ({
+      wch: Math.max(16, Math.min(42, header.length + 8)),
+    }));
+    XLSX.utils.book_append_sheet(wb, ws, sheetName.slice(0, 31) || "Report");
+    const date = new Date().toISOString().split("T")[0];
     XLSX.writeFile(wb, `${filenamePrefix}-${date}.xlsx`);
   }
 
-  static exportGenericTableWord(title: string, headers: string[], rows: Array<Array<string | number>>, filenamePrefix: string, subtitle?: string) {
+  static exportGenericTableWord(
+    title: string,
+    headers: string[],
+    rows: Array<Array<string | number>>,
+    filenamePrefix: string,
+    subtitle?: string,
+  ) {
     const html = this.buildTableHtml(title, headers, rows, subtitle);
-    const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
-    const date = new Date().toISOString().split('T')[0];
+    const blob = new Blob(["\ufeff", html], { type: "application/msword" });
+    const date = new Date().toISOString().split("T")[0];
     this.downloadBlob(blob, `${filenamePrefix}-${date}.doc`);
   }
 
-  static exportGenericTablePdf(title: string, headers: string[], rows: Array<Array<string | number>>, subtitle?: string) {
+  static exportGenericTablePdf(
+    title: string,
+    headers: string[],
+    rows: Array<Array<string | number>>,
+    subtitle?: string,
+  ) {
     const html = this.buildTableHtml(title, headers, rows, subtitle);
-    const printWindow = window.open('', '_blank', 'width=1200,height=900');
+    const printWindow = window.open("", "_blank", "width=1200,height=900");
     if (!printWindow) return;
     printWindow.document.open();
     printWindow.document.write(html);
@@ -197,13 +341,37 @@ export class ExportImportService {
   }
 
   static getImportTemplate(): Blob {
-    const headers = ['Description', 'Category', 'Type', 'Status', 'Start Date', 'Closing Date', 'PL Number', 'eOffice Case', 'Days Taken', 'Remarks'];
-    const example = ['Replace traction motor brush gear', 'GENERAL', 'Scheduled PM', 'SUBMITTED', new Date().toISOString().split('T')[0], new Date().toISOString().split('T')[0], 'PL-2026-001', 'EOC-2026-001', '0', 'Routine maintenance'];
+    const headers = [
+      "Description",
+      "Category",
+      "Type",
+      "Status",
+      "Start Date",
+      "Closing Date",
+      "PL Number",
+      "eOffice Case",
+      "Days Taken",
+      "Remarks",
+    ];
+    const example = [
+      "Replace traction motor brush gear",
+      "GENERAL",
+      "Scheduled PM",
+      "SUBMITTED",
+      new Date().toISOString().split("T")[0],
+      new Date().toISOString().split("T")[0],
+      "PL-2026-001",
+      "EOC-2026-001",
+      "0",
+      "Routine maintenance",
+    ];
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet([headers, example]);
-    ws['!cols'] = headers.map(() => ({ wch: 22 }));
-    XLSX.utils.book_append_sheet(wb, ws, 'Template');
-    const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    return new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    ws["!cols"] = headers.map(() => ({ wch: 22 }));
+    XLSX.utils.book_append_sheet(wb, ws, "Template");
+    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    return new Blob([buf], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
   }
 }

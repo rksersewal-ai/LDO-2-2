@@ -1,8 +1,8 @@
-import { ReactNode } from 'react';
-import { AlertCircle, CheckCircle, Info, AlertTriangle, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { ReactNode } from "react";
+import { AlertCircle, CheckCircle, Info, AlertTriangle, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
-export type ToastType = 'success' | 'error' | 'warning' | 'info';
+export type ToastType = "success" | "error" | "warning" | "info";
 
 export interface ToastMessage {
   id: string;
@@ -18,31 +18,38 @@ interface ToastProps extends ToastMessage {
 
 function getToastIcon(type: ToastType) {
   switch (type) {
-    case 'success':
+    case "success":
       return <CheckCircle className="w-5 h-5 text-primary" />;
-    case 'error':
+    case "error":
       return <AlertCircle className="w-5 h-5 text-rose-400" />;
-    case 'warning':
+    case "warning":
       return <AlertTriangle className="w-5 h-5 text-amber-400" />;
-    case 'info':
+    case "info":
       return <Info className="w-5 h-5 text-blue-400" />;
   }
 }
 
 function getToastStyles(type: ToastType) {
   switch (type) {
-    case 'success':
-      return 'bg-teal-900/40 border-teal-500/30 text-teal-100';
-    case 'error':
-      return 'bg-rose-900/40 border-rose-500/30 text-rose-100';
-    case 'warning':
-      return 'bg-amber-900/40 border-amber-500/30 text-amber-100';
-    case 'info':
-      return 'bg-blue-900/40 border-blue-500/30 text-blue-100';
+    case "success":
+      return "bg-teal-900/40 border-teal-500/30 text-teal-100";
+    case "error":
+      return "bg-rose-900/40 border-rose-500/30 text-rose-100";
+    case "warning":
+      return "bg-amber-900/40 border-amber-500/30 text-amber-100";
+    case "info":
+      return "bg-blue-900/40 border-blue-500/30 text-blue-100";
   }
 }
 
-export function Toast({ id, message, type, duration = 4000, action, onClose }: ToastProps) {
+export function Toast({
+  id,
+  message,
+  type,
+  duration = 4000,
+  action,
+  onClose,
+}: ToastProps) {
   return (
     <motion.div
       layout
@@ -86,7 +93,7 @@ export function ToastContainer({ toasts, onClose }: ToastContainerProps) {
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none">
       <AnimatePresence mode="popLayout">
-        {toasts.map(toast => (
+        {toasts.map((toast) => (
           <div key={toast.id} className="pointer-events-auto">
             <Toast {...toast} onClose={onClose} />
           </div>

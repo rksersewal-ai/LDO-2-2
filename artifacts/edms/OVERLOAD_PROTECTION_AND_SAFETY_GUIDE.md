@@ -3,6 +3,7 @@
 ## Overview
 
 This guide documents the implementation of:
+
 1. **Overload Protection** — Debounce, throttle, and concurrency limiting
 2. **Action Safety** — Safe delete patterns with soft delete (no data loss)
 3. **Spacing/Typography Normalization** — CSS variables for consistent UX
@@ -16,6 +17,7 @@ This guide documents the implementation of:
 Five production-ready hooks for preventing browser/server overload:
 
 #### `useDebounce(value, delayMs)`
+
 Delays expensive operations until user stops changing input
 
 ```typescript
@@ -33,13 +35,14 @@ useEffect(() => {
 ---
 
 #### `useThrottle(value, intervalMs)`
+
 Limits how frequently a function can be called
 
 ```typescript
 const throttledScroll = useThrottle(scrollY, 100);
 
 useEffect(() => {
-  console.log('Scroll position:', throttledScroll); // Max once per 100ms
+  console.log("Scroll position:", throttledScroll); // Max once per 100ms
 }, [throttledScroll]);
 ```
 
@@ -48,6 +51,7 @@ useEffect(() => {
 ---
 
 #### `useDebouncedCallback(callback, delayMs, deps)`
+
 Combines useCallback with debounce for handlers
 
 ```typescript
@@ -66,16 +70,21 @@ const debouncedSearch = useDebouncedCallback((query) => {
 ---
 
 #### `useThrottledCallback(callback, intervalMs, deps)`
+
 Combines useCallback with throttle for handlers
 
 ```typescript
-const throttledResize = useThrottledCallback(() => {
-  recalculateLayout();
-}, 100, []);
+const throttledResize = useThrottledCallback(
+  () => {
+    recalculateLayout();
+  },
+  100,
+  [],
+);
 
 useEffect(() => {
-  window.addEventListener('resize', throttledResize);
-  return () => window.removeEventListener('resize', throttledResize);
+  window.addEventListener("resize", throttledResize);
+  return () => window.removeEventListener("resize", throttledResize);
 }, [throttledResize]);
 ```
 
@@ -84,6 +93,7 @@ useEffect(() => {
 ---
 
 #### `useConcurrencyLimiter(maxConcurrent)`
+
 Prevents request floods on bulk operations
 
 ```typescript
@@ -103,12 +113,13 @@ const handleBulkDelete = async (ids: string[]) => {
 ---
 
 #### `useBatcher(batchFn, flushDelayMs, maxBatchSize)`
+
 Groups rapid updates into single async operation
 
 ```typescript
 const batcher = useBatcher(performBulkUpdate, 300, 50);
 
-items.forEach(item => {
+items.forEach((item) => {
   batcher.add(item); // Batches up to 50 items or 300ms idle
 });
 
@@ -127,6 +138,7 @@ if (batcher.pending === 0) {
 ### File Created: `src/components/ui/SafeActionButton.tsx`
 
 #### Design Principle: NO HARD DELETES
+
 - All deletions are **soft deletes** (archived/marked inactive)
 - Data is recoverable — nothing permanently lost
 - Confirmation required before any state change
@@ -151,6 +163,7 @@ Safe wrapper for dangerous actions (delete, archive, disable)
 ```
 
 **Props:**
+
 - `action`: 'delete' | 'archive' | 'disable' | 'custom'
 - `itemName`: Specific item being affected (e.g., "WR-2026-001")
 - `message`: Explain what will happen
@@ -158,6 +171,7 @@ Safe wrapper for dangerous actions (delete, archive, disable)
 - `variant`: 'danger' | 'warning' | 'default'
 
 **Features:**
+
 - Confirmation dialog before any action
 - Shows what will happen (soft delete message)
 - Loading state during operation
@@ -186,6 +200,7 @@ Safe action button with loading state and error handling
 ```
 
 **Features:**
+
 - Automatic loading state
 - Error handling
 - Success/error callbacks
@@ -198,39 +213,42 @@ Safe action button with loading state and error handling
 ### CSS Variables Added to `src/index.css`
 
 #### Typography Scale
+
 ```css
---font-size-app-title: 32px;      /* Dashboard, major headings */
---font-size-page-title: 28px;     /* Work Ledger, DocumentHub */
---font-size-section-title: 20px;  /* KPI Stats, Recent Items */
+--font-size-app-title: 32px; /* Dashboard, major headings */
+--font-size-page-title: 28px; /* Work Ledger, DocumentHub */
+--font-size-section-title: 20px; /* KPI Stats, Recent Items */
 --font-size-subsection-title: 16px; /* Card headers */
---font-size-body: 14px;           /* Default text */
---font-size-label: 13px;          /* Form labels */
---font-size-caption: 12px;        /* Timestamps, hints */
---font-size-micro: 11px;          /* Only tags, badges */
---font-size-mono-data: 13px;      /* IDs, tabular numbers */
+--font-size-body: 14px; /* Default text */
+--font-size-label: 13px; /* Form labels */
+--font-size-caption: 12px; /* Timestamps, hints */
+--font-size-micro: 11px; /* Only tags, badges */
+--font-size-mono-data: 13px; /* IDs, tabular numbers */
 ```
 
 #### Spacing Scale
+
 ```css
---spacing-xs: 4px;    /* Tiny gaps */
---spacing-sm: 8px;    /* Small gaps */
---spacing-md: 12px;   /* Standard gaps (form fields) */
---spacing-lg: 16px;   /* Medium gaps (between sections) */
---spacing-xl: 20px;   /* Large gaps */
---spacing-2xl: 24px;  /* Large section gaps */
---spacing-3xl: 32px;  /* Very large gaps */
---spacing-4xl: 40px;  /* Extra large gaps */
---spacing-5xl: 48px;  /* Maximum gaps */
+--spacing-xs: 4px; /* Tiny gaps */
+--spacing-sm: 8px; /* Small gaps */
+--spacing-md: 12px; /* Standard gaps (form fields) */
+--spacing-lg: 16px; /* Medium gaps (between sections) */
+--spacing-xl: 20px; /* Large gaps */
+--spacing-2xl: 24px; /* Large section gaps */
+--spacing-3xl: 32px; /* Very large gaps */
+--spacing-4xl: 40px; /* Extra large gaps */
+--spacing-5xl: 48px; /* Maximum gaps */
 ```
 
 #### Component Heights
+
 ```css
---height-table-row-dense: 36px;      /* WorkLedger, AuditLog */
---height-table-row: 44px;            /* DocumentHub, normal rows */
---height-control: 36px;              /* Buttons, inputs, selects */
---height-action-button: 40px;        /* Primary actions */
---padding-control-h: 12px;           /* Horizontal padding */
---padding-control-v: 8px;            /* Vertical padding */
+--height-table-row-dense: 36px; /* WorkLedger, AuditLog */
+--height-table-row: 44px; /* DocumentHub, normal rows */
+--height-control: 36px; /* Buttons, inputs, selects */
+--height-action-button: 40px; /* Primary actions */
+--padding-control-h: 12px; /* Horizontal padding */
+--padding-control-v: 8px; /* Vertical padding */
 ```
 
 ---
@@ -330,6 +348,7 @@ export function BulkApprovalPanel() {
 ### Backend Contract
 
 **Soft Delete (Recommended):**
+
 ```typescript
 PATCH /records/:id
 {
@@ -340,6 +359,7 @@ PATCH /records/:id
 ```
 
 **Recovery:**
+
 ```typescript
 PATCH /records/:id/restore
 {
@@ -373,7 +393,7 @@ export const WorkLedgerService = {
 
   // List excludes archived by default
   async getActive(params?: any): Promise<WorkRecord[]> {
-    const result = await apiClient.getList('/work-records/', {
+    const result = await apiClient.getList("/work-records/", {
       ...params,
       excludeArchived: true,
     });
@@ -382,7 +402,7 @@ export const WorkLedgerService = {
 
   // Admin can see archived items
   async getAll(params?: any): Promise<WorkRecord[]> {
-    return apiClient.getList('/work-records/', params);
+    return apiClient.getList("/work-records/", params);
   },
 };
 ```
@@ -430,18 +450,21 @@ export const WorkLedgerService = {
 ## Implementation Checklist
 
 ### Overload Protection
+
 - [ ] Import `useDebounce` for search inputs
 - [ ] Import `useDebouncedCallback` for filter handlers
 - [ ] Import `useConcurrencyLimiter` for bulk operations
 - [ ] Add abort signals to all API calls (via `useAbortOnNavigate`)
 
 ### Action Safety
+
 - [ ] Replace `<button>Delete</button>` with `<SafeActionButton action="delete">`
 - [ ] Ensure all "delete" endpoints do soft delete (set `isArchived: true`)
 - [ ] Add recovery/restore endpoint for soft-deleted items
 - [ ] Update list queries to exclude archived by default
 
 ### Typography/Spacing
+
 - [ ] Use `--font-size-*` CSS variables instead of inline sizes
 - [ ] Use `--spacing-*` CSS variables for gaps/padding
 - [ ] Audit existing pages for hardcoded sizes
@@ -452,18 +475,21 @@ export const WorkLedgerService = {
 ## Testing Checklist
 
 ### Overload Protection
+
 - [ ] Type rapidly in search input — debounce should limit API calls
 - [ ] Open DevTools Network tab and verify < 1 request per 300ms
 - [ ] Change multiple filters rapidly — no duplicate requests
 - [ ] Bulk import 100 files with concurrency=5 — no 100 concurrent requests
 
 ### Action Safety
+
 - [ ] Click delete button — confirmation dialog appears
 - [ ] Dialog shows what will happen (soft delete message)
 - [ ] Confirm — item marked archived, not deleted from DB
 - [ ] Admin can restore archived items
 
 ### Typography/Spacing
+
 - [ ] All page titles same size (28px)
 - [ ] All form field gaps same (12px)
 - [ ] All table rows same height (dense: 36px, normal: 44px)
@@ -473,12 +499,12 @@ export const WorkLedgerService = {
 
 ## Files Summary
 
-| File | Purpose | Status |
-|------|---------|--------|
-| `src/hooks/useOverloadProtection.ts` | Debounce, throttle, concurrency | ✅ Created |
-| `src/components/ui/SafeActionButton.tsx` | Safe delete/archive with confirmation | ✅ Created |
-| `src/index.css` | Typography & spacing variables | ✅ Updated |
-| `OVERLOAD_PROTECTION_AND_SAFETY_GUIDE.md` | This guide | ✅ Created |
+| File                                      | Purpose                               | Status     |
+| ----------------------------------------- | ------------------------------------- | ---------- |
+| `src/hooks/useOverloadProtection.ts`      | Debounce, throttle, concurrency       | ✅ Created |
+| `src/components/ui/SafeActionButton.tsx`  | Safe delete/archive with confirmation | ✅ Created |
+| `src/index.css`                           | Typography & spacing variables        | ✅ Updated |
+| `OVERLOAD_PROTECTION_AND_SAFETY_GUIDE.md` | This guide                            | ✅ Created |
 
 ---
 

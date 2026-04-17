@@ -1,12 +1,12 @@
 /**
  * TableSafeWrapper Component
- * 
+ *
  * Wraps table sections with crash protection:
  * - Loading state handling
  * - Error boundary isolation (prevents table crashes from taking down page)
  * - Retry mechanism for failed table loads
  * - Graceful degradation with empty state
- * 
+ *
  * Usage:
  *   <TableSafeWrapper
  *     isLoading={loading}
@@ -19,9 +19,9 @@
  *   </TableSafeWrapper>
  */
 
-import { ErrorBoundary } from './ErrorBoundary';
-import { LoadingState } from './LoadingState';
-import { ErrorState } from './ErrorState';
+import { ErrorBoundary } from "./ErrorBoundary";
+import { LoadingState } from "./LoadingState";
+import { ErrorState } from "./ErrorState";
 
 interface TableSafeWrapperProps {
   children: React.ReactNode;
@@ -43,9 +43,9 @@ export function TableSafeWrapper({
   error,
   onRetry,
   itemCount = 0,
-  emptyMessage = 'No items to display',
+  emptyMessage = "No items to display",
   name,
-  minHeight = 'min-h-[300px]',
+  minHeight = "min-h-[300px]",
 }: TableSafeWrapperProps) {
   const showLoading = isLoading && itemCount === 0;
 
@@ -64,7 +64,9 @@ export function TableSafeWrapper({
         ) : itemCount === 0 ? (
           <div className="h-full flex items-center justify-center">
             <div className="text-center">
-              <p className="text-sm text-muted-foreground mb-3">{emptyMessage}</p>
+              <p className="text-sm text-muted-foreground mb-3">
+                {emptyMessage}
+              </p>
               {onRetry && (
                 <button
                   onClick={onRetry}

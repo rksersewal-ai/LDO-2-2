@@ -1,15 +1,15 @@
 /**
  * SafeActionButton Component
- * 
+ *
  * Safe wrapper for dangerous actions (delete, disable, archive).
  * Implements soft-delete (safe, reversible) with confirmation dialog.
- * 
+ *
  * Design Principles:
  * - No hard deletes (data loss prevented by soft delete)
  * - Confirmation required before any state change
  * - Clear, honest messaging about what will happen
  * - Optional undo capability
- * 
+ *
  * Usage:
  *   <SafeActionButton
  *     action="delete"
@@ -21,20 +21,29 @@
  *   </SafeActionButton>
  */
 
-import { useState } from 'react';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './alert-dialog';
-import { Button } from './button';
-import { AlertTriangle, Trash2, Archive, Ban } from 'lucide-react';
+import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./alert-dialog";
+import { Button } from "./button";
+import { AlertTriangle, Trash2, Archive, Ban } from "lucide-react";
 
 interface SafeActionButtonProps {
-  action: 'delete' | 'archive' | 'disable' | 'custom';
+  action: "delete" | "archive" | "disable" | "custom";
   itemName?: string;
   message?: string;
   onConfirm: () => void | Promise<void>;
   onCancel?: () => void;
   children: React.ReactNode;
   className?: string;
-  variant?: 'danger' | 'warning' | 'default';
+  variant?: "danger" | "warning" | "default";
   isLoading?: boolean;
   disabled?: boolean;
   title?: string;
@@ -43,35 +52,36 @@ interface SafeActionButtonProps {
 const ACTION_CONFIG = {
   delete: {
     icon: Trash2,
-    title: 'Archive Item?',
-    description: 'This item will be soft-deleted (archived). You can restore it later. No data is permanently lost.',
-    actionLabel: 'Archive',
-    cancelLabel: 'Cancel',
-    color: 'text-rose-400',
+    title: "Archive Item?",
+    description:
+      "This item will be soft-deleted (archived). You can restore it later. No data is permanently lost.",
+    actionLabel: "Archive",
+    cancelLabel: "Cancel",
+    color: "text-rose-400",
   },
   archive: {
     icon: Archive,
-    title: 'Archive Item?',
-    description: 'This item will be archived and hidden from normal views.',
-    actionLabel: 'Archive',
-    cancelLabel: 'Cancel',
-    color: 'text-amber-400',
+    title: "Archive Item?",
+    description: "This item will be archived and hidden from normal views.",
+    actionLabel: "Archive",
+    cancelLabel: "Cancel",
+    color: "text-amber-400",
   },
   disable: {
     icon: Ban,
-    title: 'Disable Item?',
-    description: 'This item will be disabled but remain in the system.',
-    actionLabel: 'Disable',
-    cancelLabel: 'Cancel',
-    color: 'text-muted-foreground',
+    title: "Disable Item?",
+    description: "This item will be disabled but remain in the system.",
+    actionLabel: "Disable",
+    cancelLabel: "Cancel",
+    color: "text-muted-foreground",
   },
   custom: {
     icon: AlertTriangle,
-    title: 'Confirm Action?',
-    description: 'Please confirm this action.',
-    actionLabel: 'Confirm',
-    cancelLabel: 'Cancel',
-    color: 'text-amber-400',
+    title: "Confirm Action?",
+    description: "Please confirm this action.",
+    actionLabel: "Confirm",
+    cancelLabel: "Cancel",
+    color: "text-amber-400",
   },
 };
 
@@ -82,8 +92,8 @@ export function SafeActionButton({
   onConfirm,
   onCancel,
   children,
-  className = '',
-  variant = 'danger',
+  className = "",
+  variant = "danger",
   isLoading = false,
   disabled = false,
   title,
@@ -115,9 +125,12 @@ export function SafeActionButton({
   };
 
   const variantStyles = {
-    danger: 'hover:bg-rose-500/10 hover:border-rose-500/30 text-rose-400 hover:text-rose-300',
-    warning: 'hover:bg-amber-500/10 hover:border-amber-500/30 text-amber-400 hover:text-amber-300',
-    default: 'hover:bg-slate-500/10 hover:border-slate-500/30 text-muted-foreground hover:text-foreground/90',
+    danger:
+      "hover:bg-rose-500/10 hover:border-rose-500/30 text-rose-400 hover:text-rose-300",
+    warning:
+      "hover:bg-amber-500/10 hover:border-amber-500/30 text-amber-400 hover:text-amber-300",
+    default:
+      "hover:bg-slate-500/10 hover:border-slate-500/30 text-muted-foreground hover:text-foreground/90",
   };
 
   return (
@@ -128,7 +141,7 @@ export function SafeActionButton({
         onClick={() => setIsOpen(true)}
         disabled={disabled || isLoading || isProcessing}
         className={`${variantStyles[variant]} transition-colors ${className}`}
-        title={`${action.charAt(0).toUpperCase() + action.slice(1)}${itemName ? ` ${itemName}` : ''}`}
+        title={`${action.charAt(0).toUpperCase() + action.slice(1)}${itemName ? ` ${itemName}` : ""}`}
       >
         {children}
       </Button>
@@ -144,9 +157,12 @@ export function SafeActionButton({
 
           <AlertDialogDescription className="space-y-3">
             <p>{message || config.description}</p>
-            {itemName && <p className="text-sm font-mono text-foreground/90">{itemName}</p>}
+            {itemName && (
+              <p className="text-sm font-mono text-foreground/90">{itemName}</p>
+            )}
             <p className="text-xs text-slate-600 italic">
-              💡 No data is permanently deleted. Items can be restored from archive.
+              💡 No data is permanently deleted. Items can be restored from
+              archive.
             </p>
           </AlertDialogDescription>
 
@@ -159,7 +175,7 @@ export function SafeActionButton({
               disabled={isProcessing}
               className="bg-rose-500/20 text-rose-400 border-rose-500/30 hover:bg-rose-500/30"
             >
-              {isProcessing ? 'Processing...' : config.actionLabel}
+              {isProcessing ? "Processing..." : config.actionLabel}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -170,7 +186,7 @@ export function SafeActionButton({
 
 /**
  * CommandButton: Safe action button with loading state and error handling
- * 
+ *
  * Usage:
  *   <CommandButton
  *     onClick={async () => await deleteRecord(id)}
@@ -190,22 +206,22 @@ interface CommandButtonProps {
   onSuccess?: () => void;
   onError?: (error: Error) => void;
   className?: string;
-  variant?: 'default' | 'danger' | 'warning';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: "default" | "danger" | "warning";
+  size?: "sm" | "md" | "lg";
   disabled?: boolean;
 }
 
 export function CommandButton({
   onClick,
   children,
-  loadingMessage = 'Processing...',
-  successMessage = 'Done',
-  errorMessage = 'Error',
+  loadingMessage = "Processing...",
+  successMessage = "Done",
+  errorMessage = "Error",
   onSuccess,
   onError,
-  className = '',
-  variant = 'default',
-  size = 'md',
+  className = "",
+  variant = "default",
+  size = "md",
   disabled = false,
 }: CommandButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
@@ -228,15 +244,18 @@ export function CommandButton({
   };
 
   const variantClasses = {
-    default: 'bg-teal-500/20 text-primary border-teal-500/30 hover:bg-teal-500/30',
-    danger: 'bg-rose-500/20 text-rose-400 border-rose-500/30 hover:bg-rose-500/30',
-    warning: 'bg-amber-500/20 text-amber-400 border-amber-500/30 hover:bg-amber-500/30',
+    default:
+      "bg-teal-500/20 text-primary border-teal-500/30 hover:bg-teal-500/30",
+    danger:
+      "bg-rose-500/20 text-rose-400 border-rose-500/30 hover:bg-rose-500/30",
+    warning:
+      "bg-amber-500/20 text-amber-400 border-amber-500/30 hover:bg-amber-500/30",
   };
 
   const sizeClasses = {
-    sm: 'text-xs px-2 py-1',
-    md: 'text-sm px-3 py-2',
-    lg: 'text-base px-4 py-2.5',
+    sm: "text-xs px-2 py-1",
+    md: "text-sm px-3 py-2",
+    lg: "text-base px-4 py-2.5",
   };
 
   return (

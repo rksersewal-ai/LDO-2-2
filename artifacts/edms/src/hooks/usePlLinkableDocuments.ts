@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import apiClient from '../services/ApiClient';
+import { useCallback, useEffect, useState } from "react";
+import apiClient from "../services/ApiClient";
 
 export interface PlLinkableDocument {
   id: string;
@@ -13,8 +13,8 @@ export interface PlLinkableDocument {
 }
 
 function formatSize(size: number | null | undefined): string {
-  if (!size || size <= 0) return '0 B';
-  const units = ['B', 'KB', 'MB', 'GB'];
+  if (!size || size <= 0) return "0 B";
+  const units = ["B", "KB", "MB", "GB"];
   let value = size;
   let unit = 0;
   while (value >= 1024 && unit < units.length - 1) {
@@ -28,12 +28,14 @@ function mapApiDocument(doc: any): PlLinkableDocument {
   return {
     id: String(doc.id),
     name: doc.name ?? doc.title ?? String(doc.id),
-    category: doc.category ?? 'OTHER',
-    revision: String(doc.revision ?? ''),
-    status: doc.status ?? 'Draft',
-    size: formatSize(typeof doc.size === 'number' ? doc.size : Number(doc.size ?? 0)),
+    category: doc.category ?? "OTHER",
+    revision: String(doc.revision ?? ""),
+    status: doc.status ?? "Draft",
+    size: formatSize(
+      typeof doc.size === "number" ? doc.size : Number(doc.size ?? 0),
+    ),
     ocrStatus: doc.ocr_status,
-    date: doc.updated_at ?? doc.date ?? doc.created_at ?? '',
+    date: doc.updated_at ?? doc.date ?? doc.created_at ?? "",
   };
 }
 
@@ -53,7 +55,7 @@ export function usePlLinkableDocuments(search?: string) {
       });
       setDocuments(response.items.map(mapApiDocument));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load documents');
+      setError(err instanceof Error ? err.message : "Failed to load documents");
     } finally {
       setLoading(false);
     }

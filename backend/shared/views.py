@@ -9,7 +9,6 @@ from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -90,6 +89,14 @@ class LogoutView(APIView):
             ip_address=request.META.get('REMOTE_ADDR'),
         )
         return success_response({'message': 'Logged out successfully'})
+
+
+class CurrentUserView(APIView):
+    """GET /api/auth/me/ — returns the currently authenticated user profile."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return success_response({'user': serialize_user(request.user)})
 
 
 class SearchView(APIView):
@@ -256,7 +263,7 @@ class HealthStatusView(APIView):
                 cursor.execute('SELECT 1')
                 cursor.fetchone()
             db_status = 'OK'
-        except Exception as exc:  # pragma: no cover
+        except Exception:  # pragma: no cover
             logger.exception('Health check database probe failed')
             db_status = 'ERROR'
 
@@ -264,18 +271,18 @@ class HealthStatusView(APIView):
         memory = psutil.virtual_memory()
         disk_root = settings.BASE_DIR.anchor or str(settings.BASE_DIR)
         disk = psutil.disk_usage(disk_root)
-        return success_response(
-            {
+        data = {
                 'status': 'OK',
                 'timestamp': timezone.now(),
                 'services': {'database': db_status, 'ocr': 'OK', 'cache': 'OK'},
-                'metrics': {
+            }
+        if request.user and request.user.is_authenticated:
+            data['metrics'] = {
                     'cpu_percent': cpu_percent,
                     'memory_percent': memory.percent,
                     'disk_percent': disk.percent,
-                },
-            },
-        )
+                }
+        return success_response(data)
 
 
 class DashboardStatsView(APIView):

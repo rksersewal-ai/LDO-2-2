@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode } from "react";
 
 export interface RightPanelContent {
   panelKey?: string;
@@ -21,7 +21,9 @@ interface RightPanelContextType {
   closePanel: () => void;
 }
 
-const RightPanelContext = createContext<RightPanelContextType | undefined>(undefined);
+const RightPanelContext = createContext<RightPanelContextType | undefined>(
+  undefined,
+);
 
 export function RightPanelProvider({ children }: { children: ReactNode }) {
   const [content, setContent] = useState<RightPanelContent | null>(null);
@@ -35,7 +37,9 @@ export function RightPanelProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <RightPanelContext.Provider value={{ content, setContent, openPanel, closePanel }}>
+    <RightPanelContext.Provider
+      value={{ content, setContent, openPanel, closePanel }}
+    >
       {children}
     </RightPanelContext.Provider>
   );
@@ -44,7 +48,7 @@ export function RightPanelProvider({ children }: { children: ReactNode }) {
 export function useRightPanel() {
   const ctx = useContext(RightPanelContext);
   if (!ctx) {
-    throw new Error('useRightPanel must be used within RightPanelProvider');
+    throw new Error("useRightPanel must be used within RightPanelProvider");
   }
   return ctx;
 }

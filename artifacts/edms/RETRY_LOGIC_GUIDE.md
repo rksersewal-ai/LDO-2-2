@@ -10,25 +10,25 @@ The API client now automatically retries failed requests that are caused by tran
 
 ### ✅ Retried Errors (Transient)
 
-| Error | Status | Rationale |
-|-------|--------|-----------|
-| Network timeout | ECONNABORTED, ETIMEDOUT | Likely temporary network issue |
-| Connection refused | ECONNREFUSED | Server might be restarting |
-| Rate limiting | 429 Too Many Requests | Backend can handle later |
-| Server errors | 5xx | Server hiccup, might succeed next time |
-| Request timeout | 408 Request Timeout | Temporary issue |
-| No network | ENOTFOUND, EAI_AGAIN | Network connectivity issue |
+| Error              | Status                  | Rationale                              |
+| ------------------ | ----------------------- | -------------------------------------- |
+| Network timeout    | ECONNABORTED, ETIMEDOUT | Likely temporary network issue         |
+| Connection refused | ECONNREFUSED            | Server might be restarting             |
+| Rate limiting      | 429 Too Many Requests   | Backend can handle later               |
+| Server errors      | 5xx                     | Server hiccup, might succeed next time |
+| Request timeout    | 408 Request Timeout     | Temporary issue                        |
+| No network         | ENOTFOUND, EAI_AGAIN    | Network connectivity issue             |
 
 ### ❌ NOT Retried (Permanent)
 
-| Error | Status | Rationale |
-|-------|--------|-----------|
-| Bad request | 400 | Invalid input, won't change |
-| Unauthorized | 401 | Auth issue, won't be fixed by retry |
-| Forbidden | 403 | Permissions issue, won't change |
-| Not found | 404 | Resource doesn't exist |
-| Invalid data | 422 | Validation error |
-| Conflict | 409 | Data conflict |
+| Error        | Status | Rationale                           |
+| ------------ | ------ | ----------------------------------- |
+| Bad request  | 400    | Invalid input, won't change         |
+| Unauthorized | 401    | Auth issue, won't be fixed by retry |
+| Forbidden    | 403    | Permissions issue, won't change     |
+| Not found    | 404    | Resource doesn't exist              |
+| Invalid data | 422    | Validation error                    |
+| Conflict     | 409    | Data conflict                       |
 
 ---
 
@@ -59,6 +59,7 @@ Attempt 4: Wait ~4s + jitter (±10%), then retry
 ```
 
 **Example timeline:**
+
 ```
 t=0ms:    GET /documents/ → timeout
 t=900ms:  Delay (1000ms - 100ms jitter)
@@ -88,6 +89,7 @@ When a retry occurs, the client logs a warning:
 ```
 
 This helps you:
+
 - Monitor when transient failures occur
 - Understand retry behavior during debugging
 - See final success without code changes
@@ -99,13 +101,13 @@ This helps you:
 ### Global Configuration
 
 ```typescript
-import apiClient from '@/services/ApiClient';
+import apiClient from "@/services/ApiClient";
 
 // Set globally for all future requests
 apiClient.setRetryConfig({
-  maxRetries: 5,           // More retries for unreliable networks
-  initialDelayMs: 2000,    // Wait longer initially
-  maxDelayMs: 60000        // Cap at 1 minute
+  maxRetries: 5, // More retries for unreliable networks
+  initialDelayMs: 2000, // Wait longer initially
+  maxDelayMs: 60000, // Cap at 1 minute
 });
 
 // Later, retrieve current config
@@ -143,6 +145,7 @@ async createDocument(data: FormData) {
 ✅ **Automatically retried** up to `maxRetries` times
 
 Getting the same data multiple times is safe:
+
 ```typescript
 // Safe: Getting documents 3 times = getting documents 1 time
 GET /documents/ → 503 → GET /documents/ → 503 → GET /documents/ → 200 ✓
@@ -153,6 +156,7 @@ GET /documents/ → 503 → GET /documents/ → 503 → GET /documents/ → 200 
 ❌ **Not retried by default** (unsafe)
 
 Mutating the same data multiple times could create duplicates:
+
 ```typescript
 // Unsafe: Creating a document 3 times = 3 documents!
 POST /documents/ { title: 'Invoice' } → timeout → POST /documents/ → 201 ✓
@@ -226,13 +230,13 @@ const { data, loading, error } = useDocumentList({ page: 1 });
 ### Manual API Calls
 
 ```typescript
-import apiClient from '@/services/ApiClient';
+import apiClient from "@/services/ApiClient";
 
 // Automatically retries on transient failures
 const docs = await apiClient.getDocuments({ page: 1 });
 
 // Automatically retries on transient failures
-const doc = await apiClient.getDocument('doc-123');
+const doc = await apiClient.getDocument("doc-123");
 
 // Does NOT retry (mutations are unsafe to retry)
 const created = await apiClient.createDocument(formData);
@@ -246,7 +250,7 @@ async function createWithRetry(data) {
       return await apiClient.createDocument(data);
     } catch (error) {
       if (i === maxAttempts - 1) throw error;
-      await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+      await new Promise((r) => setTimeout(r, 1000 * (i + 1)));
     }
   }
 }
@@ -256,17 +260,17 @@ async function createWithRetry(data) {
 
 ```typescript
 try {
-  const docs = await apiClient.getDocuments({ search: 'test' });
+  const docs = await apiClient.getDocuments({ search: "test" });
 } catch (error) {
   // At this point, we've already retried 3 times and it still failed
   // This is likely a permanent error (401, 404, 422, etc.)
-  
+
   if (error.response?.status === 401) {
     // Auth error - redirect to login
-    window.location.href = '/login';
+    window.location.href = "/login";
   } else if (error.response?.status === 404) {
     // Resource not found
-    showError('Resource not found');
+    showError("Resource not found");
   } else {
     // Some other error
     showError(`Failed after retries: ${error.message}`);
@@ -293,6 +297,7 @@ Enable browser console to see retry attempts:
 ### Network Tab
 
 In DevTools Network tab:
+
 - You'll see multiple requests for the same URL
 - All but the last one likely timed out or returned 5xx
 - The last one should return 200
@@ -300,6 +305,7 @@ In DevTools Network tab:
 ### React DevTools
 
 Component data flows normally:
+
 - `loading` → `true` (during all retries)
 - Once any attempt succeeds → `data` populated, `loading` → `false`
 - If all fail → `error` populated, `loading` → `false`
@@ -315,7 +321,7 @@ Component data flows normally:
 private isRetryableError(error: any): boolean {
   // Force retry for testing
   if (Math.random() < 0.5) return true;  // 50% of requests retry
-  
+
   // Rest of logic...
 }
 ```
@@ -381,9 +387,9 @@ Total:      ~13.2s (vs. immediate failure without retry)
 ```typescript
 // Default is 30s, some operations need more
 apiClient.setRetryConfig({
-  maxRetries: 5,           // More attempts
-  initialDelayMs: 5000,    // Start with 5s delay
-  maxDelayMs: 60000        // Cap at 1 minute
+  maxRetries: 5, // More attempts
+  initialDelayMs: 5000, // Start with 5s delay
+  maxDelayMs: 60000, // Cap at 1 minute
 });
 ```
 
@@ -419,7 +425,7 @@ If you need to verify, check server state first:
 try {
   const created = await apiClient.createDocument(data);
 } catch (error) {
-  if (error.code === 'ECONNABORTED') {
+  if (error.code === "ECONNABORTED") {
     // Might have been created - check server
     const existing = await apiClient.getDocuments({ search: data.title });
     if (existing.total > 0) {
@@ -446,14 +452,14 @@ try {
 
 ## Summary
 
-| Feature | Behavior |
-|---------|----------|
-| Automatic retries | ✅ GET requests only |
-| Exponential backoff | ✅ 1s → 2s → 4s (capped at 30s) |
-| Jitter | ✅ Random ±10% to prevent thundering herd |
-| Console logging | ✅ "Request failed (code), retrying in Xms" |
-| Customizable | ✅ `setRetryConfig()` for global changes |
-| Safe mutations | ✅ POST/PATCH/DELETE not retried |
-| Idempotent GETs | ✅ Always retried |
+| Feature             | Behavior                                    |
+| ------------------- | ------------------------------------------- |
+| Automatic retries   | ✅ GET requests only                        |
+| Exponential backoff | ✅ 1s → 2s → 4s (capped at 30s)             |
+| Jitter              | ✅ Random ±10% to prevent thundering herd   |
+| Console logging     | ✅ "Request failed (code), retrying in Xms" |
+| Customizable        | ✅ `setRetryConfig()` for global changes    |
+| Safe mutations      | ✅ POST/PATCH/DELETE not retried            |
+| Idempotent GETs     | ✅ Always retried                           |
 
 **Result:** Better resilience, fewer user complaints, same code. 🎯

@@ -1,17 +1,17 @@
 /**
  * ErrorBoundary Component
- * 
+ *
  * Class component that catches JavaScript errors in child components.
  * Prevents full-page crashes from risky widgets (charts, viewers, third-party).
- * 
+ *
  * Usage:
  * <ErrorBoundary name="ChartWidget" onError={console.error}>
  *   <ExpensiveChart data={data} />
  * </ErrorBoundary>
  */
 
-import React, { ReactNode } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import React, { ReactNode } from "react";
+import { AlertTriangle } from "lucide-react";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -26,7 +26,10 @@ interface ErrorBoundaryState {
   error: Error | null;
 }
 
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null };
@@ -41,7 +44,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     console.error(
       `[ErrorBoundary] ${this.props.name} crashed:`,
       error,
-      errorInfo
+      errorInfo,
     );
 
     // Call user-provided error handler
@@ -70,7 +73,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             </h3>
           </div>
           <p className="text-xs text-rose-300/70 mb-4 max-w-md text-center">
-            {this.state.error?.message || 'An unexpected error occurred'}
+            {this.state.error?.message || "An unexpected error occurred"}
           </p>
           <button
             onClick={this.handleReset}

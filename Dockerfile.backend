@@ -1,0 +1,40 @@
+# ── Backend — Python/Django + Gunicorn ─────────────────────────────────────────
+FROM python:3.12-slim AS runtime
+
+# System deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq-dev \
+    gcc \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Install Python deps first (layer cache)
+COPY backend/requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Optional OCR support (install if requirements-ocr.txt present)
+COPY backend/requirements-ocr.txt ./requirements-ocr.txt
+RUN pip install --no-cache-dir -r requirements-ocr.txt || true
+
+COPY backend/ ./
+
+# Create non-root user
+RUN addgroup --system edms && adduser --system --ingroup edms edms
+RUN chown -R edms:edms /app
+USER edms
+
+# Static files dir
+RUN mkdir -p /app/staticfiles /app/media
+
+EXPOSE 8420
+
+# Run Django via Gunicorn
+CMD ["gunicorn", "edms.wsgi:application", \
+     "--bind", "0.0.0.0:8420", \
+     "--workers", "3", \
+     "--timeout", "120", \
+     "--log-level", "info", \
+     "--access-logfile", "-", \
+     "--error-logfile", "-"]

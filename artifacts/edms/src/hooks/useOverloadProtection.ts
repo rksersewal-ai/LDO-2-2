@@ -1,17 +1,17 @@
 /**
  * useOverloadProtection Hooks
- * 
+ *
  * Shared utilities for preventing browser/server overload:
  * - Debounce: delay rapid function calls (search, filter changes)
  * - Throttle: limit call frequency (scroll, resize events)
  * - Concurrency limiter: prevent request floods (bulk operations)
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from "react";
 
 /**
  * Debounce Hook: Delay expensive operations until user stops changing input
- * 
+ *
  * Usage:
  *   const debouncedSearch = useDebounce(searchQuery, 300);
  *   useEffect(() => {
@@ -34,7 +34,7 @@ export function useDebounce<T>(value: T, delayMs: number = 300): T {
 
 /**
  * Throttle Hook: Limit how frequently a function can be called
- * 
+ *
  * Usage:
  *   const throttledScroll = useThrottle(scrollY, 100);
  *   useEffect(() => {
@@ -52,10 +52,13 @@ export function useThrottle<T>(value: T, intervalMs: number = 200): T {
       setThrottledValue(value);
       return undefined;
     } else {
-      const timer = setTimeout(() => {
-        lastUpdatedRef.current = Date.now();
-        setThrottledValue(value);
-      }, intervalMs - (now - lastUpdatedRef.current));
+      const timer = setTimeout(
+        () => {
+          lastUpdatedRef.current = Date.now();
+          setThrottledValue(value);
+        },
+        intervalMs - (now - lastUpdatedRef.current),
+      );
 
       return () => clearTimeout(timer);
     }
@@ -66,7 +69,7 @@ export function useThrottle<T>(value: T, intervalMs: number = 200): T {
 
 /**
  * Debounced Callback: Combines useCallback with debounce for handlers
- * 
+ *
  * Usage:
  *   const debouncedSearch = useDebouncedCallback((query) => {
  *     performSearch(query);
@@ -75,7 +78,7 @@ export function useThrottle<T>(value: T, intervalMs: number = 200): T {
 export function useDebouncedCallback<T extends (...args: any[]) => void>(
   callback: T,
   delayMs: number = 300,
-  deps: React.DependencyList = []
+  deps: React.DependencyList = [],
 ): T {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -92,13 +95,13 @@ export function useDebouncedCallback<T extends (...args: any[]) => void>(
         callback(...args);
       }, delayMs);
     },
-    [callback, delayMs, ...deps]
+    [callback, delayMs, ...deps],
   ) as T;
 }
 
 /**
  * Throttled Callback: Combines useCallback with throttle for handlers
- * 
+ *
  * Usage:
  *   const throttledResize = useThrottledCallback(() => {
  *     recalculateLayout();
@@ -107,7 +110,7 @@ export function useDebouncedCallback<T extends (...args: any[]) => void>(
 export function useThrottledCallback<T extends (...args: any[]) => void>(
   callback: T,
   intervalMs: number = 200,
-  deps: React.DependencyList = []
+  deps: React.DependencyList = [],
 ): T {
   const lastCalledRef = useRef(0);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -134,13 +137,13 @@ export function useThrottledCallback<T extends (...args: any[]) => void>(
         }, intervalMs - timeSinceLastCall);
       }
     },
-    [callback, intervalMs, ...deps]
+    [callback, intervalMs, ...deps],
   ) as T;
 }
 
 /**
  * Concurrency Limiter: Limit simultaneous async operations
- * 
+ *
  * Usage:
  *   const limiter = useConcurrencyLimiter(3); // Max 3 concurrent
  *   const results = await limiter.run(async () => {
@@ -163,17 +166,17 @@ export function useConcurrencyLimiter(maxConcurrent: number = 5) {
   }, [processQueue]);
 
   const run = useCallback(
-    async <T,>(fn: () => Promise<T>): Promise<T> => {
+    async <T>(fn: () => Promise<T>): Promise<T> => {
       return new Promise((resolve, reject) => {
         const execute = async () => {
-          setActiveCount(c => c + 1);
+          setActiveCount((c) => c + 1);
           try {
             const result = await fn();
             resolve(result);
           } catch (error) {
             reject(error);
           } finally {
-            setActiveCount(c => c - 1);
+            setActiveCount((c) => c - 1);
             processQueue();
           }
         };
@@ -185,7 +188,7 @@ export function useConcurrencyLimiter(maxConcurrent: number = 5) {
         }
       });
     },
-    [activeCount, maxConcurrent, processQueue]
+    [activeCount, maxConcurrent, processQueue],
   );
 
   return { run, activeCount };
@@ -193,7 +196,7 @@ export function useConcurrencyLimiter(maxConcurrent: number = 5) {
 
 /**
  * Batch Operations: Group multiple updates into single async operation
- * 
+ *
  * Usage:
  *   const batcher = useBatcher(performBulkUpdate, 300);
  *   items.forEach(item => batcher.add(item));
@@ -202,7 +205,7 @@ export function useConcurrencyLimiter(maxConcurrent: number = 5) {
 export function useBatcher<T>(
   batchFn: (items: T[]) => Promise<void>,
   flushDelayMs: number = 500,
-  maxBatchSize: number = 100
+  maxBatchSize: number = 100,
 ) {
   const [pending, setPending] = useState(0);
   const batchRef = useRef<T[]>([]);
@@ -214,11 +217,11 @@ export function useBatcher<T>(
     const batch = batchRef.current;
     batchRef.current = [];
 
-    setPending(p => p + batch.length);
+    setPending((p) => p + batch.length);
     try {
       await batchFn(batch);
     } finally {
-      setPending(p => Math.max(0, p - batch.length));
+      setPending((p) => Math.max(0, p - batch.length));
     }
   }, [batchFn]);
 
@@ -234,7 +237,7 @@ export function useBatcher<T>(
         timeoutRef.current = setTimeout(flush, flushDelayMs);
       }
     },
-    [flush, maxBatchSize, flushDelayMs]
+    [flush, maxBatchSize, flushDelayMs],
   );
 
   useEffect(() => {

@@ -1,16 +1,20 @@
 /**
  * useApi Hook
  * Simplified API integration hook for React components with standardized API responses
- * 
+ *
  * All list endpoints return: NormalizedListResult<T>
  * All item endpoints return: T
  * All mutations return: T
  */
 
-import { useState, useCallback } from 'react';
-import { AxiosError } from 'axios';
-import apiClient from '../services/ApiClient';
-import type { NormalizedListResult, ListQueryParams, SearchScope } from '../lib/types';
+import { useState, useCallback } from "react";
+import { AxiosError } from "axios";
+import apiClient from "../services/ApiClient";
+import type {
+  NormalizedListResult,
+  ListQueryParams,
+  SearchScope,
+} from "../lib/types";
 
 interface UseApiState<T> {
   data: T | null;
@@ -28,10 +32,7 @@ interface UseApiOptions {
  * Generic API hook for GET requests
  * For list endpoints, ensures normalized response shape
  */
-export function useApiGet<T = any>(
-  url: string,
-  options: UseApiOptions = {}
-) {
+export function useApiGet<T = any>(url: string, options: UseApiOptions = {}) {
   const [state, setState] = useState<UseApiState<T>>({
     data: null,
     loading: options.autoFetch !== false,
@@ -39,15 +40,15 @@ export function useApiGet<T = any>(
   });
 
   const fetch = useCallback(async () => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
+    setState((prev) => ({ ...prev, loading: true, error: null }));
     try {
       const response = await apiClient.client.get(url);
-      setState(prev => ({ ...prev, data: response.data, loading: false }));
+      setState((prev) => ({ ...prev, data: response.data, loading: false }));
       options.onSuccess?.(response.data);
     } catch (error) {
       const err = error as AxiosError;
       const message = apiClient.getErrorMessage(err);
-      setState(prev => ({ ...prev, error: message, loading: false }));
+      setState((prev) => ({ ...prev, error: message, loading: false }));
       options.onError?.(err);
     }
   }, [url, options]);
@@ -59,8 +60,8 @@ export function useApiGet<T = any>(
  * Generic API hook for POST/PATCH requests
  */
 export function useApiMutation<T = any, D = any>(
-  method: 'post' | 'patch' | 'put' | 'delete' = 'post',
-  options: UseApiOptions = {}
+  method: "post" | "patch" | "put" | "delete" = "post",
+  options: UseApiOptions = {},
 ) {
   const [state, setState] = useState<UseApiState<T>>({
     data: null,
@@ -70,26 +71,26 @@ export function useApiMutation<T = any, D = any>(
 
   const mutate = useCallback(
     async (url: string, data?: D) => {
-      setState(prev => ({ ...prev, loading: true, error: null }));
+      setState((prev) => ({ ...prev, loading: true, error: null }));
       try {
         let response;
-        if (method === 'delete') {
+        if (method === "delete") {
           response = await apiClient.client.delete(url);
         } else {
           response = await apiClient.client[method](url, data);
         }
-        setState(prev => ({ ...prev, data: response.data, loading: false }));
+        setState((prev) => ({ ...prev, data: response.data, loading: false }));
         options.onSuccess?.(response.data);
         return response.data;
       } catch (error) {
         const err = error as AxiosError;
         const message = apiClient.getErrorMessage(err);
-        setState(prev => ({ ...prev, error: message, loading: false }));
+        setState((prev) => ({ ...prev, error: message, loading: false }));
         options.onError?.(err);
         throw err;
       }
     },
-    [method, options]
+    [method, options],
   );
 
   return { ...state, mutate };
@@ -107,26 +108,28 @@ export function useDocumentList(query?: ListQueryParams) {
   });
 
   const fetch = useCallback(async () => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
+    setState((prev) => ({ ...prev, loading: true, error: null }));
     try {
       const response = await apiClient.getDocuments(query);
-      setState(prev => ({ ...prev, data: response, loading: false }));
+      setState((prev) => ({ ...prev, data: response, loading: false }));
     } catch (error) {
       const err = error as AxiosError;
       const message = apiClient.getErrorMessage(err);
-      setState(prev => ({ ...prev, error: message, loading: false }));
+      setState((prev) => ({ ...prev, error: message, loading: false }));
     }
   }, [query?.page, query?.pageSize, query?.search, query?.sort]);
 
-  const createMutation = useApiMutation('post');
-  const updateMutation = useApiMutation('patch');
-  const deleteMutation = useApiMutation('delete');
+  const createMutation = useApiMutation("post");
+  const updateMutation = useApiMutation("patch");
+  const deleteMutation = useApiMutation("delete");
 
   return {
     ...state,
     refetch: fetch,
-    createDocument: (data: FormData) => createMutation.mutate('/documents/', data),
-    updateDocument: (id: string, data: any) => updateMutation.mutate(`/documents/${id}/`, data),
+    createDocument: (data: FormData) =>
+      createMutation.mutate("/documents/", data),
+    updateDocument: (id: string, data: any) =>
+      updateMutation.mutate(`/documents/${id}/`, data),
     deleteDocument: (id: string) => deleteMutation.mutate(`/documents/${id}/`),
   };
 }
@@ -143,26 +146,27 @@ export function useWorkRecordList(query?: ListQueryParams) {
   });
 
   const fetch = useCallback(async () => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
+    setState((prev) => ({ ...prev, loading: true, error: null }));
     try {
       const response = await apiClient.getWorkRecords(query);
-      setState(prev => ({ ...prev, data: response, loading: false }));
+      setState((prev) => ({ ...prev, data: response, loading: false }));
     } catch (error) {
       const err = error as AxiosError;
       const message = apiClient.getErrorMessage(err);
-      setState(prev => ({ ...prev, error: message, loading: false }));
+      setState((prev) => ({ ...prev, error: message, loading: false }));
     }
   }, [query?.page, query?.pageSize, query?.search, query?.sort]);
 
-  const createMutation = useApiMutation('post');
-  const updateMutation = useApiMutation('patch');
-  const deleteMutation = useApiMutation('delete');
+  const createMutation = useApiMutation("post");
+  const updateMutation = useApiMutation("patch");
+  const deleteMutation = useApiMutation("delete");
 
   return {
     ...state,
     refetch: fetch,
-    createRecord: (data: any) => createMutation.mutate('/work-records/', data),
-    updateRecord: (id: string, data: any) => updateMutation.mutate(`/work-records/${id}/`, data),
+    createRecord: (data: any) => createMutation.mutate("/work-records/", data),
+    updateRecord: (id: string, data: any) =>
+      updateMutation.mutate(`/work-records/${id}/`, data),
     deleteRecord: (id: string) => deleteMutation.mutate(`/work-records/${id}/`),
   };
 }
@@ -213,18 +217,18 @@ export function useSearch(query: string, scope?: SearchScope) {
 
   const search = useCallback(async () => {
     if (!query.trim()) {
-      setState(prev => ({ ...prev, data: null }));
+      setState((prev) => ({ ...prev, data: null }));
       return;
     }
 
-    setState(prev => ({ ...prev, loading: true, error: null }));
+    setState((prev) => ({ ...prev, loading: true, error: null }));
     try {
       const response = await apiClient.search(query, scope);
-      setState(prev => ({ ...prev, data: response, loading: false }));
+      setState((prev) => ({ ...prev, data: response, loading: false }));
     } catch (error) {
       const err = error as AxiosError;
       const message = apiClient.getErrorMessage(err);
-      setState(prev => ({ ...prev, error: message, loading: false }));
+      setState((prev) => ({ ...prev, error: message, loading: false }));
     }
   }, [query, scope]);
 

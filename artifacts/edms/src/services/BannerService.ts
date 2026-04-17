@@ -1,4 +1,4 @@
-import { MOCK_BANNERS } from '../lib/mockExtended';
+import { MOCK_BANNERS } from "../lib/mockExtended";
 
 export interface BannerRecord {
   id: string;
@@ -11,12 +11,12 @@ export interface BannerRecord {
   order: number;
 }
 
-const STORAGE_KEY = 'ldo2_banners';
+const STORAGE_KEY = "ldo2_banners";
 
 function buildDefaultStore(): BannerRecord[] {
-  return MOCK_BANNERS
-    .map((banner) => ({ ...banner }))
-    .sort((left, right) => left.order - right.order);
+  return MOCK_BANNERS.map((banner) => ({ ...banner })).sort(
+    (left, right) => left.order - right.order,
+  );
 }
 
 function resequence(banners: BannerRecord[]) {
@@ -24,7 +24,7 @@ function resequence(banners: BannerRecord[]) {
 }
 
 function loadStore(): BannerRecord[] {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return buildDefaultStore();
   }
 
@@ -38,20 +38,20 @@ function loadStore(): BannerRecord[] {
 
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) {
-      throw new Error('Banner store is not an array');
+      throw new Error("Banner store is not an array");
     }
 
     return resequence(
       parsed.map((banner) => ({
         id: String(banner.id),
-        title: String(banner.title ?? ''),
-        message: String(banner.message ?? ''),
+        title: String(banner.title ?? ""),
+        message: String(banner.message ?? ""),
         link: banner.link ? String(banner.link) : null,
         active: Boolean(banner.active),
-        validFrom: String(banner.validFrom ?? ''),
-        validTo: String(banner.validTo ?? ''),
+        validFrom: String(banner.validFrom ?? ""),
+        validTo: String(banner.validTo ?? ""),
         order: Number(banner.order ?? 0),
-      }))
+      })),
     );
   } catch {
     const fallback = buildDefaultStore();
@@ -61,7 +61,7 @@ function loadStore(): BannerRecord[] {
 }
 
 function persist(banners: BannerRecord[]) {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(banners));
   }
 }
@@ -70,10 +70,12 @@ let _store = loadStore();
 
 export const BannerService = {
   getAll(): Promise<BannerRecord[]> {
-    return Promise.resolve([..._store].sort((left, right) => left.order - right.order));
+    return Promise.resolve(
+      [..._store].sort((left, right) => left.order - right.order),
+    );
   },
 
-  create(input: Omit<BannerRecord, 'id' | 'order'>): Promise<BannerRecord> {
+  create(input: Omit<BannerRecord, "id" | "order">): Promise<BannerRecord> {
     const banner: BannerRecord = {
       ...input,
       id: `BNR-${Date.now()}`,
@@ -84,7 +86,10 @@ export const BannerService = {
     return Promise.resolve(banner);
   },
 
-  update(id: string, patch: Partial<Omit<BannerRecord, 'id'>>): Promise<BannerRecord | null> {
+  update(
+    id: string,
+    patch: Partial<Omit<BannerRecord, "id">>,
+  ): Promise<BannerRecord | null> {
     const index = _store.findIndex((banner) => banner.id === id);
     if (index < 0) {
       return Promise.resolve(null);
@@ -93,7 +98,7 @@ export const BannerService = {
     _store[index] = {
       ..._store[index],
       ...patch,
-      link: patch.link === '' ? null : (patch.link ?? _store[index].link),
+      link: patch.link === "" ? null : (patch.link ?? _store[index].link),
     };
     _store = resequence(_store);
     persist(_store);

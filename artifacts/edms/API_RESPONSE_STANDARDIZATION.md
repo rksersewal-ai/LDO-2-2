@@ -3,6 +3,7 @@
 ## Overview
 
 All API endpoints in the EDMS application now return standardized response shapes, making it easier to:
+
 - Build reusable hooks and components
 - Handle pagination consistently
 - Test and debug API integration
@@ -18,15 +19,16 @@ All `GET /endpoint/` calls return a normalized pagination object:
 
 ```typescript
 interface NormalizedListResult<T> {
-  items: T[];           // The actual data array
-  total: number;        // Total count of all items
-  page: number;         // Current page (1-indexed)
-  pageSize: number;     // Items per page
-  hasMore: boolean;     // Whether more items exist beyond current page
+  items: T[]; // The actual data array
+  total: number; // Total count of all items
+  page: number; // Current page (1-indexed)
+  pageSize: number; // Items per page
+  hasMore: boolean; // Whether more items exist beyond current page
 }
 ```
 
 **Example:**
+
 ```typescript
 const result = await apiClient.getDocuments({
   page: 1,
@@ -49,7 +51,7 @@ const result = await apiClient.getDocuments({
 All `GET /endpoint/:id` calls return the item directly:
 
 ```typescript
-const doc = await apiClient.getDocument('doc-123');
+const doc = await apiClient.getDocument("doc-123");
 // Returns: Document
 ```
 
@@ -58,7 +60,9 @@ const doc = await apiClient.getDocument('doc-123');
 POST/PATCH/PUT/DELETE operations return the affected item:
 
 ```typescript
-const updated = await apiClient.updateDocument('doc-123', { status: 'APPROVED' });
+const updated = await apiClient.updateDocument("doc-123", {
+  status: "APPROVED",
+});
 // Returns: Document (with new data)
 ```
 
@@ -68,16 +72,16 @@ const updated = await apiClient.updateDocument('doc-123', { status: 'APPROVED' }
 
 ### List Endpoints (all now return `NormalizedListResult<T>`)
 
-| Endpoint | Method | Returns | New Signature |
-|----------|--------|---------|---|
-| `/documents/` | `getDocuments()` | `NormalizedListResult<Document>` | `getDocuments(query?: ListQueryParams)` |
-| `/work-records/` | `getWorkRecords()` | `NormalizedListResult<WorkRecord>` | `getWorkRecords(query?: ListQueryParams)` |
-| `/pl-items/` | `getPlItems()` | `NormalizedListResult<PLNumber>` | `getPlItems(query?: ListQueryParams)` |
-| `/cases/` | `getCases()` | `NormalizedListResult<CaseRecord>` | `getCases(query?: ListQueryParams)` |
-| `/approvals/` | `getApprovals()` | `NormalizedListResult<Approval>` | `getApprovals(query?: ListQueryParams)` |
-| `/ocr/jobs/` | `getOcrJobs()` | `NormalizedListResult<OcrJob>` | `getOcrJobs(query?: ListQueryParams)` |
-| `/audit/log/` | `getAuditLog()` | `NormalizedListResult<AuditEntry>` | `getAuditLog(query?: ListQueryParams)` |
-| `/search/` | `search()` | `NormalizedListResult<SearchResult>` | `search(query: string, scope?: string)` |
+| Endpoint         | Method             | Returns                              | New Signature                             |
+| ---------------- | ------------------ | ------------------------------------ | ----------------------------------------- |
+| `/documents/`    | `getDocuments()`   | `NormalizedListResult<Document>`     | `getDocuments(query?: ListQueryParams)`   |
+| `/work-records/` | `getWorkRecords()` | `NormalizedListResult<WorkRecord>`   | `getWorkRecords(query?: ListQueryParams)` |
+| `/pl-items/`     | `getPlItems()`     | `NormalizedListResult<PLNumber>`     | `getPlItems(query?: ListQueryParams)`     |
+| `/cases/`        | `getCases()`       | `NormalizedListResult<CaseRecord>`   | `getCases(query?: ListQueryParams)`       |
+| `/approvals/`    | `getApprovals()`   | `NormalizedListResult<Approval>`     | `getApprovals(query?: ListQueryParams)`   |
+| `/ocr/jobs/`     | `getOcrJobs()`     | `NormalizedListResult<OcrJob>`       | `getOcrJobs(query?: ListQueryParams)`     |
+| `/audit/log/`    | `getAuditLog()`    | `NormalizedListResult<AuditEntry>`   | `getAuditLog(query?: ListQueryParams)`    |
+| `/search/`       | `search()`         | `NormalizedListResult<SearchResult>` | `search(query: string, scope?: string)`   |
 
 ---
 
@@ -87,23 +91,24 @@ All list endpoints accept standardized query parameters:
 
 ```typescript
 interface ListQueryParams {
-  page?: number;              // Default: 1
-  pageSize?: number;          // Default: 15
-  search?: string;            // Search term
-  sort?: string;              // Sort field (e.g., '-date', 'name')
+  page?: number; // Default: 1
+  pageSize?: number; // Default: 15
+  search?: string; // Search term
+  sort?: string; // Sort field (e.g., '-date', 'name')
   filters?: Record<string, any>; // Custom filters
 }
 ```
 
 **Usage:**
+
 ```typescript
 // Page 2, search for invoices, sorted by date descending
 const result = await apiClient.getDocuments({
   page: 2,
   pageSize: 20,
-  search: 'invoice',
-  sort: '-date',
-  filters: { status: 'APPROVED' }
+  search: "invoice",
+  sort: "-date",
+  filters: { status: "APPROVED" },
 });
 ```
 
@@ -114,6 +119,7 @@ const result = await apiClient.getDocuments({
 ### For Components Using Old Shape
 
 **Before:**
+
 ```typescript
 const { documents } = useDocuments();
 // documents was: Document[] or null
@@ -122,6 +128,7 @@ documents.map(d => <DocumentRow key={d.id} doc={d} />)
 ```
 
 **After (Option 1 - Use legacy hooks for compatibility):**
+
 ```typescript
 const { documents } = useDocuments();
 // Still returns Document[], backwards compatible!
@@ -130,6 +137,7 @@ documents.map(d => <DocumentRow key={d.id} doc={d} />)
 ```
 
 **After (Option 2 - Use new pagination-aware hooks):**
+
 ```typescript
 const { data, loading, error } = useDocumentList({
   page: currentPage,
@@ -139,9 +147,9 @@ const { data, loading, error } = useDocumentList({
 return (
   <>
     {data?.items.map(d => <DocumentRow key={d.id} doc={d} />)}
-    <Pagination 
-      page={data?.page} 
-      total={data?.total} 
+    <Pagination
+      page={data?.page}
+      total={data?.total}
       pageSize={data?.pageSize}
       hasMore={data?.hasMore}
     />
@@ -152,8 +160,9 @@ return (
 ### For Pages Using Raw API Calls
 
 **Before:**
+
 ```typescript
-const response = await apiClient.getDocuments({ search: 'test' });
+const response = await apiClient.getDocuments({ search: "test" });
 // Could return: Document[] or { results: Document[], count: number, ... }
 // Inconsistent shape!
 
@@ -162,8 +171,9 @@ const total = response.count || response.length;
 ```
 
 **After:**
+
 ```typescript
-const result = await apiClient.getDocuments({ search: 'test' });
+const result = await apiClient.getDocuments({ search: "test" });
 // Always returns: NormalizedListResult<Document>
 
 const { items, total, page, pageSize, hasMore } = result;
@@ -175,13 +185,15 @@ const { items, total, page, pageSize, hasMore } = result;
 ## Backwards Compatibility
 
 ✅ **Legacy hooks still work:**
+
 ```typescript
 // These still exist and return the old shape for backwards compatibility
-useDocuments()    // Returns { documents, loading, error, refetch, ... }
-useWorkRecords()  // Returns { records, loading, error, refetch, ... }
+useDocuments(); // Returns { documents, loading, error, refetch, ... }
+useWorkRecords(); // Returns { records, loading, error, refetch, ... }
 ```
 
 ⚠️ **They're marked as @deprecated** — migrate to new hooks when updating pages:
+
 ```typescript
 // NEW: Pagination-aware hooks
 useDocumentList(query?)   // Returns { data: NormalizedListResult, loading, error, refetch, ... }
@@ -193,6 +205,7 @@ useWorkRecordList(query?) // Returns { data: NormalizedListResult, loading, erro
 ## Benefits
 
 ### 1. **Predictable Data Shapes**
+
 ```typescript
 // Always safe to access
 result.items        ✅ Never undefined
@@ -202,14 +215,16 @@ result.hasMore      ✅ Always boolean
 ```
 
 ### 2. **Type Safety**
+
 ```typescript
 // TypeScript catches mistakes
 const items: Document[] = result.items; // ✅ Type-safe
-const count = result.total;             // ✅ Type-safe
-const x = result.count;                 // ❌ Compile error
+const count = result.total; // ✅ Type-safe
+const x = result.count; // ❌ Compile error
 ```
 
 ### 3. **Easier Pagination**
+
 ```typescript
 // Before: Implement pagination logic in each component
 // After: Built-in pagination info
@@ -220,6 +235,7 @@ if (result.hasMore) {
 ```
 
 ### 4. **Better Testing**
+
 ```typescript
 // Mock data shape is always consistent
 const mockResult: NormalizedListResult<Document> = {
@@ -227,7 +243,7 @@ const mockResult: NormalizedListResult<Document> = {
   total: 2,
   page: 1,
   pageSize: 15,
-  hasMore: false
+  hasMore: false,
 };
 ```
 
@@ -238,6 +254,7 @@ const mockResult: NormalizedListResult<Document> = {
 ### Response Normalization
 
 The ApiClient includes a `normalizeListResponse()` helper that:
+
 - Handles both paginated and non-paginated responses
 - Converts legacy array responses to standard shape
 - Calculates `hasMore` based on pagination math
@@ -253,6 +270,7 @@ The ApiClient includes a `normalizeListResponse()` helper that:
 ### Mock Data Fallback
 
 When the API is unavailable, the client returns properly formatted mock data:
+
 ```typescript
 // If getDocuments() fails, returns:
 {
@@ -279,6 +297,7 @@ async getDocuments(query?: ListQueryParams): Promise<NormalizedListResult<any>>
 ```
 
 Hover over any API method in your IDE to see:
+
 - Return type
 - Parameter structure
 - Usage examples
@@ -301,16 +320,16 @@ const { data, loading } = useDocumentList({
 
 return (
   <>
-    <Input 
-      value={search} 
+    <Input
+      value={search}
       onChange={e => {
         setSearch(e.target.value);
         setPage(1); // Reset to page 1 on search
       }}
     />
-    
+
     {data?.items.map(doc => <DocumentRow key={doc.id} doc={doc} />)}
-    
+
     {data?.hasMore && (
       <Button onClick={() => setPage(p => p + 1)}>
         Load More
@@ -338,11 +357,11 @@ useEffect(() => {
 const { data } = useDocumentList({
   page: 1,
   pageSize: 15,
-  sort: sortField === 'date' && sortDir === 'asc' ? 'date' : '-date',
+  sort: sortField === "date" && sortDir === "asc" ? "date" : "-date",
   filters: {
     status: selectedStatus,
-    category: selectedCategory
-  }
+    category: selectedCategory,
+  },
 });
 ```
 
@@ -351,17 +370,20 @@ const { data } = useDocumentList({
 ## What Changed in Files
 
 ### `lib/types.ts`
+
 - Added: `ApiListResponse<T>`, `ApiItemResponse<T>`, `ApiMutationResponse<T>`
 - Added: `ListQueryParams`, `NormalizedListResult<T>`
 - Added: `ApiErrorDetail`, `ApiErrorResponse`
 
 ### `services/ApiClient.ts`
+
 - Added: Response normalization helper
 - Updated: All list methods to return `NormalizedListResult<T>`
 - Added: JSDoc comments for all methods
 - Maintained: All existing method signatures (backwards compatible)
 
 ### `hooks/useApi.ts`
+
 - Added: `useDocumentList()`, `useWorkRecordList()` (new pagination-aware hooks)
 - Updated: `useDocuments()`, `useWorkRecords()` (now use new hooks internally)
 - Marked: Old hooks as @deprecated but still functional

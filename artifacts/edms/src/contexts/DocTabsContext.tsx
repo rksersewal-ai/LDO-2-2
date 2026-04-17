@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback } from "react";
 
 export interface TabDoc {
   id: string;
@@ -23,16 +23,18 @@ export function DocTabsProvider({ children }: { children: React.ReactNode }) {
   const [tabs, setTabs] = useState<TabDoc[]>([]);
 
   const openTab = useCallback((docId: string, docName?: string) => {
-    setTabs(prev => {
+    setTabs((prev) => {
       const nextName = docName?.trim() || docId;
-      const existing = prev.find(t => t.id === docId);
+      const existing = prev.find((t) => t.id === docId);
 
       if (existing) {
         if (existing.name === nextName) {
           return prev;
         }
 
-        return prev.map(tab => tab.id === docId ? { ...tab, name: nextName } : tab);
+        return prev.map((tab) =>
+          tab.id === docId ? { ...tab, name: nextName } : tab,
+        );
       }
 
       return [...prev, { id: docId, name: nextName }];
@@ -40,7 +42,7 @@ export function DocTabsProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const closeTab = useCallback((tabId: string) => {
-    setTabs(prev => prev.filter(t => t.id !== tabId));
+    setTabs((prev) => prev.filter((t) => t.id !== tabId));
   }, []);
 
   const clearTabs = useCallback(() => {

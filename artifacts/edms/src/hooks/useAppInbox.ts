@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
-import type { AppInboxItem } from '../lib/types';
-import { InboxService } from '../services/InboxService';
+import { useCallback, useEffect, useState } from "react";
+import type { AppInboxItem } from "../lib/types";
+import { InboxService } from "../services/InboxService";
 
 export function useAppInbox() {
   const [items, setItems] = useState<AppInboxItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [source, setSource] = useState<'backend' | 'mock'>('mock');
+  const [source, setSource] = useState<"backend" | "mock">("mock");
 
   const load = useCallback(async () => {
     setLoading(true);

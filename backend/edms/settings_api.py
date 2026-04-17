@@ -3,6 +3,7 @@ LDO-2 EDMS - Django REST Framework & JWT Configuration
 Add these settings to your main Django settings.py
 """
 
+from datetime import timedelta
 import os
 import platform
 import sys
@@ -45,7 +46,6 @@ REST_FRAMEWORK = {
     },
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',
     ],
     'DATETIME_FORMAT': '%Y-%m-%dT%H:%M:%SZ',
     'DEFAULT_METADATA_CLASS': 'rest_framework.metadata.SimpleMetadata',
@@ -55,11 +55,9 @@ REST_FRAMEWORK = {
 # JWT Token Configuration
 # ─────────────────────────────────────────────────────────────────────────────
 
-from datetime import timedelta
-
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=24),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=2),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'UPDATE_LAST_LOGIN': True,
@@ -81,8 +79,6 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_USER_CLASS': 'rest_framework_simplejwt.models.TokenUser',
 
-    'JTI_CLAIM': 'jti',
-
     'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
     'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
@@ -102,7 +98,9 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:4173',      # Standard Vite frontend
     'http://127.0.0.1:4173',
-    'https://edms.example.com',   # Production domain (update)
+    'http://localhost:5173',      # Vite dev server
+    'http://127.0.0.1:5173',
+    # Add your production domain here — do NOT use placeholder domains
 ]
 
 CORS_EXPOSE_HEADERS = [
@@ -115,7 +113,9 @@ CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:4173',
     'http://127.0.0.1:4173',
-    'https://edms.example.com',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    # Add your production domain here
 ]
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -1,55 +1,65 @@
-export type UserRole = 'admin' | 'supervisor' | 'engineer' | 'reviewer' | 'viewer';
+export type UserRole =
+  | "admin"
+  | "supervisor"
+  | "engineer"
+  | "reviewer"
+  | "viewer";
 
 export type DocumentCategory =
-  | 'DRAWING'
-  | 'TECHNICAL_EVALUATION'
-  | 'SPECIFICATION'
-  | 'ELIGIBILITY_CRITERIA'
-  | 'SCOPE_OF_SUPPLY'
-  | 'SMI'
-  | 'STANDARD'
-  | 'TENDER'
-  | 'SDR'
-  | 'TEST_REPORT'
-  | 'CERTIFICATE'
-  | 'PROCEDURE'
-  | 'OTHER';
+  | "DRAWING"
+  | "TECHNICAL_EVALUATION"
+  | "SPECIFICATION"
+  | "ELIGIBILITY_CRITERIA"
+  | "SCOPE_OF_SUPPLY"
+  | "SMI"
+  | "STANDARD"
+  | "TENDER"
+  | "SDR"
+  | "TEST_REPORT"
+  | "CERTIFICATE"
+  | "PROCEDURE"
+  | "OTHER";
 
-export type DocumentStatus = 'ACTIVE' | 'OBSOLETE' | 'UNDER_REVIEW' | 'DRAFT' | 'APPROVED';
+export type DocumentStatus =
+  | "ACTIVE"
+  | "OBSOLETE"
+  | "UNDER_REVIEW"
+  | "DRAFT"
+  | "APPROVED";
 
 export type OcrStatus =
-  | 'PENDING'
-  | 'PROCESSING'
-  | 'COMPLETED'
-  | 'FAILED'
-  | 'FLAGGED'
-  | 'SKIPPED'
-  | 'NOT_REQUIRED';
+  | "PENDING"
+  | "PROCESSING"
+  | "COMPLETED"
+  | "FAILED"
+  | "FLAGGED"
+  | "SKIPPED"
+  | "NOT_REQUIRED";
 
-export type InspectionCategory = 'CAT-A' | 'CAT-B' | 'CAT-C' | 'CAT-D';
+export type InspectionCategory = "CAT-A" | "CAT-B" | "CAT-C" | "CAT-D";
 
 export type WorkCategory =
-  | 'GENERAL'
-  | 'DRAWING'
-  | 'SPECIFICATION'
-  | 'TENDER'
-  | 'SHOP'
-  | 'IC'
-  | 'AMENDMENT'
-  | 'VENDOR'
-  | 'EXTERNAL'
-  | 'FAILURE'
-  | 'INSPECTION';
+  | "GENERAL"
+  | "DRAWING"
+  | "SPECIFICATION"
+  | "TENDER"
+  | "SHOP"
+  | "IC"
+  | "AMENDMENT"
+  | "VENDOR"
+  | "EXTERNAL"
+  | "FAILURE"
+  | "INSPECTION";
 
-export type PLStatus = 'ACTIVE' | 'UNDER_REVIEW' | 'OBSOLETE';
+export type PLStatus = "ACTIVE" | "UNDER_REVIEW" | "OBSOLETE";
 
-export type SafetyClassification = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+export type SafetyClassification = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
-export type WorkRecordStatus = 'OPEN' | 'SUBMITTED' | 'VERIFIED' | 'CLOSED';
+export type WorkRecordStatus = "OPEN" | "SUBMITTED" | "VERIFIED" | "CLOSED";
 
-export type CaseStatus = 'OPEN' | 'IN_PROGRESS' | 'CLOSED';
+export type CaseStatus = "OPEN" | "IN_PROGRESS" | "CLOSED";
 
-export type CaseSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+export type CaseSeverity = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
 export interface Document {
   id: string;
@@ -86,7 +96,7 @@ export interface DocumentMetadataAssertion {
   value: string;
   normalized_value?: string | null;
   source?: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  status: "PENDING" | "APPROVED" | "REJECTED";
   notes?: string | null;
   created_at?: string;
   updated_at?: string;
@@ -101,7 +111,7 @@ export interface DocumentOcrEntity {
   method?: string;
   source_engine?: string;
   source_page?: number | null;
-  review_status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  review_status: "PENDING" | "APPROVED" | "REJECTED";
   review_notes?: string | null;
   created_at?: string;
   updated_at?: string;
@@ -110,7 +120,7 @@ export interface DocumentOcrEntity {
 export interface EngineeringChange {
   id: string;
   ecNumber: string;
-  status: 'OPEN' | 'IN_REVIEW' | 'IMPLEMENTED' | 'RELEASED';
+  status: "OPEN" | "IN_REVIEW" | "IMPLEMENTED" | "RELEASED";
   description: string;
   date: string;
   author?: string;
@@ -141,7 +151,7 @@ export interface PLNumber {
   designSupervisor?: string;
   concernedSupervisor?: string;
   eOfficeFile?: string;
-  vendorType?: 'VD' | 'NVD';
+  vendorType?: "VD" | "NVD";
   recentActivity?: string[];
   engineeringChanges?: EngineeringChange[];
   linkedDocumentIds: string[];
@@ -158,7 +168,7 @@ export interface WorkTypeDefinition {
   category: WorkCategory;
   disposalDays: number;
   description?: string;
-  priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  priority?: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   isActive?: boolean;
   requiresDocument?: boolean;
   consentApplicable?: boolean;
@@ -260,7 +270,7 @@ export interface DropdownSettings {
 }
 
 export interface SearchResult {
-  type: 'document' | 'pl' | 'work' | 'case';
+  type: "document" | "pl" | "work" | "case";
   id: string;
   title: string;
   subtitle?: string;
@@ -270,7 +280,7 @@ export interface SearchResult {
   date?: string;
   duplicateStatus?: string;
   duplicateGroupKey?: string;
-  fingerprintState?: 'missing' | 'present' | 'full';
+  fingerprintState?: "missing" | "present" | "full";
   linkedPl?: string;
   matchReasons?: string[];
   matchedAssertions?: Array<{
@@ -286,7 +296,7 @@ export interface SearchResult {
   }>;
 }
 
-export type SearchScope = 'ALL' | 'DOCUMENTS' | 'PL' | 'WORK' | 'CASES';
+export type SearchScope = "ALL" | "DOCUMENTS" | "PL" | "WORK" | "CASES";
 
 export interface SearchFacetBucket {
   value?: string | null;
@@ -333,6 +343,73 @@ export interface KPIStatus {
   label: string;
   color: string;
   isOnTime: boolean;
+}
+
+export interface InitialRunSourceDetail {
+  id: string;
+  name: string;
+  source_system: string;
+  root_path: string;
+  last_crawled_at?: string | null;
+  last_successful_crawl_at?: string | null;
+  last_error?: string;
+  tracked_files: number;
+  active_files: number;
+  missing_files: number;
+  failed_files: number;
+  indexed_documents: number;
+}
+
+export interface InitialRunJobSummary {
+  id: string;
+  source_name?: string;
+  status: string;
+  created_at?: string;
+  started_at?: string | null;
+  completed_at?: string | null;
+  discovered_count?: number;
+  indexed_count?: number;
+  duplicate_count?: number;
+  failed_count?: number;
+  documents_scanned?: number;
+  documents_indexed?: number;
+  full_hashes_computed?: number;
+  error_message?: string;
+}
+
+export interface InitialRunSummary {
+  documents: {
+    total_documents: number;
+    indexed_documents: number;
+    missing_search_index: number;
+    missing_sparse_hash: number;
+    missing_full_hash: number;
+    pending_ocr: number;
+    processing_ocr: number;
+    pending_dedup: number;
+    duplicate_groups: number;
+    duplicate_documents: number;
+  };
+  sources: {
+    total_sources: number;
+    active_sources: number;
+    tracked_files: number;
+    active_files: number;
+    missing_files: number;
+    failed_files: number;
+  };
+  active_source_details: InitialRunSourceDetail[];
+  latest_jobs: {
+    crawl: InitialRunJobSummary[];
+    hash_backfill: InitialRunJobSummary[];
+  };
+}
+
+export interface InitialRunActionResult {
+  action: string;
+  mode: "queued" | "inline" | "mixed" | "noop";
+  message: string;
+  results: Record<string, unknown>;
 }
 
 // ─────────────────────────────────────────────────────────────────────────

@@ -137,7 +137,7 @@ class ApprovalSerializer(serializers.ModelSerializer):
             'approved_at',
             'rejected_at',
         ]
-        read_only_fields = ['id', 'requested_at', 'approved_at', 'rejected_at']
+        read_only_fields = ['id', 'status', 'approved_by', 'rejected_by', 'requested_at', 'approved_at', 'rejected_at']
 
 
 class CaseSerializer(serializers.ModelSerializer):

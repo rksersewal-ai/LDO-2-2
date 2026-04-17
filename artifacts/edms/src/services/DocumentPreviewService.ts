@@ -1,4 +1,4 @@
-const RECENT_PREVIEW_KEY = 'edms_recent_document_preview';
+const RECENT_PREVIEW_KEY = "edms_recent_document_preview";
 
 export interface RecentDocumentPreview {
   documentId: string;

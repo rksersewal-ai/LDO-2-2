@@ -1,0 +1,211 @@
+- generic [ref=e4]:
+  - complementary [ref=e5]:
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e10]: L2
+        - generic [ref=e11]:
+          - paragraph [ref=e12]: LDO-2 EDMS
+          - paragraph [ref=e13]: Enterprise
+      - button "Collapse navigation" [ref=e14]:
+        - img [ref=e15]
+    - navigation "Main navigation" [ref=e18]:
+      - generic [ref=e19]:
+        - generic [ref=e20]: Core
+        - link "Dashboard" [ref=e21] [cursor=pointer]:
+          - /url: /
+          - img [ref=e22]
+          - generic [ref=e27]: Dashboard
+        - link "Search Explorer" [ref=e28] [cursor=pointer]:
+          - /url: /search
+          - img [ref=e29]
+          - generic [ref=e37]: Search Explorer
+        - link "Document Hub" [ref=e38] [cursor=pointer]:
+          - /url: /documents
+          - img [ref=e39]
+          - generic [ref=e41]: Document Hub
+      - generic [ref=e42]:
+        - generic [ref=e43]: Engineering
+        - link "BOM Explorer" [ref=e44] [cursor=pointer]:
+          - /url: /bom
+          - img [ref=e45]
+          - generic [ref=e50]: BOM Explorer
+        - link "PL Knowledge Hub" [ref=e51] [cursor=pointer]:
+          - /url: /pl
+          - img [ref=e53]
+          - generic [ref=e59]: PL Knowledge Hub
+      - generic [ref=e60]:
+        - generic [ref=e61]: Workflow
+        - link "Work Ledger" [ref=e62] [cursor=pointer]:
+          - /url: /ledger
+          - img [ref=e63]
+          - generic [ref=e66]: Work Ledger
+        - link "Cases" [ref=e67] [cursor=pointer]:
+          - /url: /cases
+          - img [ref=e68]
+          - generic [ref=e70]: Cases
+        - link "Approvals" [ref=e71] [cursor=pointer]:
+          - /url: /approvals
+          - img [ref=e72]
+          - generic [ref=e75]: Approvals
+      - generic [ref=e76]:
+        - generic [ref=e77]: Tools
+        - link "Alert Rules" [ref=e78] [cursor=pointer]:
+          - /url: /alerts
+          - img [ref=e79]
+          - generic [ref=e82]: Alert Rules
+        - link "Doc Templates" [ref=e83] [cursor=pointer]:
+          - /url: /templates
+          - img [ref=e84]
+          - generic [ref=e88]: Doc Templates
+      - generic [ref=e89]:
+        - generic [ref=e90]: Reports
+        - link "Reports" [ref=e91] [cursor=pointer]:
+          - /url: /reports
+          - img [ref=e92]
+          - generic [ref=e94]: Reports
+        - link "Ledger Reports" [ref=e95] [cursor=pointer]:
+          - /url: /ledger-reports
+          - img [ref=e96]
+          - generic [ref=e99]: Ledger Reports
+      - generic [ref=e100]:
+        - generic [ref=e101]: System
+        - link "Admin" [ref=e102] [cursor=pointer]:
+          - /url: /admin
+          - img [ref=e103]
+          - generic [ref=e114]: Admin
+        - link "Users" [ref=e115] [cursor=pointer]:
+          - /url: /admin/users
+          - img [ref=e116]
+          - generic [ref=e121]: Users
+        - link "Deduplication" [ref=e122] [cursor=pointer]:
+          - /url: /admin/deduplication
+          - img [ref=e123]
+          - generic [ref=e127]: Deduplication
+        - link "OCR Monitor" [ref=e128] [cursor=pointer]:
+          - /url: /ocr
+          - img [ref=e129]
+          - generic [ref=e131]: OCR Monitor
+        - link "System Health" [ref=e132] [cursor=pointer]:
+          - /url: /health
+          - img [ref=e133]
+          - generic [ref=e136]: System Health
+        - link "Audit Log" [ref=e137] [cursor=pointer]:
+          - /url: /audit
+          - img [ref=e138]
+          - generic [ref=e141]: Audit Log
+        - link "Banners" [ref=e142] [cursor=pointer]:
+          - /url: /banners
+          - img [ref=e143]
+          - generic [ref=e146]: Banners
+        - link "Settings" [ref=e147] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e148]
+          - generic [ref=e151]: Settings
+        - link "Design System" [ref=e152] [cursor=pointer]:
+          - /url: /design-system
+          - img [ref=e153]
+          - generic [ref=e155]: Design System
+  - main [ref=e156]:
+    - generic [ref=e157]:
+      - generic [ref=e158]:
+        - generic [ref=e159]:
+          - img [ref=e160]
+          - generic [ref=e162]: Maintenance
+          - generic [ref=e163]: OCR Engine restart at 03:00 UTC — minor processing delays expected.
+        - button "Dismiss banner" [ref=e164]:
+          - img [ref=e165]
+      - generic [ref=e168]:
+        - navigation "Breadcrumb" [ref=e169]:
+          - button "Home" [ref=e809]
+          - generic [ref=e810]:
+            - generic [ref=e811]: /
+            - generic [ref=e812]: Approvals
+        - generic [ref=e178]:
+          - generic [ref=e179]: 04 Apr 2026, 19:46:50
+          - button "Open command palette" [ref=e180]:
+            - img [ref=e181]
+            - generic [ref=e184]: Search…
+            - generic [ref=e185]: ⌘K
+          - button "Switch to light mode" [ref=e186]:
+            - img [ref=e187]
+          - button "Text size controls" [ref=e194]:
+            - img [ref=e195]
+          - button "Notifications (6 unread)" [ref=e198]:
+            - img [ref=e199]
+            - generic [ref=e202]: "6"
+          - button "Profile menu" [ref=e205] [cursor=pointer]:
+            - generic [ref=e206]: SA
+            - generic [ref=e207]:
+              - generic [ref=e208]: System Administrator
+              - generic [ref=e209]: admin
+    - generic [ref=e814]:
+      - generic [ref=e815]:
+        - heading "Approvals" [level=1] [ref=e816]
+        - paragraph [ref=e817]:
+          - text: Review and action pending approval requests.
+          - generic [ref=e818]: 3 items awaiting your decision.
+      - generic [ref=e819]:
+        - button "Pending (3)" [ref=e820]
+        - button "Approved" [ref=e821]
+        - button "Rejected" [ref=e822]
+        - button "All" [ref=e823]
+      - generic [ref=e825]:
+        - generic [ref=e827] [cursor=pointer]:
+          - generic [ref=e828]:
+            - generic [ref=e829]:
+              - img [ref=e830]
+              - generic [ref=e833]: Thermal Tolerance Spec v2 — Final Approval
+              - generic [ref=e834]: Pending
+              - generic [ref=e835]: High Priority
+            - generic [ref=e836]:
+              - generic [ref=e837]: APR-301
+              - generic [ref=e838]: Document Approval
+              - generic [ref=e839]: By M. Chen
+              - generic [ref=e840]:
+                - img [ref=e841]
+                - text: Due 2026-03-25
+          - generic [ref=e844]:
+            - button [ref=e845]:
+              - img [ref=e846]
+            - button [ref=e849]:
+              - img [ref=e850]
+            - img [ref=e854]
+        - generic [ref=e857] [cursor=pointer]:
+          - generic [ref=e858]:
+            - generic [ref=e859]:
+              - img [ref=e860]
+              - generic [ref=e863]: Propulsion CAD Render Release
+              - generic [ref=e864]: Pending
+            - generic [ref=e865]:
+              - generic [ref=e866]: APR-302
+              - generic [ref=e867]: Document Approval
+              - generic [ref=e868]: By A. Kowalski
+              - generic [ref=e869]:
+                - img [ref=e870]
+                - text: Due 2026-03-28
+          - generic [ref=e873]:
+            - button [ref=e874]:
+              - img [ref=e875]
+            - button [ref=e878]:
+              - img [ref=e879]
+            - img [ref=e883]
+        - generic [ref=e886] [cursor=pointer]:
+          - generic [ref=e887]:
+            - generic [ref=e888]:
+              - img [ref=e889]
+              - generic [ref=e892]: Work Record WRK-4405 Verification Sign-off
+              - generic [ref=e893]: Pending
+              - generic [ref=e894]: High Priority
+            - generic [ref=e895]:
+              - generic [ref=e896]: APR-303
+              - generic [ref=e897]: Work Verification
+              - generic [ref=e898]: By M. Chen
+              - generic [ref=e899]:
+                - img [ref=e900]
+                - text: Due 2026-03-24
+          - generic [ref=e903]:
+            - button [ref=e904]:
+              - img [ref=e905]
+            - button [ref=e908]:
+              - img [ref=e909]
+            - img [ref=e913]

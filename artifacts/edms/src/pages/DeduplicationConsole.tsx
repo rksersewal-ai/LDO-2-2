@@ -1,5 +1,12 @@
-import { Fragment, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { useNavigate } from 'react-router';
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+import { useNavigate } from "react-router";
 import {
   Layers3,
   Play,
@@ -23,12 +30,23 @@ import {
   RefreshCcw,
   BadgeAlert,
   FolderGit2,
-} from 'lucide-react';
-import { toast } from 'sonner';
-import { Badge, Button, GlassCard, Input, PageHeader, Select } from '../components/ui/Shared';
-import { DatePicker } from '../components/ui/DatePicker';
-import { Switch } from '../components/ui/switch';
-import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
+} from "lucide-react";
+import { toast } from "sonner";
+import {
+  Badge,
+  Button,
+  GlassCard,
+  Input,
+  PageHeader,
+  Select,
+} from "../components/ui/Shared";
+import { DatePicker } from "../components/ui/DatePicker";
+import { Switch } from "../components/ui/switch";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "../components/ui/popover";
 import {
   Dialog,
   DialogContent,
@@ -36,7 +54,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../components/ui/dialog';
+} from "../components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,9 +64,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../components/ui/alert-dialog';
-import { useRightPanel } from '../contexts/RightPanelContext';
-import { DeduplicationService } from '../services/DeduplicationService';
+} from "../components/ui/alert-dialog";
+import { useRightPanel } from "../contexts/RightPanelContext";
+import { DeduplicationService } from "../services/DeduplicationService";
 import {
   DEDUP_CLASS_OPTIONS,
   DEDUP_MIN_SIZE_OPTIONS,
@@ -61,12 +79,25 @@ import {
   type DuplicateGroup,
   type FingerprintState,
   type GroupStatus,
-} from '../lib/deduplicationMock';
-import { DocumentPreviewButton, getDocumentContextAttributes } from '../components/documents/DocumentPreviewActions';
+} from "../lib/deduplicationMock";
+import {
+  DocumentPreviewButton,
+  getDocumentContextAttributes,
+} from "../components/documents/DocumentPreviewActions";
 
-type RepositoryScope = 'LDO Repository';
-type CollectionScope = 'All collections' | 'Electrical Drawings' | 'Vendor Qualifications' | 'Control Specifications' | 'Maintenance Procedures';
-type PlantScope = 'All plants' | 'BLW / Varanasi' | 'CLW / Chittaranjan' | 'ICF / Chennai' | 'RWF / Bengaluru';
+type RepositoryScope = "LDO Repository";
+type CollectionScope =
+  | "All collections"
+  | "Electrical Drawings"
+  | "Vendor Qualifications"
+  | "Control Specifications"
+  | "Maintenance Procedures";
+type PlantScope =
+  | "All plants"
+  | "BLW / Varanasi"
+  | "CLW / Chittaranjan"
+  | "ICF / Chennai"
+  | "RWF / Bengaluru";
 
 interface FilterState {
   documentClasses: string[];
@@ -79,36 +110,36 @@ interface FilterState {
 }
 
 type PendingActionState =
-  | { type: 'scan_missing_hashes' }
-  | { type: 'apply_decision'; groupId: string }
-  | { type: 'mark_non_duplicate'; groupId: string }
-  | { type: 'bulk_ignore' }
+  | { type: "scan_missing_hashes" }
+  | { type: "apply_decision"; groupId: string }
+  | { type: "mark_non_duplicate"; groupId: string }
+  | { type: "bulk_ignore" }
   | null;
 
 const DEFAULT_FILTERS: FilterState = {
   documentClasses: [],
-  sourceSystem: 'All sources',
-  owner: 'All owners',
-  uploadFrom: '',
-  uploadTo: '',
+  sourceSystem: "All sources",
+  owner: "All owners",
+  uploadFrom: "",
+  uploadTo: "",
   minSizeBytes: 0,
-  search: '',
+  search: "",
 };
 
-const REPOSITORY_OPTIONS: RepositoryScope[] = ['LDO Repository'];
+const REPOSITORY_OPTIONS: RepositoryScope[] = ["LDO Repository"];
 const COLLECTION_OPTIONS: CollectionScope[] = [
-  'All collections',
-  'Electrical Drawings',
-  'Vendor Qualifications',
-  'Control Specifications',
-  'Maintenance Procedures',
+  "All collections",
+  "Electrical Drawings",
+  "Vendor Qualifications",
+  "Control Specifications",
+  "Maintenance Procedures",
 ];
 const PLANT_OPTIONS: PlantScope[] = [
-  'All plants',
-  'BLW / Varanasi',
-  'CLW / Chittaranjan',
-  'ICF / Chennai',
-  'RWF / Bengaluru',
+  "All plants",
+  "BLW / Varanasi",
+  "CLW / Chittaranjan",
+  "ICF / Chennai",
+  "RWF / Bengaluru",
 ];
 
 function formatBytes(bytes: number) {
@@ -118,38 +149,46 @@ function formatBytes(bytes: number) {
 }
 
 function formatDate(value: string) {
-  return new Date(`${value}T00:00:00`).toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
+  return new Date(`${value}T00:00:00`).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
   });
 }
 
 function formatDateTime(value: string) {
-  const normalized = value.includes('T') ? value : value.replace(' ', 'T');
+  const normalized = value.includes("T") ? value : value.replace(" ", "T");
   const date = new Date(normalized);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+  return date.toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
 function humanizeToken(value: string) {
-  return value.replaceAll('_', ' ').toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+  return value
+    .replaceAll("_", " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 function summarizeList(values: string[], fallback: string, limit = 3) {
   if (!values.length) return fallback;
-  if (values.length <= limit) return values.join(', ');
-  return `${values.slice(0, limit).join(', ')} +${values.length - limit}`;
+  if (values.length <= limit) return values.join(", ");
+  return `${values.slice(0, limit).join(", ")} +${values.length - limit}`;
 }
 
 function totalReferences(doc: DuplicateCandidateDocument) {
-  return doc.references.erp + doc.references.work + doc.references.config + doc.references.approvals;
+  return (
+    doc.references.erp +
+    doc.references.work +
+    doc.references.config +
+    doc.references.approvals
+  );
 }
 
 function aggregateReferences(group: DuplicateGroup) {
@@ -160,54 +199,81 @@ function aggregateReferences(group: DuplicateGroup) {
       config: acc.config + doc.references.config,
       approvals: acc.approvals + doc.references.approvals,
     }),
-    { erp: 0, work: 0, config: 0, approvals: 0 }
+    { erp: 0, work: 0, config: 0, approvals: 0 },
   );
 }
 
 function getFingerprintMeta(state: FingerprintState) {
   switch (state) {
-    case 'full':
-      return { label: 'Full hash present', className: 'bg-emerald-500/15 text-emerald-200 border border-emerald-400/30' };
-    case 'present':
-      return { label: 'Present', className: 'bg-teal-500/15 text-teal-200 border border-teal-400/30' };
+    case "full":
+      return {
+        label: "Full hash present",
+        className:
+          "bg-emerald-500/15 text-emerald-200 border border-emerald-400/30",
+      };
+    case "present":
+      return {
+        label: "Present",
+        className: "bg-teal-500/15 text-teal-200 border border-teal-400/30",
+      };
     default:
-      return { label: 'Missing (needs scan)', className: 'bg-amber-500/15 text-amber-200 border border-amber-400/30' };
+      return {
+        label: "Missing (needs scan)",
+        className: "bg-amber-500/15 text-amber-200 border border-amber-400/30",
+      };
   }
 }
 
 function getStatusMeta(status: GroupStatus, mode: DedupMode) {
-  if (status === 'exact' && mode === 'fingerprint') {
-    return { label: 'Exact duplicate', variant: 'success' as const };
+  if (status === "exact" && mode === "fingerprint") {
+    return { label: "Exact duplicate", variant: "success" as const };
   }
-  if (status === 'pending') {
-    return { label: 'Pending confirmation', variant: 'warning' as const };
+  if (status === "pending") {
+    return { label: "Pending confirmation", variant: "warning" as const };
   }
   return {
-    label: mode === 'metadata' ? 'Probable duplicate (metadata only)' : 'Probable duplicate',
-    variant: 'warning' as const,
+    label:
+      mode === "metadata"
+        ? "Probable duplicate (metadata only)"
+        : "Probable duplicate",
+    variant: "warning" as const,
   };
 }
 
 function deriveStatus(group: DuplicateGroup, mode: DedupMode) {
-  if (mode === 'metadata') {
-    return group.status === 'exact' ? 'probable' : group.status;
+  if (mode === "metadata") {
+    return group.status === "exact" ? "probable" : group.status;
   }
-  if (group.documents.some((doc) => doc.fingerprintState === 'missing')) {
-    return group.status === 'exact' ? 'pending' : group.status;
+  if (group.documents.some((doc) => doc.fingerprintState === "missing")) {
+    return group.status === "exact" ? "pending" : group.status;
   }
   return group.status;
 }
 
 function buildCsv(groups: DuplicateGroup[]) {
   const rows = [
-    ['Group ID', 'Document ID', 'Title', 'Document Number', 'Part Number', 'Revision', 'Class', 'File Size', 'Fingerprint', 'Upload Date', 'Uploader', 'References', 'Group Status'],
+    [
+      "Group ID",
+      "Document ID",
+      "Title",
+      "Document Number",
+      "Part Number",
+      "Revision",
+      "Class",
+      "File Size",
+      "Fingerprint",
+      "Upload Date",
+      "Uploader",
+      "References",
+      "Group Status",
+    ],
     ...groups.flatMap((group) =>
       group.documents.map((doc) => [
         group.id,
         doc.id,
         doc.title,
         doc.documentNumber,
-        doc.partNumber ?? '',
+        doc.partNumber ?? "",
         doc.revision,
         doc.className,
         formatBytes(doc.fileSizeBytes),
@@ -216,17 +282,21 @@ function buildCsv(groups: DuplicateGroup[]) {
         doc.uploader,
         String(totalReferences(doc)),
         getStatusMeta(group.status, group.dedupModeUsed).label,
-      ])
+      ]),
     ),
   ];
 
-  return rows.map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(',')).join('\n');
+  return rows
+    .map((row) =>
+      row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(","),
+    )
+    .join("\n");
 }
 
 function downloadFile(content: string, filename: string, mimeType: string) {
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
+  const link = document.createElement("a");
   link.href = url;
   link.download = filename;
   document.body.appendChild(link);
@@ -255,12 +325,19 @@ function ScopeChip({
         >
           <span className="text-primary/90">{icon}</span>
           <span className="min-w-0">
-            <span className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{label}</span>
-            <span className="block truncate font-semibold text-foreground">{value}</span>
+            <span className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+              {label}
+            </span>
+            <span className="block truncate font-semibold text-foreground">
+              {value}
+            </span>
           </span>
         </button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-80 rounded-2xl border border-teal-500/20 bg-slate-950/95 p-4 text-foreground shadow-2xl shadow-slate-950/60">
+      <PopoverContent
+        align="start"
+        className="w-80 rounded-2xl border border-teal-500/20 bg-slate-950/95 p-4 text-foreground shadow-2xl shadow-slate-950/60"
+      >
         {children}
       </PopoverContent>
     </Popover>
@@ -282,7 +359,10 @@ function SelectionList({
     <div className="space-y-3">
       <div>
         <p className="text-sm font-semibold text-foreground">{title}</p>
-        <p className="text-xs text-muted-foreground">Choosing a scope chip updates the query state without leaving this screen.</p>
+        <p className="text-xs text-muted-foreground">
+          Choosing a scope chip updates the query state without leaving this
+          screen.
+        </p>
       </div>
       <div className="space-y-1.5">
         {options.map((option) => (
@@ -292,8 +372,8 @@ function SelectionList({
             onClick={() => onChange(option)}
             className={`flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-sm transition-all ${
               value === option
-                ? 'border-teal-400/35 bg-teal-500/12 text-teal-200'
-                : 'border-border/60 bg-card text-foreground/90 hover:border-slate-500/70 hover:bg-card/80'
+                ? "border-teal-400/35 bg-teal-500/12 text-teal-200"
+                : "border-border/60 bg-card text-foreground/90 hover:border-slate-500/70 hover:bg-card/80"
             }`}
           >
             <span>{option}</span>
@@ -321,7 +401,11 @@ function MultiSelectChipPicker({
   icon: ReactNode;
 }) {
   const toggleValue = (nextValue: string) => {
-    onChange(value.includes(nextValue) ? value.filter((item) => item !== nextValue) : [...value, nextValue]);
+    onChange(
+      value.includes(nextValue)
+        ? value.filter((item) => item !== nextValue)
+        : [...value, nextValue],
+    );
   };
 
   return (
@@ -333,15 +417,22 @@ function MultiSelectChipPicker({
         >
           <span className="text-primary/90">{icon}</span>
           <span className="min-w-0 flex-1 truncate">
-            <span className="mr-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{label}</span>
+            <span className="mr-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              {label}
+            </span>
             <span className="text-foreground">{summary}</span>
           </span>
         </button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-80 rounded-2xl border border-teal-500/20 bg-slate-950/95 p-4 text-foreground shadow-2xl shadow-slate-950/60">
+      <PopoverContent
+        align="start"
+        className="w-80 rounded-2xl border border-teal-500/20 bg-slate-950/95 p-4 text-foreground shadow-2xl shadow-slate-950/60"
+      >
         <div className="mb-3">
           <p className="text-sm font-semibold text-foreground">{label}</p>
-          <p className="text-xs text-muted-foreground">Selections apply when you click “Apply filters”.</p>
+          <p className="text-xs text-muted-foreground">
+            Selections apply when you click “Apply filters”.
+          </p>
         </div>
         <div className="space-y-2">
           {options.map((option) => {
@@ -351,8 +442,8 @@ function MultiSelectChipPicker({
                 key={option}
                 className={`flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 text-sm transition-all ${
                   selected
-                    ? 'border-teal-400/35 bg-teal-500/12 text-teal-100'
-                    : 'border-border/60 bg-card text-foreground/90 hover:border-slate-500/70 hover:bg-card/80'
+                    ? "border-teal-400/35 bg-teal-500/12 text-teal-100"
+                    : "border-border/60 bg-card text-foreground/90 hover:border-slate-500/70 hover:bg-card/80"
                 }`}
               >
                 <input
@@ -370,7 +461,11 @@ function MultiSelectChipPicker({
           <Button variant="ghost" size="sm" onClick={() => onChange([])}>
             Clear
           </Button>
-          <Button variant="secondary" size="sm" onClick={() => onChange([...value])}>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => onChange([...value])}
+          >
             Keep selection
           </Button>
         </div>
@@ -386,13 +481,13 @@ function OwnerPicker({
   value: string;
   onChange: (value: string) => void;
 }) {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const filteredOptions = useMemo(
     () =>
-      ['All owners', ...DEDUP_OWNER_OPTIONS].filter((option) =>
-        option.toLowerCase().includes(search.toLowerCase())
+      ["All owners", ...DEDUP_OWNER_OPTIONS].filter((option) =>
+        option.toLowerCase().includes(search.toLowerCase()),
       ),
-    [search]
+    [search],
   );
 
   return (
@@ -404,18 +499,33 @@ function OwnerPicker({
         >
           <ShieldCheck className="h-4 w-4 text-primary/90" />
           <span className="min-w-0 flex-1 truncate">
-            <span className="mr-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Uploader / owner</span>
+            <span className="mr-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              Uploader / owner
+            </span>
             {value}
           </span>
         </button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-80 rounded-2xl border border-teal-500/20 bg-slate-950/95 p-4 text-foreground shadow-2xl shadow-slate-950/60">
+      <PopoverContent
+        align="start"
+        className="w-80 rounded-2xl border border-teal-500/20 bg-slate-950/95 p-4 text-foreground shadow-2xl shadow-slate-950/60"
+      >
         <div className="space-y-3">
           <div>
-            <p className="text-sm font-semibold text-foreground">Uploader / owner</p>
-            <p className="text-xs text-muted-foreground">Use the existing EDMS permission scope; the picker only refines what the user already can see.</p>
+            <p className="text-sm font-semibold text-foreground">
+              Uploader / owner
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Use the existing EDMS permission scope; the picker only refines
+              what the user already can see.
+            </p>
           </div>
-          <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search owner..." className="w-full" />
+          <Input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search owner..."
+            className="w-full"
+          />
           <div className="max-h-64 space-y-1 overflow-y-auto custom-scrollbar">
             {filteredOptions.map((option) => {
               const selected = value === option;
@@ -426,8 +536,8 @@ function OwnerPicker({
                   onClick={() => onChange(option)}
                   className={`flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-sm transition-all ${
                     selected
-                      ? 'border-teal-400/35 bg-teal-500/12 text-teal-100'
-                      : 'border-border/60 bg-card text-foreground/90 hover:border-slate-500/70 hover:bg-card/80'
+                      ? "border-teal-400/35 bg-teal-500/12 text-teal-100"
+                      : "border-border/60 bg-card text-foreground/90 hover:border-slate-500/70 hover:bg-card/80"
                   }`}
                 >
                   <span>{option}</span>
@@ -459,7 +569,8 @@ function DateRangePickerChip({
   icon: ReactNode;
   compact?: boolean;
 }) {
-  const summary = start && end ? `${formatDate(start)} → ${formatDate(end)}` : 'Any time';
+  const summary =
+    start && end ? `${formatDate(start)} → ${formatDate(end)}` : "Any time";
 
   return (
     <Popover>
@@ -467,30 +578,59 @@ function DateRangePickerChip({
         <button
           type="button"
           className={`flex items-center gap-2 rounded-xl border border-border/60 bg-slate-950/55 px-3 text-left transition-all hover:border-teal-400/30 hover:bg-card/70 ${
-            compact ? 'h-10 min-w-[220px] text-sm text-foreground' : 'rounded-full px-3.5 py-2 text-xs text-foreground'
+            compact
+              ? "h-10 min-w-[220px] text-sm text-foreground"
+              : "rounded-full px-3.5 py-2 text-xs text-foreground"
           }`}
         >
           <span className="text-primary/90">{icon}</span>
           <span className="min-w-0 flex-1 truncate">
-            <span className="mr-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{label}</span>
+            <span className="mr-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              {label}
+            </span>
             <span>{summary}</span>
           </span>
         </button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-[360px] rounded-2xl border border-teal-500/20 bg-slate-950/95 p-4 text-foreground shadow-2xl shadow-slate-950/60">
+      <PopoverContent
+        align="start"
+        className="w-[360px] rounded-2xl border border-teal-500/20 bg-slate-950/95 p-4 text-foreground shadow-2xl shadow-slate-950/60"
+      >
         <div className="mb-4">
           <p className="text-sm font-semibold text-foreground">{label}</p>
-          <p className="text-xs text-muted-foreground">Calendars stay non-blocking and close when you click anywhere outside or press Escape.</p>
+          <p className="text-xs text-muted-foreground">
+            Calendars stay non-blocking and close when you click anywhere
+            outside or press Escape.
+          </p>
         </div>
         <div className="grid gap-3 md:grid-cols-2">
-          <DatePicker value={start} onChange={onStartChange} placeholder="From" maxDate={end || undefined} />
-          <DatePicker value={end} onChange={onEndChange} placeholder="To" minDate={start || undefined} />
+          <DatePicker
+            value={start}
+            onChange={onStartChange}
+            placeholder="From"
+            maxDate={end || undefined}
+          />
+          <DatePicker
+            value={end}
+            onChange={onEndChange}
+            placeholder="To"
+            minDate={start || undefined}
+          />
         </div>
         <div className="mt-4 flex justify-between">
-          <Button variant="ghost" size="sm" onClick={() => { onStartChange(''); onEndChange(''); }}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              onStartChange("");
+              onEndChange("");
+            }}
+          >
             Clear
           </Button>
-          <span className="text-[11px] text-muted-foreground">Current: {summary}</span>
+          <span className="text-[11px] text-muted-foreground">
+            Current: {summary}
+          </span>
         </div>
       </PopoverContent>
     </Popover>
@@ -510,7 +650,9 @@ function SettingRow({
     <div className="flex items-start justify-between gap-4 rounded-2xl border border-border/70 bg-slate-950/45 px-4 py-3">
       <div>
         <p className="text-sm font-semibold text-foreground">{title}</p>
-        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{description}</p>
+        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+          {description}
+        </p>
       </div>
       <div className="shrink-0">{control}</div>
     </div>
@@ -523,49 +665,67 @@ export default function DeduplicationConsole() {
 
   const [groups, setGroups] = useState<DuplicateGroup[]>(DUPLICATE_GROUPS);
   const [isLoadingGroups, setIsLoadingGroups] = useState(true);
-  const [groupSource, setGroupSource] = useState<'backend' | 'mock'>('mock');
-  const [dedupMode, setDedupMode] = useState<DedupMode>('fingerprint');
+  const [groupSource, setGroupSource] = useState<"backend" | "mock">("mock");
+  const [dedupMode, setDedupMode] = useState<DedupMode>("fingerprint");
   const [confirmFullHash, setConfirmFullHash] = useState(true);
   const [includeArchived, setIncludeArchived] = useState(false);
-  const [repositoryScope, setRepositoryScope] = useState<RepositoryScope>('LDO Repository');
-  const [collectionScope, setCollectionScope] = useState<CollectionScope>('All collections');
-  const [plantScope, setPlantScope] = useState<PlantScope>('All plants');
-  const [scopeDateFrom, setScopeDateFrom] = useState('2025-11-01');
-  const [scopeDateTo, setScopeDateTo] = useState('2026-03-31');
-  const [draftFilters, setDraftFilters] = useState<FilterState>(DEFAULT_FILTERS);
-  const [appliedFilters, setAppliedFilters] = useState<FilterState>(DEFAULT_FILTERS);
+  const [repositoryScope, setRepositoryScope] =
+    useState<RepositoryScope>("LDO Repository");
+  const [collectionScope, setCollectionScope] =
+    useState<CollectionScope>("All collections");
+  const [plantScope, setPlantScope] = useState<PlantScope>("All plants");
+  const [scopeDateFrom, setScopeDateFrom] = useState("2025-11-01");
+  const [scopeDateTo, setScopeDateTo] = useState("2026-03-31");
+  const [draftFilters, setDraftFilters] =
+    useState<FilterState>(DEFAULT_FILTERS);
+  const [appliedFilters, setAppliedFilters] =
+    useState<FilterState>(DEFAULT_FILTERS);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
-  const [bulkSelectedGroupIds, setBulkSelectedGroupIds] = useState<string[]>([]);
+  const [bulkSelectedGroupIds, setBulkSelectedGroupIds] = useState<string[]>(
+    [],
+  );
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<PendingActionState>(null);
   const [actionBusy, setActionBusy] = useState(false);
-  const [jobStatus, setJobStatus] = useState<string>('No dedup jobs running.');
+  const [jobStatus, setJobStatus] = useState<string>("No dedup jobs running.");
   const [scheduleForm, setScheduleForm] = useState({
-    cadence: 'Weekly',
-    runDate: '2026-04-02',
-    runTime: '02:00',
+    cadence: "Weekly",
+    runDate: "2026-04-02",
+    runTime: "02:00",
     notify: true,
   });
   const [settingsForm, setSettingsForm] = useState({
-    hashAlgo: 'BLAKE3',
-    hashVersion: '2',
-    inlineFingerprintLimit: '50 MB',
+    hashAlgo: "BLAKE3",
+    hashVersion: "2",
+    inlineFingerprintLimit: "50 MB",
     indexCollectionWide: true,
   });
-  const [masterSelection, setMasterSelection] = useState<Record<string, string>>(() =>
-    Object.fromEntries(DUPLICATE_GROUPS.map((group) => [group.id, group.suggestedMasterId]))
+  const [masterSelection, setMasterSelection] = useState<
+    Record<string, string>
+  >(() =>
+    Object.fromEntries(
+      DUPLICATE_GROUPS.map((group) => [group.id, group.suggestedMasterId]),
+    ),
   );
-  const [decisionSelection, setDecisionSelection] = useState<Record<string, DedupDecision>>(() =>
+  const [decisionSelection, setDecisionSelection] = useState<
+    Record<string, DedupDecision>
+  >(() =>
     Object.fromEntries(
       DUPLICATE_GROUPS.map((group) => [
         group.id,
-        group.status === 'exact' ? 'hide_duplicates' : group.status === 'pending' ? 'merge_metadata' : 'ignore_for_now',
-      ])
-    )
+        group.status === "exact"
+          ? "hide_duplicates"
+          : group.status === "pending"
+            ? "merge_metadata"
+            : "ignore_for_now",
+      ]),
+    ),
   );
   const [groupNotes, setGroupNotes] = useState<Record<string, string>>(() =>
-    Object.fromEntries(DUPLICATE_GROUPS.map((group) => [group.id, group.notes]))
+    Object.fromEntries(
+      DUPLICATE_GROUPS.map((group) => [group.id, group.notes]),
+    ),
   );
 
   const loadGroups = useCallback(async (signal?: AbortSignal) => {
@@ -576,10 +736,15 @@ export default function DeduplicationConsole() {
       setGroupSource(result.source);
       setJobStatus(result.summary);
     } catch (error) {
-      console.warn('[DeduplicationConsole] Falling back to local groups after load failure.', error);
+      console.warn(
+        "[DeduplicationConsole] Falling back to local groups after load failure.",
+        error,
+      );
       setGroups(DUPLICATE_GROUPS);
-      setGroupSource('mock');
-      setJobStatus('Using the fallback console dataset because duplicate groups could not be loaded from the backend.');
+      setGroupSource("mock");
+      setJobStatus(
+        "Using the fallback console dataset because duplicate groups could not be loaded from the backend.",
+      );
     } finally {
       setIsLoadingGroups(false);
     }
@@ -591,7 +756,7 @@ export default function DeduplicationConsole() {
 
     void loadGroups(controller.signal).catch(() => {
       if (!cancelled) {
-        setGroupSource('mock');
+        setGroupSource("mock");
       }
     });
 
@@ -614,11 +779,11 @@ export default function DeduplicationConsole() {
       for (const group of groups) {
         if (!next[group.id]) {
           next[group.id] =
-            group.status === 'exact'
-              ? 'hide_duplicates'
-              : group.status === 'pending'
-                ? 'merge_metadata'
-                : 'ignore_for_now';
+            group.status === "exact"
+              ? "hide_duplicates"
+              : group.status === "pending"
+                ? "merge_metadata"
+                : "ignore_for_now";
         }
       }
       return next;
@@ -638,23 +803,60 @@ export default function DeduplicationConsole() {
         const derivedStatus = deriveStatus(group, dedupMode);
         const visibleDocuments = group.documents.filter((doc) => {
           if (repositoryScope !== group.repository) return false;
-          if (collectionScope !== 'All collections' && group.collection !== collectionScope) return false;
-          if (plantScope !== 'All plants' && group.plant !== plantScope) return false;
+          if (
+            collectionScope !== "All collections" &&
+            group.collection !== collectionScope
+          )
+            return false;
+          if (plantScope !== "All plants" && group.plant !== plantScope)
+            return false;
           if (!includeArchived && doc.isArchived) return false;
           if (scopeDateFrom && doc.uploadDate < scopeDateFrom) return false;
           if (scopeDateTo && doc.uploadDate > scopeDateTo) return false;
-          if (appliedFilters.documentClasses.length && !appliedFilters.documentClasses.includes(doc.className)) return false;
-          if (appliedFilters.sourceSystem !== 'All sources' && doc.sourceSystem !== appliedFilters.sourceSystem) return false;
-          if (appliedFilters.owner !== 'All owners' && doc.owner !== appliedFilters.owner && doc.uploader !== appliedFilters.owner) return false;
-          if (appliedFilters.uploadFrom && doc.uploadDate < appliedFilters.uploadFrom) return false;
-          if (appliedFilters.uploadTo && doc.uploadDate > appliedFilters.uploadTo) return false;
-          if (appliedFilters.minSizeBytes && doc.fileSizeBytes < appliedFilters.minSizeBytes) return false;
+          if (
+            appliedFilters.documentClasses.length &&
+            !appliedFilters.documentClasses.includes(doc.className)
+          )
+            return false;
+          if (
+            appliedFilters.sourceSystem !== "All sources" &&
+            doc.sourceSystem !== appliedFilters.sourceSystem
+          )
+            return false;
+          if (
+            appliedFilters.owner !== "All owners" &&
+            doc.owner !== appliedFilters.owner &&
+            doc.uploader !== appliedFilters.owner
+          )
+            return false;
+          if (
+            appliedFilters.uploadFrom &&
+            doc.uploadDate < appliedFilters.uploadFrom
+          )
+            return false;
+          if (
+            appliedFilters.uploadTo &&
+            doc.uploadDate > appliedFilters.uploadTo
+          )
+            return false;
+          if (
+            appliedFilters.minSizeBytes &&
+            doc.fileSizeBytes < appliedFilters.minSizeBytes
+          )
+            return false;
           if (appliedFilters.search) {
-            const haystack = [doc.id, doc.title, doc.documentNumber, doc.drawingNumber, doc.partNumber]
+            const haystack = [
+              doc.id,
+              doc.title,
+              doc.documentNumber,
+              doc.drawingNumber,
+              doc.partNumber,
+            ]
               .filter(Boolean)
-              .join(' ')
+              .join(" ")
               .toLowerCase();
-            if (!haystack.includes(appliedFilters.search.toLowerCase())) return false;
+            if (!haystack.includes(appliedFilters.search.toLowerCase()))
+              return false;
           }
           return true;
         });
@@ -666,21 +868,40 @@ export default function DeduplicationConsole() {
         };
       })
       .filter((group) => group.visibleDocuments.length > 0);
-  }, [appliedFilters, collectionScope, dedupMode, groups, includeArchived, plantScope, repositoryScope, scopeDateFrom, scopeDateTo]);
+  }, [
+    appliedFilters,
+    collectionScope,
+    dedupMode,
+    groups,
+    includeArchived,
+    plantScope,
+    repositoryScope,
+    scopeDateFrom,
+    scopeDateTo,
+  ]);
 
   const selectedGroup = useMemo(
     () => displayedGroups.find((group) => group.id === selectedGroupId) ?? null,
-    [displayedGroups, selectedGroupId]
+    [displayedGroups, selectedGroupId],
   );
 
   const summaryStats = useMemo(() => {
-    const docCount = displayedGroups.reduce((sum, group) => sum + group.visibleDocuments.length, 0);
-    const savings = displayedGroups.reduce((sum, group) => sum + group.potentialSavingsBytes, 0);
+    const docCount = displayedGroups.reduce(
+      (sum, group) => sum + group.visibleDocuments.length,
+      0,
+    );
+    const savings = displayedGroups.reduce(
+      (sum, group) => sum + group.potentialSavingsBytes,
+      0,
+    );
     return { groups: displayedGroups.length, documents: docCount, savings };
   }, [displayedGroups]);
 
   useEffect(() => {
-    if (selectedGroupId && !displayedGroups.some((group) => group.id === selectedGroupId)) {
+    if (
+      selectedGroupId &&
+      !displayedGroups.some((group) => group.id === selectedGroupId)
+    ) {
       setSelectedGroupId(null);
     }
   }, [displayedGroups, selectedGroupId]);
@@ -692,15 +913,18 @@ export default function DeduplicationConsole() {
     }
 
     const aggregate = aggregateReferences(selectedGroup);
-    const masterId = masterSelection[selectedGroup.id] ?? selectedGroup.suggestedMasterId;
-    const selectedMaster = selectedGroup.documents.find((doc) => doc.id === masterId) ?? selectedGroup.documents[0];
+    const masterId =
+      masterSelection[selectedGroup.id] ?? selectedGroup.suggestedMasterId;
+    const selectedMaster =
+      selectedGroup.documents.find((doc) => doc.id === masterId) ??
+      selectedGroup.documents[0];
     const decision = decisionSelection[selectedGroup.id];
     const impactSummary =
-      decision === 'hide_duplicates'
+      decision === "hide_duplicates"
         ? `Hide ${Math.max(selectedGroup.documents.length - 1, 1)} duplicates and keep ${selectedMaster.id} as the master record.`
-        : decision === 'merge_metadata'
+        : decision === "merge_metadata"
           ? `Merge metadata into ${selectedMaster.id} and preserve existing links on the most-referenced document.`
-          : 'Leave the group visible but excluded from future queue prioritization.';
+          : "Leave the group visible but excluded from future queue prioritization.";
 
     openPanel({
       panelKey: selectedGroup.id,
@@ -720,63 +944,93 @@ export default function DeduplicationConsole() {
       ),
       sections: [
         {
-          heading: 'Summary',
+          heading: "Summary",
           content: (
             <div className="space-y-4">
               <div className="rounded-2xl border border-teal-500/20 bg-teal-500/8 p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Master candidate suggestion</p>
-                    <p className="mt-1 text-sm font-semibold text-foreground">{selectedMaster.id}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">{selectedMaster.title}</p>
+                    <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+                      Master candidate suggestion
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-foreground">
+                      {selectedMaster.id}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {selectedMaster.title}
+                    </p>
                   </div>
                   <Badge variant="success">Most-linked candidate</Badge>
                 </div>
                 <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
                   <div className="rounded-xl border border-border bg-slate-950/45 p-3">
-                    <p className="text-muted-foreground">Potential storage saving</p>
-                    <p className="mt-1 text-lg font-semibold text-foreground">{formatBytes(selectedGroup.potentialSavingsBytes)}</p>
+                    <p className="text-muted-foreground">
+                      Potential storage saving
+                    </p>
+                    <p className="mt-1 text-lg font-semibold text-foreground">
+                      {formatBytes(selectedGroup.potentialSavingsBytes)}
+                    </p>
                   </div>
                   <div className="rounded-xl border border-border bg-slate-950/45 p-3">
                     <p className="text-muted-foreground">Mode used</p>
                     <p className="mt-1 text-sm font-semibold text-foreground">
-                      {dedupMode === 'fingerprint' ? 'Metadata + content fingerprint' : 'Metadata only'}
+                      {dedupMode === "fingerprint"
+                        ? "Metadata + content fingerprint"
+                        : "Metadata only"}
                     </p>
                   </div>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Risk review</p>
+                <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+                  Risk review
+                </p>
                 {selectedGroup.risks.map((risk) => (
-                  <div key={risk} className="flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/8 px-3 py-2.5 text-xs text-amber-100">
+                  <div
+                    key={risk}
+                    className="flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/8 px-3 py-2.5 text-xs text-amber-100"
+                  >
                     <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-300" />
                     <span>{risk}</span>
                   </div>
                 ))}
                 <div className="rounded-xl border border-border bg-slate-950/45 p-3 text-xs text-foreground/90">
-                  <span className="font-semibold text-foreground">Impact summary:</span> {impactSummary}
+                  <span className="font-semibold text-foreground">
+                    Impact summary:
+                  </span>{" "}
+                  {impactSummary}
                 </div>
               </div>
 
-              {((selectedGroup.approvedAssertions?.length ?? 0) > 0 || (selectedGroup.conflictingEntities?.length ?? 0) > 0) && (
+              {((selectedGroup.approvedAssertions?.length ?? 0) > 0 ||
+                (selectedGroup.conflictingEntities?.length ?? 0) > 0) && (
                 <div className="space-y-3 rounded-2xl border border-border/70 bg-slate-950/45 p-4">
                   <div>
-                    <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Metadata evidence</p>
+                    <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+                      Metadata evidence
+                    </p>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      Duplicate grouping is reinforced by governed identifiers and extracted entities already stored on the document records.
+                      Duplicate grouping is reinforced by governed identifiers
+                      and extracted entities already stored on the document
+                      records.
                     </p>
                   </div>
                   {(selectedGroup.approvedAssertions?.length ?? 0) > 0 && (
                     <div className="space-y-2">
-                      <p className="text-xs font-semibold text-foreground">Common approved assertions</p>
+                      <p className="text-xs font-semibold text-foreground">
+                        Common approved assertions
+                      </p>
                       <div className="flex flex-wrap gap-2">
                         {selectedGroup.approvedAssertions?.map((assertion) => (
                           <span
-                            key={`${assertion.fieldKey}-${assertion.values.join('|')}`}
+                            key={`${assertion.fieldKey}-${assertion.values.join("|")}`}
                             className="rounded-full border border-indigo-500/20 bg-indigo-500/10 px-2.5 py-1 text-[11px] text-indigo-100"
                           >
-                            <span className="font-semibold">{humanizeToken(assertion.fieldKey)}:</span> {assertion.values.join(', ')}
+                            <span className="font-semibold">
+                              {humanizeToken(assertion.fieldKey)}:
+                            </span>{" "}
+                            {assertion.values.join(", ")}
                           </span>
                         ))}
                       </div>
@@ -784,14 +1038,19 @@ export default function DeduplicationConsole() {
                   )}
                   {(selectedGroup.conflictingEntities?.length ?? 0) > 0 && (
                     <div className="space-y-2">
-                      <p className="text-xs font-semibold text-foreground">Conflicting extracted entities</p>
+                      <p className="text-xs font-semibold text-foreground">
+                        Conflicting extracted entities
+                      </p>
                       <div className="space-y-2">
                         {selectedGroup.conflictingEntities?.map((entity) => (
                           <div
-                            key={`${entity.entityType}-${entity.values.join('|')}`}
+                            key={`${entity.entityType}-${entity.values.join("|")}`}
                             className="rounded-xl border border-rose-500/20 bg-rose-500/8 px-3 py-2 text-xs text-rose-100"
                           >
-                            <span className="font-semibold">{humanizeToken(entity.entityType)}:</span> {entity.values.join(', ')}
+                            <span className="font-semibold">
+                              {humanizeToken(entity.entityType)}:
+                            </span>{" "}
+                            {entity.values.join(", ")}
                           </div>
                         ))}
                       </div>
@@ -803,27 +1062,38 @@ export default function DeduplicationConsole() {
           ),
         },
         {
-          heading: 'Documents in this group',
+          heading: "Documents in this group",
           content: (
             <div className="space-y-3">
               <div className="flex flex-wrap gap-2">
-                {(['hide_duplicates', 'merge_metadata', 'ignore_for_now'] as DedupDecision[]).map((option) => {
+                {(
+                  [
+                    "hide_duplicates",
+                    "merge_metadata",
+                    "ignore_for_now",
+                  ] as DedupDecision[]
+                ).map((option) => {
                   const selected = decision === option;
                   const label =
-                    option === 'hide_duplicates'
-                      ? 'Hide duplicates'
-                      : option === 'merge_metadata'
-                        ? 'Merge metadata'
-                        : 'Ignore for now';
+                    option === "hide_duplicates"
+                      ? "Hide duplicates"
+                      : option === "merge_metadata"
+                        ? "Merge metadata"
+                        : "Ignore for now";
                   return (
                     <button
                       key={option}
                       type="button"
-                      onClick={() => setDecisionSelection((current) => ({ ...current, [selectedGroup.id]: option }))}
+                      onClick={() =>
+                        setDecisionSelection((current) => ({
+                          ...current,
+                          [selectedGroup.id]: option,
+                        }))
+                      }
                       className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
                         selected
-                          ? 'border-teal-400/40 bg-teal-500/14 text-teal-100'
-                          : 'border-border/60 bg-card text-muted-foreground hover:border-slate-500/70 hover:text-foreground'
+                          ? "border-teal-400/40 bg-teal-500/14 text-teal-100"
+                          : "border-border/60 bg-card text-muted-foreground hover:border-slate-500/70 hover:text-foreground"
                       }`}
                     >
                       {label}
@@ -832,7 +1102,9 @@ export default function DeduplicationConsole() {
                 })}
               </div>
               {selectedGroup.documents.map((doc) => {
-                const isMaster = (masterSelection[selectedGroup.id] ?? selectedGroup.suggestedMasterId) === doc.id;
+                const isMaster =
+                  (masterSelection[selectedGroup.id] ??
+                    selectedGroup.suggestedMasterId) === doc.id;
                 const fingerprint = getFingerprintMeta(doc.fingerprintState);
                 return (
                   <div
@@ -845,7 +1117,12 @@ export default function DeduplicationConsole() {
                         type="radio"
                         name={`master-${selectedGroup.id}`}
                         checked={isMaster}
-                        onChange={() => setMasterSelection((current) => ({ ...current, [selectedGroup.id]: doc.id }))}
+                        onChange={() =>
+                          setMasterSelection((current) => ({
+                            ...current,
+                            [selectedGroup.id]: doc.id,
+                          }))
+                        }
                         className="mt-1 h-4 w-4 accent-teal-400"
                       />
                       <div className="min-w-0 flex-1">
@@ -858,7 +1135,9 @@ export default function DeduplicationConsole() {
                             >
                               {doc.id}
                             </button>
-                            <p className="mt-1 text-xs text-foreground/90">{doc.title}</p>
+                            <p className="mt-1 text-xs text-foreground/90">
+                              {doc.title}
+                            </p>
                           </div>
                           <div className="flex items-center gap-2">
                             <DocumentPreviewButton
@@ -867,24 +1146,38 @@ export default function DeduplicationConsole() {
                               iconOnly
                               className="h-7 min-h-0 px-2 text-foreground/90 hover:text-teal-200"
                             />
-                            {isMaster && <Badge variant="success">Set as master</Badge>}
+                            {isMaster && (
+                              <Badge variant="success">Set as master</Badge>
+                            )}
                           </div>
                         </div>
                         <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] text-muted-foreground">
                           <div className="rounded-xl border border-border/60 bg-slate-950/55 px-3 py-2">
-                            <p className="uppercase tracking-[0.16em]">Number / revision</p>
-                            <p className="mt-1 text-foreground">{doc.documentNumber} · {doc.revision}</p>
+                            <p className="uppercase tracking-[0.16em]">
+                              Number / revision
+                            </p>
+                            <p className="mt-1 text-foreground">
+                              {doc.documentNumber} · {doc.revision}
+                            </p>
                           </div>
                           <div className="rounded-xl border border-border/60 bg-slate-950/55 px-3 py-2">
-                            <p className="uppercase tracking-[0.16em]">Links count</p>
-                            <p className="mt-1 text-foreground">{totalReferences(doc)} linked entities</p>
+                            <p className="uppercase tracking-[0.16em]">
+                              Links count
+                            </p>
+                            <p className="mt-1 text-foreground">
+                              {totalReferences(doc)} linked entities
+                            </p>
                           </div>
                         </div>
                         <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px]">
                           <span className="rounded-full border border-border/60 bg-card/70 px-2.5 py-1 text-muted-foreground">
                             Metadata key ready
                           </span>
-                          <span className={`rounded-full px-2.5 py-1 ${fingerprint.className}`}>{fingerprint.label}</span>
+                          <span
+                            className={`rounded-full px-2.5 py-1 ${fingerprint.className}`}
+                          >
+                            {fingerprint.label}
+                          </span>
                           {doc.isFullHashRequired && (
                             <span className="rounded-full border border-emerald-400/25 bg-emerald-500/10 px-2.5 py-1 text-emerald-100">
                               Full hash required class
@@ -900,15 +1193,38 @@ export default function DeduplicationConsole() {
           ),
         },
         {
-          heading: 'Links & impact',
+          heading: "Links & impact",
           content: (
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { label: 'ERP orders / jobs', value: aggregate.erp, route: '/reports', icon: <Database className="h-4 w-4" /> },
-                  { label: 'Work / approvals', value: aggregate.work + aggregate.approvals, route: '/approvals', icon: <GitBranch className="h-4 w-4" /> },
-                  { label: 'Config / BOM links', value: aggregate.config, route: '/bom', icon: <FolderGit2 className="h-4 w-4" /> },
-                  { label: 'Document refs total', value: selectedGroup.documents.reduce((sum, doc) => sum + totalReferences(doc), 0), route: '/documents', icon: <Link2 className="h-4 w-4" /> },
+                  {
+                    label: "ERP orders / jobs",
+                    value: aggregate.erp,
+                    route: "/reports",
+                    icon: <Database className="h-4 w-4" />,
+                  },
+                  {
+                    label: "Work / approvals",
+                    value: aggregate.work + aggregate.approvals,
+                    route: "/approvals",
+                    icon: <GitBranch className="h-4 w-4" />,
+                  },
+                  {
+                    label: "Config / BOM links",
+                    value: aggregate.config,
+                    route: "/bom",
+                    icon: <FolderGit2 className="h-4 w-4" />,
+                  },
+                  {
+                    label: "Document refs total",
+                    value: selectedGroup.documents.reduce(
+                      (sum, doc) => sum + totalReferences(doc),
+                      0,
+                    ),
+                    route: "/documents",
+                    icon: <Link2 className="h-4 w-4" />,
+                  },
                 ].map((item) => (
                   <button
                     key={item.label}
@@ -918,41 +1234,65 @@ export default function DeduplicationConsole() {
                   >
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <span className="text-primary/90">{item.icon}</span>
-                      <span className="text-[11px] uppercase tracking-[0.16em]">{item.label}</span>
+                      <span className="text-[11px] uppercase tracking-[0.16em]">
+                        {item.label}
+                      </span>
                     </div>
                     <div className="mt-2 flex items-end justify-between">
-                      <span className="text-2xl font-semibold text-foreground">{item.value}</span>
+                      <span className="text-2xl font-semibold text-foreground">
+                        {item.value}
+                      </span>
                       <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
                     </div>
                   </button>
                 ))}
               </div>
               <div className="rounded-2xl border border-border/70 bg-slate-950/45 p-3 text-xs text-muted-foreground">
-                Review these linked entities before hiding or merging duplicates. Destructive actions must preserve link targets and approval history.
+                Review these linked entities before hiding or merging
+                duplicates. Destructive actions must preserve link targets and
+                approval history.
               </div>
             </div>
           ),
         },
         {
-          heading: 'Notes & log',
+          heading: "Notes & log",
           content: (
             <div className="space-y-3">
               <textarea
-                value={groupNotes[selectedGroup.id] ?? ''}
-                onChange={(event) => setGroupNotes((current) => ({ ...current, [selectedGroup.id]: event.target.value }))}
+                value={groupNotes[selectedGroup.id] ?? ""}
+                onChange={(event) =>
+                  setGroupNotes((current) => ({
+                    ...current,
+                    [selectedGroup.id]: event.target.value,
+                  }))
+                }
                 className="min-h-[120px] w-full rounded-2xl border border-border/60 bg-slate-950/65 px-3 py-3 text-sm text-foreground outline-none transition-all focus:border-teal-400/40 focus:ring-1 focus:ring-teal-400/30"
                 placeholder="Capture operator notes, exception handling, or audit rationale."
               />
               <div className="space-y-2 rounded-2xl border border-border/70 bg-slate-950/45 p-3">
-                <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Decision log</p>
+                <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                  Decision log
+                </p>
                 {selectedGroup.decisionLog.map((entry) => (
-                  <div key={`${entry.at}-${entry.actor}-${entry.action}`} className="rounded-xl border border-border/60 bg-slate-950/55 px-3 py-2.5">
+                  <div
+                    key={`${entry.at}-${entry.actor}-${entry.action}`}
+                    className="rounded-xl border border-border/60 bg-slate-950/55 px-3 py-2.5"
+                  >
                     <div className="flex items-center justify-between gap-3 text-[11px]">
-                      <span className="font-semibold text-foreground">{entry.action}</span>
-                      <span className="text-muted-foreground">{formatDateTime(entry.at)}</span>
+                      <span className="font-semibold text-foreground">
+                        {entry.action}
+                      </span>
+                      <span className="text-muted-foreground">
+                        {formatDateTime(entry.at)}
+                      </span>
                     </div>
-                    <p className="mt-1 text-xs text-muted-foreground">{entry.actor}</p>
-                    <p className="mt-2 text-xs text-foreground/90">{entry.note}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {entry.actor}
+                    </p>
+                    <p className="mt-2 text-xs text-foreground/90">
+                      {entry.note}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -962,12 +1302,29 @@ export default function DeduplicationConsole() {
       ],
       footer: (
         <div className="space-y-2">
-          <Button className="w-full" onClick={() => setPendingAction({ type: 'apply_decision', groupId: selectedGroup.id })}>
+          <Button
+            className="w-full"
+            onClick={() =>
+              setPendingAction({
+                type: "apply_decision",
+                groupId: selectedGroup.id,
+              })
+            }
+          >
             <CopyCheck className="h-4 w-4" />
             Apply dedup decision
           </Button>
           <div className="grid grid-cols-2 gap-2">
-            <Button variant="secondary" size="sm" onClick={() => setPendingAction({ type: 'mark_non_duplicate', groupId: selectedGroup.id })}>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() =>
+                setPendingAction({
+                  type: "mark_non_duplicate",
+                  groupId: selectedGroup.id,
+                })
+              }
+            >
               Mark as non-duplicate
             </Button>
             <div className="grid grid-cols-2 gap-2">
@@ -979,7 +1336,11 @@ export default function DeduplicationConsole() {
                 className="w-full"
                 label="Preview"
               />
-              <Button variant="ghost" size="sm" onClick={() => navigate(`/documents/${selectedMaster.id}`)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate(`/documents/${selectedMaster.id}`)}
+              >
                 Open full document view
               </Button>
             </div>
@@ -989,21 +1350,43 @@ export default function DeduplicationConsole() {
     });
 
     return () => closePanel();
-  }, [closePanel, decisionSelection, dedupMode, groupNotes, masterSelection, navigate, openPanel, selectedGroup]);
+  }, [
+    closePanel,
+    decisionSelection,
+    dedupMode,
+    groupNotes,
+    masterSelection,
+    navigate,
+    openPanel,
+    selectedGroup,
+  ]);
 
   const allVisibleGroupIds = displayedGroups.map((group) => group.id);
-  const allVisibleSelected = allVisibleGroupIds.length > 0 && allVisibleGroupIds.every((groupId) => bulkSelectedGroupIds.includes(groupId));
+  const allVisibleSelected =
+    allVisibleGroupIds.length > 0 &&
+    allVisibleGroupIds.every((groupId) =>
+      bulkSelectedGroupIds.includes(groupId),
+    );
 
   const runDedupNow = async () => {
-    const descriptor = dedupMode === 'fingerprint' ? 'metadata + fingerprint' : 'metadata only';
-    setJobStatus(`Refreshing duplicate groups using ${descriptor} across the current scope.`);
+    const descriptor =
+      dedupMode === "fingerprint" ? "metadata + fingerprint" : "metadata only";
+    setJobStatus(
+      `Refreshing duplicate groups using ${descriptor} across the current scope.`,
+    );
     await loadGroups();
-    toast.success('Dedup groups refreshed', { description: `Using ${descriptor} mode with current scope and filters.` });
+    toast.success("Dedup groups refreshed", {
+      description: `Using ${descriptor} mode with current scope and filters.`,
+    });
   };
 
   const exportReport = () => {
-    downloadFile(buildCsv(displayedGroups), `dedup-report-${new Date().toISOString().slice(0, 10)}.csv`, 'text/csv;charset=utf-8;');
-    toast.success('Dedup report exported');
+    downloadFile(
+      buildCsv(displayedGroups),
+      `dedup-report-${new Date().toISOString().slice(0, 10)}.csv`,
+      "text/csv;charset=utf-8;",
+    );
+    toast.success("Dedup report exported");
   };
 
   const resetFilters = () => {
@@ -1013,7 +1396,9 @@ export default function DeduplicationConsole() {
 
   const handleBulkToggle = (groupId: string, checked: boolean) => {
     setBulkSelectedGroupIds((current) =>
-      checked ? Array.from(new Set([...current, groupId])) : current.filter((id) => id !== groupId)
+      checked
+        ? Array.from(new Set([...current, groupId]))
+        : current.filter((id) => id !== groupId),
     );
   };
 
@@ -1022,22 +1407,29 @@ export default function DeduplicationConsole() {
     setActionBusy(true);
 
     try {
-      if (pendingAction.type === 'scan_missing_hashes') {
+      if (pendingAction.type === "scan_missing_hashes") {
         const pendingCount = groups.reduce(
-          (sum, group) => sum + group.documents.filter((doc) => doc.fingerprintState === 'missing').length,
-          0
+          (sum, group) =>
+            sum +
+            group.documents.filter((doc) => doc.fingerprintState === "missing")
+              .length,
+          0,
         );
         await DeduplicationService.queueMissingHashes();
-        setJobStatus(`Background hash scan queued for ${pendingCount} documents missing sparse fingerprints.`);
-        toast.success('Fingerprint scan queued', { description: `${pendingCount} documents will be processed in the background.` });
+        setJobStatus(
+          `Background hash scan queued for ${pendingCount} documents missing sparse fingerprints.`,
+        );
+        toast.success("Fingerprint scan queued", {
+          description: `${pendingCount} documents will be processed in the background.`,
+        });
       }
 
-      if (pendingAction.type === 'apply_decision') {
+      if (pendingAction.type === "apply_decision") {
         const group = groups.find((item) => item.id === pendingAction.groupId);
         if (group) {
           const masterId = masterSelection[group.id] ?? group.suggestedMasterId;
           const decision = decisionSelection[group.id];
-          if (groupSource === 'mock') {
+          if (groupSource === "mock") {
             setGroups((current) =>
               current.map((item) =>
                 item.id === group.id
@@ -1047,27 +1439,29 @@ export default function DeduplicationConsole() {
                       decisionLog: [
                         {
                           at: new Date().toISOString(),
-                          actor: 'edms.admin',
+                          actor: "edms.admin",
                           action:
-                            decision === 'hide_duplicates'
-                              ? 'Dedup applied'
-                              : decision === 'merge_metadata'
-                                ? 'Metadata merged'
-                                : 'Ignored',
+                            decision === "hide_duplicates"
+                              ? "Dedup applied"
+                              : decision === "merge_metadata"
+                                ? "Metadata merged"
+                                : "Ignored",
                           note:
-                            decision === 'hide_duplicates'
+                            decision === "hide_duplicates"
                               ? `Kept ${masterId} as master and queued ${Math.max(item.documents.length - 1, 1)} duplicates for hide/supersede.`
-                              : decision === 'merge_metadata'
+                              : decision === "merge_metadata"
                                 ? `Merged duplicate metadata into ${masterId} and retained its existing links.`
-                                : 'Excluded this group from the active review queue while preserving audit visibility.',
+                                : "Excluded this group from the active review queue while preserving audit visibility.",
                         },
                         ...item.decisionLog,
                       ],
                     }
-                  : item
-              )
+                  : item,
+              ),
             );
-            toast.success('Dedup decision queued', { description: `${group.id} was updated in the fallback console dataset.` });
+            toast.success("Dedup decision queued", {
+              description: `${group.id} was updated in the fallback console dataset.`,
+            });
           } else {
             await DeduplicationService.applyDecision(group.id, {
               decision,
@@ -1075,13 +1469,15 @@ export default function DeduplicationConsole() {
               notes: groupNotes[group.id] ?? group.notes,
             });
             await loadGroups();
-            toast.success('Dedup decision queued', { description: `${group.id} was submitted to the backend decision flow.` });
+            toast.success("Dedup decision queued", {
+              description: `${group.id} was submitted to the backend decision flow.`,
+            });
           }
         }
       }
 
-      if (pendingAction.type === 'mark_non_duplicate') {
-        if (groupSource === 'mock') {
+      if (pendingAction.type === "mark_non_duplicate") {
+        if (groupSource === "mock") {
           setGroups((current) =>
             current.map((item) =>
               item.id === pendingAction.groupId
@@ -1091,29 +1487,29 @@ export default function DeduplicationConsole() {
                     decisionLog: [
                       {
                         at: new Date().toISOString(),
-                        actor: 'edms.admin',
-                        action: 'Marked non-duplicate',
-                        note: 'Group removed from active dedup queue while preserving audit history.',
+                        actor: "edms.admin",
+                        action: "Marked non-duplicate",
+                        note: "Group removed from active dedup queue while preserving audit history.",
                       },
                       ...item.decisionLog,
                     ],
                   }
-                : item
-            )
+                : item,
+            ),
           );
         } else {
           await DeduplicationService.applyDecision(pendingAction.groupId, {
-            decision: 'ignore_for_now',
-            notes: `${groupNotes[pendingAction.groupId] ?? ''}\nMarked as non-duplicate by admin review.`,
+            decision: "ignore_for_now",
+            notes: `${groupNotes[pendingAction.groupId] ?? ""}\nMarked as non-duplicate by admin review.`,
           });
           await loadGroups();
         }
-        toast.success('Group marked as non-duplicate');
+        toast.success("Group marked as non-duplicate");
         setSelectedGroupId(null);
       }
 
-      if (pendingAction.type === 'bulk_ignore') {
-        if (groupSource === 'mock') {
+      if (pendingAction.type === "bulk_ignore") {
+        if (groupSource === "mock") {
           setGroups((current) =>
             current.map((item) =>
               bulkSelectedGroupIds.includes(item.id)
@@ -1122,35 +1518,41 @@ export default function DeduplicationConsole() {
                     decisionLog: [
                       {
                         at: new Date().toISOString(),
-                        actor: 'edms.admin',
-                        action: 'Bulk ignored',
-                        note: 'Group deprioritized from the active dedup queue via bulk action.',
+                        actor: "edms.admin",
+                        action: "Bulk ignored",
+                        note: "Group deprioritized from the active dedup queue via bulk action.",
                       },
                       ...item.decisionLog,
                     ],
                   }
-                : item
-            )
+                : item,
+            ),
           );
         } else {
           await Promise.all(
             bulkSelectedGroupIds.map((groupId) =>
               DeduplicationService.applyDecision(groupId, {
-                decision: 'ignore_for_now',
-                notes: 'Group deprioritized from the active dedup queue via bulk action.',
-              })
-            )
+                decision: "ignore_for_now",
+                notes:
+                  "Group deprioritized from the active dedup queue via bulk action.",
+              }),
+            ),
           );
           await loadGroups();
         }
-        toast.success('Selected groups ignored', { description: `${bulkSelectedGroupIds.length} groups moved out of the active queue.` });
+        toast.success("Selected groups ignored", {
+          description: `${bulkSelectedGroupIds.length} groups moved out of the active queue.`,
+        });
         setBulkSelectedGroupIds([]);
       }
 
       setPendingAction(null);
     } catch (error) {
-      toast.error('Dedup action failed', {
-        description: error instanceof Error ? error.message : 'The backend rejected the dedup action.',
+      toast.error("Dedup action failed", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "The backend rejected the dedup action.",
       });
     } finally {
       setActionBusy(false);
@@ -1159,42 +1561,47 @@ export default function DeduplicationConsole() {
 
   const pendingDialogCopy = (() => {
     if (!pendingAction) return null;
-    if (pendingAction.type === 'scan_missing_hashes') {
+    if (pendingAction.type === "scan_missing_hashes") {
       return {
-        title: 'Queue background fingerprint scan?',
-        description: 'This starts a background job that computes sparse fingerprints only for documents missing hash data. The UI stays responsive while hashes are scanned.',
-        actionLabel: 'Queue scan',
+        title: "Queue background fingerprint scan?",
+        description:
+          "This starts a background job that computes sparse fingerprints only for documents missing hash data. The UI stays responsive while hashes are scanned.",
+        actionLabel: "Queue scan",
       };
     }
 
-    if (pendingAction.type === 'bulk_ignore') {
+    if (pendingAction.type === "bulk_ignore") {
       return {
         title: `Ignore ${bulkSelectedGroupIds.length} selected groups?`,
-        description: 'This will keep the records intact but remove the selected groups from active dedup review priority until a later pass.',
-        actionLabel: 'Ignore selected',
+        description:
+          "This will keep the records intact but remove the selected groups from active dedup review priority until a later pass.",
+        actionLabel: "Ignore selected",
       };
     }
 
-    if (pendingAction.type === 'mark_non_duplicate') {
+    if (pendingAction.type === "mark_non_duplicate") {
       return {
         title: `Mark ${pendingAction.groupId} as non-duplicate?`,
-        description: 'This keeps all documents visible and records the operator decision in the audit log so the group stops returning as an active duplicate candidate.',
-        actionLabel: 'Mark non-duplicate',
+        description:
+          "This keeps all documents visible and records the operator decision in the audit log so the group stops returning as an active duplicate candidate.",
+        actionLabel: "Mark non-duplicate",
       };
     }
 
     const group = groups.find((item) => item.id === pendingAction.groupId);
-    const masterId = group ? masterSelection[group.id] ?? group.suggestedMasterId : '';
-    const decision = group ? decisionSelection[group.id] : 'hide_duplicates';
+    const masterId = group
+      ? (masterSelection[group.id] ?? group.suggestedMasterId)
+      : "";
+    const decision = group ? decisionSelection[group.id] : "hide_duplicates";
     return {
       title: `Apply dedup decision for ${pendingAction.groupId}?`,
       description:
-        decision === 'hide_duplicates'
+        decision === "hide_duplicates"
           ? `Keep ${masterId} as master and queue the remaining duplicates for hide/supersede handling. Link targets and audit history remain intact.`
-          : decision === 'merge_metadata'
+          : decision === "merge_metadata"
             ? `Merge duplicate metadata into ${masterId} while preserving the most-linked document as the active record.`
             : `Leave this group visible but excluded from the active processing queue.`,
-      actionLabel: 'Apply decision',
+      actionLabel: "Apply decision",
     };
   })();
 
@@ -1205,7 +1612,11 @@ export default function DeduplicationConsole() {
         subtitle="Identify and resolve duplicate documents across the repository using metadata and content fingerprints."
         breadcrumb={
           <nav className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <button type="button" onClick={() => navigate('/admin')} className="transition-colors hover:text-primary/90">
+            <button
+              type="button"
+              onClick={() => navigate("/admin")}
+              className="transition-colors hover:text-primary/90"
+            >
               Admin
             </button>
             <span>/</span>
@@ -1215,14 +1626,29 @@ export default function DeduplicationConsole() {
           </nav>
         }
         primaryAction={{
-          label: 'Run dedup now',
+          label: "Run dedup now",
           icon: <Play className="h-4 w-4" />,
           onClick: runDedupNow,
         }}
         secondaryActions={[
-          { label: 'Schedule job', icon: <CalendarClock className="h-4 w-4" />, onClick: () => setScheduleOpen(true), variant: 'secondary' },
-          { label: 'Dedup settings', icon: <Settings2 className="h-4 w-4" />, onClick: () => setSettingsOpen(true), variant: 'secondary' },
-          { label: 'Export report', icon: <Download className="h-4 w-4" />, onClick: exportReport, variant: 'secondary' },
+          {
+            label: "Schedule job",
+            icon: <CalendarClock className="h-4 w-4" />,
+            onClick: () => setScheduleOpen(true),
+            variant: "secondary",
+          },
+          {
+            label: "Dedup settings",
+            icon: <Settings2 className="h-4 w-4" />,
+            onClick: () => setSettingsOpen(true),
+            variant: "secondary",
+          },
+          {
+            label: "Export report",
+            icon: <Download className="h-4 w-4" />,
+            onClick: exportReport,
+            variant: "secondary",
+          },
         ]}
       />
 
@@ -1230,26 +1656,73 @@ export default function DeduplicationConsole() {
         <div className="grid gap-5 xl:grid-cols-[1.8fr_1.2fr]">
           <div className="space-y-4">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Mode + scope</p>
-              <p className="mt-1 text-sm text-muted-foreground">Compact scope chips keep the scan boundary visible without taking over the workspace.</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+                Mode + scope
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Compact scope chips keep the scan boundary visible without
+                taking over the workspace.
+              </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <ScopeChip icon={<Database className="h-4 w-4" />} label="Repository / collection" value={`${repositoryScope} · ${collectionScope}`}>
+              <ScopeChip
+                icon={<Database className="h-4 w-4" />}
+                label="Repository / collection"
+                value={`${repositoryScope} · ${collectionScope}`}
+              >
                 <div className="space-y-4">
-                  <SelectionList title="Repository" options={REPOSITORY_OPTIONS} value={repositoryScope} onChange={(value) => setRepositoryScope(value as RepositoryScope)} />
-                  <SelectionList title="Collection" options={COLLECTION_OPTIONS} value={collectionScope} onChange={(value) => setCollectionScope(value as CollectionScope)} />
+                  <SelectionList
+                    title="Repository"
+                    options={REPOSITORY_OPTIONS}
+                    value={repositoryScope}
+                    onChange={(value) =>
+                      setRepositoryScope(value as RepositoryScope)
+                    }
+                  />
+                  <SelectionList
+                    title="Collection"
+                    options={COLLECTION_OPTIONS}
+                    value={collectionScope}
+                    onChange={(value) =>
+                      setCollectionScope(value as CollectionScope)
+                    }
+                  />
                 </div>
               </ScopeChip>
-              <ScopeChip icon={<Building2 className="h-4 w-4" />} label="Plant / site" value={plantScope}>
-                <SelectionList title="Plant / site" options={PLANT_OPTIONS} value={plantScope} onChange={(value) => setPlantScope(value as PlantScope)} />
+              <ScopeChip
+                icon={<Building2 className="h-4 w-4" />}
+                label="Plant / site"
+                value={plantScope}
+              >
+                <SelectionList
+                  title="Plant / site"
+                  options={PLANT_OPTIONS}
+                  value={plantScope}
+                  onChange={(value) => setPlantScope(value as PlantScope)}
+                />
               </ScopeChip>
-              <ScopeChip icon={<FileStack className="h-4 w-4" />} label="Document classes" value={summarizeList(appliedFilters.documentClasses, 'Specs, Drawings, Vendor docs')}>
+              <ScopeChip
+                icon={<FileStack className="h-4 w-4" />}
+                label="Document classes"
+                value={summarizeList(
+                  appliedFilters.documentClasses,
+                  "Specs, Drawings, Vendor docs",
+                )}
+              >
                 <MultiSelectChipPicker
                   label="Document class"
-                  summary={summarizeList(appliedFilters.documentClasses, 'All classes')}
+                  summary={summarizeList(
+                    appliedFilters.documentClasses,
+                    "All classes",
+                  )}
                   options={DEDUP_CLASS_OPTIONS}
                   value={draftFilters.documentClasses}
-                  onChange={(next) => setDraftFilters((current) => ({ ...current, documentClasses: next }))}
+                  onChange={(next) =>
+                    setDraftFilters((current) => ({
+                      ...current,
+                      documentClasses: next,
+                    }))
+                  }
                   icon={<FileStack className="h-4 w-4" />}
                 />
               </ScopeChip>
@@ -1267,48 +1740,66 @@ export default function DeduplicationConsole() {
           <div className="rounded-3xl border border-teal-500/20 bg-slate-950/35 p-4">
             <div className="mb-4 flex items-center justify-between gap-3">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Dedup mode</p>
-                <p className="mt-1 text-sm text-muted-foreground">Mode changes re-query the candidate list in place. No page reloads.</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+                  Dedup mode
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Mode changes re-query the candidate list in place. No page
+                  reloads.
+                </p>
               </div>
-              <Badge variant={dedupMode === 'fingerprint' ? 'success' : 'info'}>
-                {dedupMode === 'fingerprint' ? 'Operational default' : 'Quick scan'}
+              <Badge variant={dedupMode === "fingerprint" ? "success" : "info"}>
+                {dedupMode === "fingerprint"
+                  ? "Operational default"
+                  : "Quick scan"}
               </Badge>
             </div>
 
             <div className="grid gap-3 md:grid-cols-2">
               <button
                 type="button"
-                onClick={() => setDedupMode('metadata')}
+                onClick={() => setDedupMode("metadata")}
                 className={`rounded-2xl border p-4 text-left transition-all ${
-                  dedupMode === 'metadata'
-                    ? 'border-teal-400/35 bg-teal-500/12 shadow-[0_18px_40px_rgba(20,184,166,0.12)]'
-                    : 'border-border/60 bg-card hover:border-slate-500/70 hover:bg-card/80'
+                  dedupMode === "metadata"
+                    ? "border-teal-400/35 bg-teal-500/12 shadow-[0_18px_40px_rgba(20,184,166,0.12)]"
+                    : "border-border/60 bg-card hover:border-slate-500/70 hover:bg-card/80"
                 }`}
               >
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-semibold text-foreground">Metadata only</p>
-                  <div className={`h-3 w-3 rounded-full border ${dedupMode === 'metadata' ? 'border-teal-300 bg-teal-300' : 'border-slate-600'}`} />
+                  <p className="text-sm font-semibold text-foreground">
+                    Metadata only
+                  </p>
+                  <div
+                    className={`h-3 w-3 rounded-full border ${dedupMode === "metadata" ? "border-teal-300 bg-teal-300" : "border-slate-600"}`}
+                  />
                 </div>
                 <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                  Use metadata keys (number, title, revision, class, file size) without reading file content.
+                  Use metadata keys (number, title, revision, class, file size)
+                  without reading file content.
                 </p>
               </button>
 
               <button
                 type="button"
-                onClick={() => setDedupMode('fingerprint')}
+                onClick={() => setDedupMode("fingerprint")}
                 className={`rounded-2xl border p-4 text-left transition-all ${
-                  dedupMode === 'fingerprint'
-                    ? 'border-teal-400/35 bg-teal-500/12 shadow-[0_18px_40px_rgba(20,184,166,0.12)]'
-                    : 'border-border/60 bg-card hover:border-slate-500/70 hover:bg-card/80'
+                  dedupMode === "fingerprint"
+                    ? "border-teal-400/35 bg-teal-500/12 shadow-[0_18px_40px_rgba(20,184,166,0.12)]"
+                    : "border-border/60 bg-card hover:border-slate-500/70 hover:bg-card/80"
                 }`}
               >
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-semibold text-foreground">Metadata + content fingerprint</p>
-                  <div className={`h-3 w-3 rounded-full border ${dedupMode === 'fingerprint' ? 'border-teal-300 bg-teal-300' : 'border-slate-600'}`} />
+                  <p className="text-sm font-semibold text-foreground">
+                    Metadata + content fingerprint
+                  </p>
+                  <div
+                    className={`h-3 w-3 rounded-full border ${dedupMode === "fingerprint" ? "border-teal-300 bg-teal-300" : "border-slate-600"}`}
+                  />
                 </div>
                 <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                  Use metadata plus a sparse file hash computed from 64 KB at the start, middle, and end of the file. Fingerprints are stored with document records for reuse.
+                  Use metadata plus a sparse file hash computed from 64 KB at
+                  the start, middle, and end of the file. Fingerprints are
+                  stored with document records for reuse.
                 </p>
               </button>
             </div>
@@ -1317,12 +1808,24 @@ export default function DeduplicationConsole() {
               <SettingRow
                 title="For high-value classes, confirm with full-file hash when required."
                 description="Use the stored full-file hash only for selected classes such as regulatory packs, vendor-critical drawings, or legal evidence bundles."
-                control={<Switch checked={confirmFullHash} onCheckedChange={setConfirmFullHash} aria-label="Confirm with full file hash when required" />}
+                control={
+                  <Switch
+                    checked={confirmFullHash}
+                    onCheckedChange={setConfirmFullHash}
+                    aria-label="Confirm with full file hash when required"
+                  />
+                }
               />
               <SettingRow
                 title="Include archived documents."
                 description="Archived records stay visible to admins for cleanup, but remain hidden from general operations unless explicitly included."
-                control={<Switch checked={includeArchived} onCheckedChange={setIncludeArchived} aria-label="Include archived documents" />}
+                control={
+                  <Switch
+                    checked={includeArchived}
+                    onCheckedChange={setIncludeArchived}
+                    aria-label="Include archived documents"
+                  />
+                }
               />
             </div>
           </div>
@@ -1332,15 +1835,22 @@ export default function DeduplicationConsole() {
       <GlassCard className="p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Filter row</p>
-            <p className="mt-1 text-sm text-muted-foreground">Narrow candidate groups without leaving the console. Filters are applied explicitly to mirror backend query behavior.</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+              Filter row
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Narrow candidate groups without leaving the console. Filters are
+              applied explicitly to mirror backend query behavior.
+            </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={groupSource === 'backend' ? 'success' : 'info'}>
-              {groupSource === 'backend' ? 'API-backed groups' : 'Fallback dataset'}
+            <Badge variant={groupSource === "backend" ? "success" : "info"}>
+              {groupSource === "backend"
+                ? "API-backed groups"
+                : "Fallback dataset"}
             </Badge>
             <div className="rounded-full border border-teal-500/20 bg-teal-500/8 px-3 py-1.5 text-xs text-teal-100">
-              {isLoadingGroups ? 'Loading duplicate groups…' : jobStatus}
+              {isLoadingGroups ? "Loading duplicate groups…" : jobStatus}
             </div>
           </div>
         </div>
@@ -1348,15 +1858,25 @@ export default function DeduplicationConsole() {
         <div className="mt-4 flex flex-wrap gap-3">
           <MultiSelectChipPicker
             label="Document class"
-            summary={summarizeList(draftFilters.documentClasses, 'All classes')}
+            summary={summarizeList(draftFilters.documentClasses, "All classes")}
             options={DEDUP_CLASS_OPTIONS}
             value={draftFilters.documentClasses}
-            onChange={(next) => setDraftFilters((current) => ({ ...current, documentClasses: next }))}
+            onChange={(next) =>
+              setDraftFilters((current) => ({
+                ...current,
+                documentClasses: next,
+              }))
+            }
             icon={<Filter className="h-4 w-4" />}
           />
           <Select
             value={draftFilters.sourceSystem}
-            onChange={(event) => setDraftFilters((current) => ({ ...current, sourceSystem: event.target.value }))}
+            onChange={(event) =>
+              setDraftFilters((current) => ({
+                ...current,
+                sourceSystem: event.target.value,
+              }))
+            }
             className="min-w-[190px]"
           >
             <option value="All sources">All sources</option>
@@ -1366,19 +1886,33 @@ export default function DeduplicationConsole() {
               </option>
             ))}
           </Select>
-          <OwnerPicker value={draftFilters.owner} onChange={(value) => setDraftFilters((current) => ({ ...current, owner: value }))} />
+          <OwnerPicker
+            value={draftFilters.owner}
+            onChange={(value) =>
+              setDraftFilters((current) => ({ ...current, owner: value }))
+            }
+          />
           <DateRangePickerChip
             label="Upload date range"
             start={draftFilters.uploadFrom}
             end={draftFilters.uploadTo}
-            onStartChange={(value) => setDraftFilters((current) => ({ ...current, uploadFrom: value }))}
-            onEndChange={(value) => setDraftFilters((current) => ({ ...current, uploadTo: value }))}
+            onStartChange={(value) =>
+              setDraftFilters((current) => ({ ...current, uploadFrom: value }))
+            }
+            onEndChange={(value) =>
+              setDraftFilters((current) => ({ ...current, uploadTo: value }))
+            }
             icon={<CalendarClock className="h-4 w-4" />}
             compact
           />
           <Select
             value={String(draftFilters.minSizeBytes)}
-            onChange={(event) => setDraftFilters((current) => ({ ...current, minSizeBytes: Number(event.target.value) }))}
+            onChange={(event) =>
+              setDraftFilters((current) => ({
+                ...current,
+                minSizeBytes: Number(event.target.value),
+              }))
+            }
             className="min-w-[170px]"
           >
             <option value="0">Any size</option>
@@ -1392,19 +1926,30 @@ export default function DeduplicationConsole() {
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={draftFilters.search}
-              onChange={(event) => setDraftFilters((current) => ({ ...current, search: event.target.value }))}
+              onChange={(event) =>
+                setDraftFilters((current) => ({
+                  ...current,
+                  search: event.target.value,
+                }))
+              }
               placeholder="Document number / title / part number"
               className="w-full pl-9"
             />
           </div>
           <div className="ml-auto flex flex-wrap gap-2">
-            <Button variant="secondary" onClick={() => setAppliedFilters({ ...draftFilters })}>
+            <Button
+              variant="secondary"
+              onClick={() => setAppliedFilters({ ...draftFilters })}
+            >
               Apply filters
             </Button>
             <Button variant="ghost" onClick={resetFilters}>
               Reset
             </Button>
-            <Button variant="secondary" onClick={() => setPendingAction({ type: 'scan_missing_hashes' })}>
+            <Button
+              variant="secondary"
+              onClick={() => setPendingAction({ type: "scan_missing_hashes" })}
+            >
               <ScanSearch className="h-4 w-4" />
               Scan missing hashes
             </Button>
@@ -1417,16 +1962,28 @@ export default function DeduplicationConsole() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-3">
               <Badge variant="info">{summaryStats.groups} groups</Badge>
-              <Badge variant="default">{summaryStats.documents} documents</Badge>
-              <Badge variant="success">{formatBytes(summaryStats.savings)} potential savings</Badge>
+              <Badge variant="default">
+                {summaryStats.documents} documents
+              </Badge>
+              <Badge variant="success">
+                {formatBytes(summaryStats.savings)} potential savings
+              </Badge>
             </div>
             {bulkSelectedGroupIds.length > 0 && (
               <div className="flex flex-wrap items-center gap-2 rounded-full border border-amber-400/25 bg-amber-500/10 px-3 py-1.5 text-xs text-amber-100">
                 <span>{bulkSelectedGroupIds.length} groups selected</span>
-                <Button variant="ghost" size="sm" onClick={() => setPendingAction({ type: 'bulk_ignore' })}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setPendingAction({ type: "bulk_ignore" })}
+                >
                   Ignore selected
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => setBulkSelectedGroupIds([])}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setBulkSelectedGroupIds([])}
+                >
                   Clear
                 </Button>
               </div>
@@ -1443,62 +2000,125 @@ export default function DeduplicationConsole() {
                     <input
                       type="checkbox"
                       checked={allVisibleSelected}
-                      onChange={(event) => setBulkSelectedGroupIds(event.target.checked ? allVisibleGroupIds : [])}
+                      onChange={(event) =>
+                        setBulkSelectedGroupIds(
+                          event.target.checked ? allVisibleGroupIds : [],
+                        )
+                      }
                       className="h-4 w-4 accent-teal-400"
                     />
                     Group / document
                   </label>
                 </th>
-                <th className="border-b border-border/70 px-4 py-3">Title / description</th>
-                <th className="border-b border-border/70 px-4 py-3">Document / drawing / part</th>
-                <th className="border-b border-border/70 px-4 py-3">Revision</th>
-                <th className="border-b border-border/70 px-4 py-3">Class / type</th>
-                <th className="border-b border-border/70 px-4 py-3">File size</th>
-                <th className="border-b border-border/70 px-4 py-3">Metadata key</th>
-                <th className="border-b border-border/70 px-4 py-3">Content fingerprint</th>
-                <th className="border-b border-border/70 px-4 py-3">Upload details</th>
-                <th className="border-b border-border/70 px-4 py-3">References</th>
-                <th className="border-b border-border/70 px-4 py-3">Group status</th>
+                <th className="border-b border-border/70 px-4 py-3">
+                  Title / description
+                </th>
+                <th className="border-b border-border/70 px-4 py-3">
+                  Document / drawing / part
+                </th>
+                <th className="border-b border-border/70 px-4 py-3">
+                  Revision
+                </th>
+                <th className="border-b border-border/70 px-4 py-3">
+                  Class / type
+                </th>
+                <th className="border-b border-border/70 px-4 py-3">
+                  File size
+                </th>
+                <th className="border-b border-border/70 px-4 py-3">
+                  Metadata key
+                </th>
+                <th className="border-b border-border/70 px-4 py-3">
+                  Content fingerprint
+                </th>
+                <th className="border-b border-border/70 px-4 py-3">
+                  Upload details
+                </th>
+                <th className="border-b border-border/70 px-4 py-3">
+                  References
+                </th>
+                <th className="border-b border-border/70 px-4 py-3">
+                  Group status
+                </th>
               </tr>
             </thead>
             <tbody>
               {displayedGroups.map((group) => {
-                const groupStatus = getStatusMeta(group.derivedStatus, dedupMode);
+                const groupStatus = getStatusMeta(
+                  group.derivedStatus,
+                  dedupMode,
+                );
                 return (
                   <Fragment key={group.id}>
                     <tr className="bg-slate-950/75">
-                      <td colSpan={11} className="border-y border-border/70 px-4 py-3">
+                      <td
+                        colSpan={11}
+                        className="border-y border-border/70 px-4 py-3"
+                      >
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <div className="flex items-center gap-3">
                             <button
                               type="button"
-                              onClick={() => handleBulkToggle(group.id, !bulkSelectedGroupIds.includes(group.id))}
+                              onClick={() =>
+                                handleBulkToggle(
+                                  group.id,
+                                  !bulkSelectedGroupIds.includes(group.id),
+                                )
+                              }
                               className={`inline-flex h-7 w-7 items-center justify-center rounded-lg border transition-all ${
                                 bulkSelectedGroupIds.includes(group.id)
-                                  ? 'border-teal-400/35 bg-teal-500/12 text-teal-100'
-                                  : 'border-border/60 bg-card text-muted-foreground hover:border-slate-500/70'
+                                  ? "border-teal-400/35 bg-teal-500/12 text-teal-100"
+                                  : "border-border/60 bg-card text-muted-foreground hover:border-slate-500/70"
                               }`}
                             >
-                              {bulkSelectedGroupIds.includes(group.id) ? <CheckCircle2 className="h-4 w-4" /> : <span className="h-2 w-2 rounded-full bg-current" />}
+                              {bulkSelectedGroupIds.includes(group.id) ? (
+                                <CheckCircle2 className="h-4 w-4" />
+                              ) : (
+                                <span className="h-2 w-2 rounded-full bg-current" />
+                              )}
                             </button>
                             <div>
                               <p className="text-sm font-semibold text-foreground">
-                                Group {group.id} · {group.visibleDocuments.length} docs · Potential savings: {formatBytes(group.potentialSavingsBytes)}
+                                Group {group.id} ·{" "}
+                                {group.visibleDocuments.length} docs · Potential
+                                savings:{" "}
+                                {formatBytes(group.potentialSavingsBytes)}
                               </p>
                               <p className="mt-1 text-xs text-muted-foreground">
-                                {group.repository} · {group.collection} · {group.plant}
+                                {group.repository} · {group.collection} ·{" "}
+                                {group.plant}
                               </p>
                             </div>
-                            <Badge variant={groupStatus.variant}>{groupStatus.label}</Badge>
+                            <Badge variant={groupStatus.variant}>
+                              {groupStatus.label}
+                            </Badge>
                           </div>
                           <div className="flex flex-wrap items-center gap-2">
-                            <Button variant="ghost" size="sm" onClick={() => setSelectedGroupId(group.id)}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setSelectedGroupId(group.id)}
+                            >
                               Choose master
                             </Button>
-                            <Button variant="ghost" size="sm" onClick={() => { setSelectedGroupId(group.id); setPendingAction({ type: 'mark_non_duplicate', groupId: group.id }); }}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedGroupId(group.id);
+                                setPendingAction({
+                                  type: "mark_non_duplicate",
+                                  groupId: group.id,
+                                });
+                              }}
+                            >
                               Mark non-duplicates
                             </Button>
-                            <Button variant="secondary" size="sm" onClick={() => setSelectedGroupId(group.id)}>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => setSelectedGroupId(group.id)}
+                            >
                               Open in side panel
                             </Button>
                           </div>
@@ -1507,7 +2127,9 @@ export default function DeduplicationConsole() {
                     </tr>
 
                     {group.visibleDocuments.map((doc) => {
-                      const fingerprint = getFingerprintMeta(doc.fingerprintState);
+                      const fingerprint = getFingerprintMeta(
+                        doc.fingerprintState,
+                      );
                       const selected = selectedGroupId === group.id;
                       return (
                         <tr
@@ -1515,15 +2137,22 @@ export default function DeduplicationConsole() {
                           data-document-id={doc.id}
                           data-document-title={doc.title}
                           onClick={() => setSelectedGroupId(group.id)}
-                          className={`cursor-pointer border-b border-slate-900/70 transition-colors ${selected ? 'bg-teal-500/7' : 'hover:bg-card/45'}`}
+                          className={`cursor-pointer border-b border-slate-900/70 transition-colors ${selected ? "bg-teal-500/7" : "hover:bg-card/45"}`}
                         >
                           <td className="sticky left-0 z-10 border-b border-slate-900/70 bg-slate-950/90 px-4 py-3 align-top">
                             <div className="flex items-start gap-3">
                               <input
                                 type="checkbox"
-                                checked={bulkSelectedGroupIds.includes(group.id)}
+                                checked={bulkSelectedGroupIds.includes(
+                                  group.id,
+                                )}
                                 onClick={(event) => event.stopPropagation()}
-                                onChange={(event) => handleBulkToggle(group.id, event.target.checked)}
+                                onChange={(event) =>
+                                  handleBulkToggle(
+                                    group.id,
+                                    event.target.checked,
+                                  )
+                                }
                                 className="mt-1 h-4 w-4 accent-teal-400"
                               />
                               <div className="min-w-0">
@@ -1537,34 +2166,53 @@ export default function DeduplicationConsole() {
                                 >
                                   {doc.id}
                                 </button>
-                                <p className="mt-1 text-[11px] text-muted-foreground">{group.id}</p>
+                                <p className="mt-1 text-[11px] text-muted-foreground">
+                                  {group.id}
+                                </p>
                               </div>
                             </div>
                           </td>
                           <td className="border-b border-slate-900/70 px-4 py-3 align-top">
-                            <p className="font-medium text-foreground">{doc.title}</p>
+                            <p className="font-medium text-foreground">
+                              {doc.title}
+                            </p>
                             <p className="mt-1 text-xs text-muted-foreground">
-                              {doc.isArchived ? 'Archived copy' : 'Active repository record'} · {group.collection}
+                              {doc.isArchived
+                                ? "Archived copy"
+                                : "Active repository record"}{" "}
+                              · {group.collection}
                             </p>
                           </td>
                           <td className="border-b border-slate-900/70 px-4 py-3 align-top">
                             <div className="space-y-1 text-xs">
-                              <p className="font-mono text-foreground">{doc.documentNumber}</p>
-                              <p className="text-muted-foreground">{doc.drawingNumber ?? '—'}</p>
-                              <p className="text-teal-200">PL-{doc.partNumber ?? '—'}</p>
+                              <p className="font-mono text-foreground">
+                                {doc.documentNumber}
+                              </p>
+                              <p className="text-muted-foreground">
+                                {doc.drawingNumber ?? "—"}
+                              </p>
+                              <p className="text-teal-200">
+                                PL-{doc.partNumber ?? "—"}
+                              </p>
                             </div>
                           </td>
                           <td className="border-b border-slate-900/70 px-4 py-3 align-top">
-                            <span className="font-mono text-xs text-foreground">{doc.revision}</span>
+                            <span className="font-mono text-xs text-foreground">
+                              {doc.revision}
+                            </span>
                           </td>
                           <td className="border-b border-slate-900/70 px-4 py-3 align-top">
                             <div className="space-y-1 text-xs">
                               <p className="text-foreground">{doc.className}</p>
-                              <p className="text-muted-foreground">{doc.type}</p>
+                              <p className="text-muted-foreground">
+                                {doc.type}
+                              </p>
                             </div>
                           </td>
                           <td className="border-b border-slate-900/70 px-4 py-3 align-top">
-                            <span className="font-mono text-xs text-foreground">{formatBytes(doc.fileSizeBytes)}</span>
+                            <span className="font-mono text-xs text-foreground">
+                              {formatBytes(doc.fileSizeBytes)}
+                            </span>
                           </td>
                           <td className="border-b border-slate-900/70 px-4 py-3 align-top">
                             <code className="rounded-lg border border-border/70 bg-slate-950/50 px-2 py-1 text-[11px] text-foreground/90">
@@ -1572,26 +2220,44 @@ export default function DeduplicationConsole() {
                             </code>
                           </td>
                           <td className="border-b border-slate-900/70 px-4 py-3 align-top">
-                            <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${fingerprint.className}`}>
+                            <span
+                              className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${fingerprint.className}`}
+                            >
                               {fingerprint.label}
                             </span>
                           </td>
                           <td className="border-b border-slate-900/70 px-4 py-3 align-top">
                             <div className="space-y-1 text-xs">
-                              <p className="text-foreground">{formatDate(doc.uploadDate)}</p>
-                              <p className="text-muted-foreground">{doc.uploader}</p>
-                              <p className="text-muted-foreground">{doc.sourceSystem}</p>
+                              <p className="text-foreground">
+                                {formatDate(doc.uploadDate)}
+                              </p>
+                              <p className="text-muted-foreground">
+                                {doc.uploader}
+                              </p>
+                              <p className="text-muted-foreground">
+                                {doc.sourceSystem}
+                              </p>
                             </div>
                           </td>
                           <td className="border-b border-slate-900/70 px-4 py-3 align-top">
                             <div className="space-y-1 text-xs">
-                              <p className="font-semibold text-foreground">{totalReferences(doc)} linked</p>
-                              <p className="text-muted-foreground">ERP {doc.references.erp} · Work {doc.references.work}</p>
-                              <p className="text-muted-foreground">Config {doc.references.config} · Approvals {doc.references.approvals}</p>
+                              <p className="font-semibold text-foreground">
+                                {totalReferences(doc)} linked
+                              </p>
+                              <p className="text-muted-foreground">
+                                ERP {doc.references.erp} · Work{" "}
+                                {doc.references.work}
+                              </p>
+                              <p className="text-muted-foreground">
+                                Config {doc.references.config} · Approvals{" "}
+                                {doc.references.approvals}
+                              </p>
                             </div>
                           </td>
                           <td className="border-b border-slate-900/70 px-4 py-3 align-top">
-                            <Badge variant={groupStatus.variant}>{groupStatus.label}</Badge>
+                            <Badge variant={groupStatus.variant}>
+                              {groupStatus.label}
+                            </Badge>
                           </td>
                         </tr>
                       );
@@ -1604,8 +2270,13 @@ export default function DeduplicationConsole() {
                 <tr>
                   <td colSpan={11} className="px-6 py-20 text-center">
                     <BadgeAlert className="mx-auto h-10 w-10 text-slate-600" />
-                    <p className="mt-4 text-sm font-semibold text-foreground">No candidate groups match the current scope and filters.</p>
-                    <p className="mt-2 text-sm text-muted-foreground">Reset the review filters or widen the scope chips to bring duplicate groups back into view.</p>
+                    <p className="mt-4 text-sm font-semibold text-foreground">
+                      No candidate groups match the current scope and filters.
+                    </p>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Reset the review filters or widen the scope chips to bring
+                      duplicate groups back into view.
+                    </p>
                     <div className="mt-4">
                       <Button variant="secondary" onClick={resetFilters}>
                         <RefreshCcw className="h-4 w-4" />
@@ -1624,9 +2295,13 @@ export default function DeduplicationConsole() {
         <DialogContent className="max-w-2xl rounded-3xl border border-teal-500/20 bg-slate-950/96 p-0 text-foreground shadow-2xl shadow-slate-950/80">
           <div className="border-b border-border/70 px-6 py-5">
             <DialogHeader className="space-y-2 text-left">
-              <DialogTitle className="text-xl text-foreground">Schedule dedup job</DialogTitle>
+              <DialogTitle className="text-xl text-foreground">
+                Schedule dedup job
+              </DialogTitle>
               <DialogDescription className="text-sm text-muted-foreground">
-                Queue recurring metadata and fingerprint scans without leaving the console. Scheduling remains non-blocking and preserves the current scope.
+                Queue recurring metadata and fingerprint scans without leaving
+                the console. Scheduling remains non-blocking and preserves the
+                current scope.
               </DialogDescription>
             </DialogHeader>
           </div>
@@ -1635,7 +2310,15 @@ export default function DeduplicationConsole() {
               title="Run cadence"
               description="Use off-peak scheduling for large hash backfill and storage reclamation sweeps."
               control={
-                <Select value={scheduleForm.cadence} onChange={(event) => setScheduleForm((current) => ({ ...current, cadence: event.target.value }))}>
+                <Select
+                  value={scheduleForm.cadence}
+                  onChange={(event) =>
+                    setScheduleForm((current) => ({
+                      ...current,
+                      cadence: event.target.value,
+                    }))
+                  }
+                >
                   <option>Daily</option>
                   <option>Weekly</option>
                   <option>Monthly</option>
@@ -1645,13 +2328,40 @@ export default function DeduplicationConsole() {
             <SettingRow
               title="Notify on completion"
               description="Send an in-app notification and email summary after the scheduled run finishes."
-              control={<Switch checked={scheduleForm.notify} onCheckedChange={(checked) => setScheduleForm((current) => ({ ...current, notify: checked }))} />}
+              control={
+                <Switch
+                  checked={scheduleForm.notify}
+                  onCheckedChange={(checked) =>
+                    setScheduleForm((current) => ({
+                      ...current,
+                      notify: checked,
+                    }))
+                  }
+                />
+              }
             />
             <div className="md:col-span-2 grid gap-4 md:grid-cols-2">
-              <DatePicker value={scheduleForm.runDate} onChange={(value) => setScheduleForm((current) => ({ ...current, runDate: value }))} label="Next run date" />
+              <DatePicker
+                value={scheduleForm.runDate}
+                onChange={(value) =>
+                  setScheduleForm((current) => ({ ...current, runDate: value }))
+                }
+                label="Next run date"
+              />
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Run time</label>
-                <Select value={scheduleForm.runTime} onChange={(event) => setScheduleForm((current) => ({ ...current, runTime: event.target.value }))} className="w-full">
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                  Run time
+                </label>
+                <Select
+                  value={scheduleForm.runTime}
+                  onChange={(event) =>
+                    setScheduleForm((current) => ({
+                      ...current,
+                      runTime: event.target.value,
+                    }))
+                  }
+                  className="w-full"
+                >
                   <option>00:30</option>
                   <option>02:00</option>
                   <option>03:30</option>
@@ -1661,14 +2371,23 @@ export default function DeduplicationConsole() {
             </div>
           </div>
           <DialogFooter className="border-t border-border/70 px-6 py-4 sm:justify-between">
-            <div className="text-xs text-muted-foreground">Scheduled jobs respect document visibility, repository scope, and the current dedup mode.</div>
+            <div className="text-xs text-muted-foreground">
+              Scheduled jobs respect document visibility, repository scope, and
+              the current dedup mode.
+            </div>
             <div className="flex gap-2">
-              <Button variant="ghost" onClick={() => setScheduleOpen(false)}>Cancel</Button>
+              <Button variant="ghost" onClick={() => setScheduleOpen(false)}>
+                Cancel
+              </Button>
               <Button
                 onClick={() => {
                   setScheduleOpen(false);
-                  setJobStatus(`Scheduled ${scheduleForm.cadence.toLowerCase()} dedup job for ${formatDate(scheduleForm.runDate)} at ${scheduleForm.runTime}.`);
-                  toast.success('Dedup job scheduled', { description: `${scheduleForm.cadence} at ${scheduleForm.runTime}` });
+                  setJobStatus(
+                    `Scheduled ${scheduleForm.cadence.toLowerCase()} dedup job for ${formatDate(scheduleForm.runDate)} at ${scheduleForm.runTime}.`,
+                  );
+                  toast.success("Dedup job scheduled", {
+                    description: `${scheduleForm.cadence} at ${scheduleForm.runTime}`,
+                  });
                 }}
               >
                 Save schedule
@@ -1682,9 +2401,13 @@ export default function DeduplicationConsole() {
         <DialogContent className="max-w-3xl rounded-3xl border border-teal-500/20 bg-slate-950/96 p-0 text-foreground shadow-2xl shadow-slate-950/80">
           <div className="border-b border-border/70 px-6 py-5">
             <DialogHeader className="space-y-2 text-left">
-              <DialogTitle className="text-xl text-foreground">Dedup settings</DialogTitle>
+              <DialogTitle className="text-xl text-foreground">
+                Dedup settings
+              </DialogTitle>
               <DialogDescription className="text-sm text-muted-foreground">
-                Tune the console against the PostgreSQL hash-index strategy: compute sparse fingerprints once, reuse them, and escalate to full hashes only when class risk requires it.
+                Tune the console against the PostgreSQL hash-index strategy:
+                compute sparse fingerprints once, reuse them, and escalate to
+                full hashes only when class risk requires it.
               </DialogDescription>
             </DialogHeader>
           </div>
@@ -1693,7 +2416,15 @@ export default function DeduplicationConsole() {
               title="Hash algorithm"
               description="Persist hash metadata with algorithm and version so future migrations can be staged without reprocessing the entire repository at request time."
               control={
-                <Select value={settingsForm.hashAlgo} onChange={(event) => setSettingsForm((current) => ({ ...current, hashAlgo: event.target.value }))}>
+                <Select
+                  value={settingsForm.hashAlgo}
+                  onChange={(event) =>
+                    setSettingsForm((current) => ({
+                      ...current,
+                      hashAlgo: event.target.value,
+                    }))
+                  }
+                >
                   <option>BLAKE3</option>
                   <option>SHA-256</option>
                 </Select>
@@ -1703,7 +2434,15 @@ export default function DeduplicationConsole() {
               title="Hash version"
               description="Fingerprint versioning keeps comparisons stable when chunking rules or hash algorithms change."
               control={
-                <Select value={settingsForm.hashVersion} onChange={(event) => setSettingsForm((current) => ({ ...current, hashVersion: event.target.value }))}>
+                <Select
+                  value={settingsForm.hashVersion}
+                  onChange={(event) =>
+                    setSettingsForm((current) => ({
+                      ...current,
+                      hashVersion: event.target.value,
+                    }))
+                  }
+                >
                   <option>1</option>
                   <option>2</option>
                   <option>3</option>
@@ -1714,7 +2453,15 @@ export default function DeduplicationConsole() {
               title="Inline fingerprint threshold"
               description="Keep large file hashing out of the request path after this threshold; schedule background workers instead."
               control={
-                <Select value={settingsForm.inlineFingerprintLimit} onChange={(event) => setSettingsForm((current) => ({ ...current, inlineFingerprintLimit: event.target.value }))}>
+                <Select
+                  value={settingsForm.inlineFingerprintLimit}
+                  onChange={(event) =>
+                    setSettingsForm((current) => ({
+                      ...current,
+                      inlineFingerprintLimit: event.target.value,
+                    }))
+                  }
+                >
                   <option>25 MB</option>
                   <option>50 MB</option>
                   <option>100 MB</option>
@@ -1724,17 +2471,34 @@ export default function DeduplicationConsole() {
             <SettingRow
               title="Index collection-wide fingerprints"
               description="Reuse stored sparse/full hashes across collections and repeated uploads to avoid recalculating identical content."
-              control={<Switch checked={settingsForm.indexCollectionWide} onCheckedChange={(checked) => setSettingsForm((current) => ({ ...current, indexCollectionWide: checked }))} />}
+              control={
+                <Switch
+                  checked={settingsForm.indexCollectionWide}
+                  onCheckedChange={(checked) =>
+                    setSettingsForm((current) => ({
+                      ...current,
+                      indexCollectionWide: checked,
+                    }))
+                  }
+                />
+              }
             />
           </div>
           <DialogFooter className="border-t border-border/70 px-6 py-4 sm:justify-between">
-            <div className="text-xs text-muted-foreground">Recommended backend: size-first filtering, sparse hash reuse, full-hash confirmation for high-value classes only.</div>
+            <div className="text-xs text-muted-foreground">
+              Recommended backend: size-first filtering, sparse hash reuse,
+              full-hash confirmation for high-value classes only.
+            </div>
             <div className="flex gap-2">
-              <Button variant="ghost" onClick={() => setSettingsOpen(false)}>Close</Button>
+              <Button variant="ghost" onClick={() => setSettingsOpen(false)}>
+                Close
+              </Button>
               <Button
                 onClick={() => {
                   setSettingsOpen(false);
-                  toast.success('Dedup settings updated', { description: `${settingsForm.hashAlgo} v${settingsForm.hashVersion}` });
+                  toast.success("Dedup settings updated", {
+                    description: `${settingsForm.hashAlgo} v${settingsForm.hashVersion}`,
+                  });
                 }}
               >
                 Save settings
@@ -1744,20 +2508,34 @@ export default function DeduplicationConsole() {
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={!!pendingAction} onOpenChange={(open) => { if (!open) setPendingAction(null); }}>
+      <AlertDialog
+        open={!!pendingAction}
+        onOpenChange={(open) => {
+          if (!open) setPendingAction(null);
+        }}
+      >
         <AlertDialogContent className="rounded-3xl border border-teal-500/20 bg-slate-950/96 text-foreground shadow-2xl shadow-slate-950/80">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-foreground">{pendingDialogCopy?.title}</AlertDialogTitle>
+            <AlertDialogTitle className="text-foreground">
+              {pendingDialogCopy?.title}
+            </AlertDialogTitle>
             <AlertDialogDescription className="mt-2 text-sm leading-relaxed text-muted-foreground">
               {pendingDialogCopy?.description}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border border-border/60 bg-card text-foreground/90 hover:bg-card/80" disabled={actionBusy}>
+            <AlertDialogCancel
+              className="border border-border/60 bg-card text-foreground/90 hover:bg-card/80"
+              disabled={actionBusy}
+            >
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction className="bg-teal-500/15 text-teal-100 hover:bg-teal-500/25" onClick={handleConfirmAction} disabled={actionBusy}>
-              {actionBusy ? 'Processing...' : pendingDialogCopy?.actionLabel}
+            <AlertDialogAction
+              className="bg-teal-500/15 text-teal-100 hover:bg-teal-500/25"
+              onClick={handleConfirmAction}
+              disabled={actionBusy}
+            >
+              {actionBusy ? "Processing..." : pendingDialogCopy?.actionLabel}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
