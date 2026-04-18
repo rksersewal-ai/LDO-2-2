@@ -138,15 +138,16 @@ export const DashboardDataService = {
 
     // Real API path — falls back to mock on failure
     try {
-      const stats = await apiClient.getDashboardStats();
+      const stats = (await apiClient.getDashboardStats()) as {
+        documents?: { total?: number; approved?: number };
+      };
       // Map backend stats to our snapshot shape; fill gaps from mock for now
       const mock = buildMockSnapshot();
       return {
         ...mock,
         documents: {
-          total: (stats as any).documents?.total ?? mock.documents.total,
-          approved:
-            (stats as any).documents?.approved ?? mock.documents.approved,
+          total: stats.documents?.total ?? mock.documents.total,
+          approved: stats.documents?.approved ?? mock.documents.approved,
           data: mock.documents.data,
         },
       };
