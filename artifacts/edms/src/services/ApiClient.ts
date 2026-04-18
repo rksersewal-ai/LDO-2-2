@@ -1346,8 +1346,9 @@ export class ApiClient {
           error,
         );
         const { MOCK_DOCUMENTS } = await import("../lib/mock");
-        const { MOCK_APPROVALS, MOCK_OCR_JOBS } =
-          await import("../lib/mockExtended");
+        const { MOCK_APPROVALS, MOCK_OCR_JOBS } = await import(
+          "../lib/mockExtended"
+        );
         return {
           documents: {
             total: MOCK_DOCUMENTS.length,
