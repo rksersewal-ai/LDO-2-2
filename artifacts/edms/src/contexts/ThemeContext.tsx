@@ -5,7 +5,7 @@ import {
   useState,
   useCallback,
   useMemo,
-  ReactNode,
+  type ReactNode,
 } from "react";
 import { PreferencesService } from "../services/PreferencesService";
 

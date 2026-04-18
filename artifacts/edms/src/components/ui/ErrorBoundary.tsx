@@ -10,7 +10,7 @@
  * </ErrorBoundary>
  */
 
-import React, { ReactNode } from "react";
+import React, { type ReactNode } from "react";
 import { AlertTriangle } from "lucide-react";
 
 interface ErrorBoundaryProps {

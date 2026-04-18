@@ -72,11 +72,11 @@ export class BomDraftService {
   }
 
   static getById(id: string): BomDraftRecord | null {
-    return this.getAll().find((draft) => draft.id === id) ?? null;
+    return BomDraftService.getAll().find((draft) => draft.id === id) ?? null;
   }
 
   static create(input: CreateBomDraftInput): BomDraftRecord {
-    const drafts = this.getAll();
+    const drafts = BomDraftService.getAll();
     const baseId = slugifyProductName(input.product.name) || "custom-bom";
     let nextId = `draft-${baseId}`;
     let suffix = 2;
@@ -100,7 +100,7 @@ export class BomDraftService {
   }
 
   static saveTree(id: string, tree: BOMNode[]): BomDraftRecord | null {
-    const drafts = this.getAll();
+    const drafts = BomDraftService.getAll();
     const index = drafts.findIndex((draft) => draft.id === id);
     if (index === -1) return null;
 
@@ -131,6 +131,8 @@ export class BomDraftService {
   }
 
   static delete(id: string) {
-    safeWriteDrafts(this.getAll().filter((draft) => draft.id !== id));
+    safeWriteDrafts(
+      BomDraftService.getAll().filter((draft) => draft.id !== id),
+    );
   }
 }

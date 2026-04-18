@@ -12,10 +12,10 @@
  */
 
 import axios, {
-  AxiosInstance,
-  AxiosError,
-  AxiosResponse,
-  InternalAxiosRequestConfig,
+  type AxiosInstance,
+  type AxiosError,
+  type AxiosResponse,
+  type InternalAxiosRequestConfig,
 } from "axios";
 import type {
   AppInboxItem,
@@ -239,7 +239,7 @@ export class ApiClient {
   private calculateBackoffDelay(attempt: number): number {
     const baseDelay =
       this.retryConfig.initialDelayMs *
-      Math.pow(this.retryConfig.backoffMultiplier, attempt);
+      this.retryConfig.backoffMultiplier ** attempt;
 
     const capped = Math.min(baseDelay, this.retryConfig.maxDelayMs);
 
