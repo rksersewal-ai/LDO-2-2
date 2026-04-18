@@ -20,19 +20,21 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,css,json,md}\" \"artifacts/**/*.{ts,tsx,js,jsx,css,json,md}\" \"lib/**/*.{ts,tsx,js,jsx,css,json,md}\"",
-    "lint:frontend": "prettier --check \"src/**/*.{ts,tsx,js,jsx,css,json,md}\" \"artifacts/**/*.{ts,tsx,js,jsx,css,json,md}\" \"lib/**/*.{ts,tsx,js,jsx,css,json,md}\"",
+    "format": "biome format --write",
+    "format:check": "biome format",
+    "lint:frontend": "biome check",
+    "lint:fix": "biome check --write",
     "lint:backend": "python -m ruff check backend",
     "lint": "pnpm run lint:frontend && pnpm run lint:backend"
   },
   "private": true,
   "devDependencies": {
+    "@biomejs/biome": "^2.4.12",
     "@rollup/rollup-win32-x64-msvc": "4.60.1",
     "@tailwindcss/oxide-win32-x64-msvc": "4.2.2",
     "@vitest/ui": "4.1.2",
     "jsdom": "29.0.1",
     "lightningcss-win32-x64-msvc": "1.32.0",
-    "prettier": "3.8.1",
     "typescript": "6.0.2",
     "vitest": "4.1.2"
   },
@@ -46,5 +48,8 @@
       "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz",
       "esbuild": "^0.25.0"
     }
+  },
+  "dependencies": {
+    "@replit/connectors-sdk": "^0.4.0"
   }
 }
