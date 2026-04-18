@@ -27,8 +27,7 @@ export default function AppLayout() {
   // Sidebar expand/collapse — persisted in preferences
   const [sidebarExpanded, setSidebarExpanded] = useState<boolean>(() => {
     try {
-      const prefs = PreferencesService.get();
-      return (prefs as any).sidebarExpanded ?? true;
+      return PreferencesService.get().sidebarExpanded ?? true;
     } catch {
       return true;
     }
@@ -38,10 +37,7 @@ export default function AppLayout() {
     setSidebarExpanded((prev) => {
       const next = !prev;
       try {
-        PreferencesService.set({
-          ...(PreferencesService.get() as any),
-          sidebarExpanded: next,
-        });
+        PreferencesService.set({ sidebarExpanded: next });
       } catch {}
       return next;
     });
