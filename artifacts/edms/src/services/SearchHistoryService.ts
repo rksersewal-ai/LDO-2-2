@@ -12,7 +12,7 @@ export class SearchHistoryService {
   static addSearch(query: string, scope: string, count: number = 0) {
     if (!query.trim()) return;
 
-    const history = this.getHistory();
+    const history = SearchHistoryService.getHistory();
     const filtered = history.filter(
       (h) => !(h.query === query && h.scope === scope),
     );
@@ -33,16 +33,16 @@ export class SearchHistoryService {
   }
 
   static getRecentSearches(limit: number = 10): SearchHistoryItem[] {
-    return this.getHistory().slice(0, limit);
+    return SearchHistoryService.getHistory().slice(0, limit);
   }
 
   static getSuggestions(
     query: string,
     scope: string = "ALL",
   ): SearchHistoryItem[] {
-    if (!query.trim()) return this.getRecentSearches(5);
+    if (!query.trim()) return SearchHistoryService.getRecentSearches(5);
 
-    const history = this.getHistory();
+    const history = SearchHistoryService.getHistory();
     const q = query.toLowerCase();
     return history
       .filter(
@@ -58,7 +58,7 @@ export class SearchHistoryService {
   }
 
   static removeItem(query: string, scope: string) {
-    const history = this.getHistory();
+    const history = SearchHistoryService.getHistory();
     const filtered = history.filter(
       (h) => !(h.query === query && h.scope === scope),
     );

@@ -22,7 +22,7 @@
  * </SafeSection>
  */
 
-import React, { ReactNode } from "react";
+import React, { type ReactNode } from "react";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { LoadingState } from "./LoadingState";
 import { ErrorState } from "./ErrorState";

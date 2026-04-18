@@ -225,7 +225,7 @@ export function searchTree(nodes: BOMNode[], query: string): Set<string> {
         node.name.toLowerCase().includes(q) ||
         node.id.toLowerCase().includes(q) ||
         node.tags.some((t) => t.toLowerCase().includes(q));
-      let childFound =
+      const childFound =
         node.children.length > 0
           ? search(node.children, [...ancestors, node.id])
           : false;

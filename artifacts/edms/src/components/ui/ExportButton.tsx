@@ -2,7 +2,8 @@
  * ExportButton — shared export button supporting CSV, Excel, and JSON.
  * Eliminates duplicated export logic across AuditLog, DocumentHub, WorkLedger.
  */
-import React, { useState, useCallback } from "react";
+import type React from "react";
+import { useState, useCallback } from "react";
 import {
   Download,
   FileText,

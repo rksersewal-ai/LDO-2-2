@@ -8,7 +8,7 @@
  */
 
 import { useState, useCallback } from "react";
-import { AxiosError } from "axios";
+import type { AxiosError } from "axios";
 import apiClient from "../services/ApiClient";
 import type {
   NormalizedListResult,

@@ -4,7 +4,7 @@ import {
   useState,
   useEffect,
   useCallback,
-  ReactNode,
+  type ReactNode,
 } from "react";
 import apiClient from "../services/ApiClient";
 import { UserService } from "../services/UserService";

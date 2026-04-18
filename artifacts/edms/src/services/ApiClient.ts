@@ -12,10 +12,10 @@
  */
 
 import axios, {
-  AxiosInstance,
-  AxiosError,
-  AxiosResponse,
-  InternalAxiosRequestConfig,
+  type AxiosInstance,
+  type AxiosError,
+  type AxiosResponse,
+  type InternalAxiosRequestConfig,
 } from "axios";
 import type {
   AppInboxItem,
@@ -239,7 +239,7 @@ export class ApiClient {
   private calculateBackoffDelay(attempt: number): number {
     const baseDelay =
       this.retryConfig.initialDelayMs *
-      Math.pow(this.retryConfig.backoffMultiplier, attempt);
+      this.retryConfig.backoffMultiplier ** attempt;
 
     const capped = Math.min(baseDelay, this.retryConfig.maxDelayMs);
 
@@ -1346,8 +1346,9 @@ export class ApiClient {
           error,
         );
         const { MOCK_DOCUMENTS } = await import("../lib/mock");
-        const { MOCK_APPROVALS, MOCK_OCR_JOBS } =
-          await import("../lib/mockExtended");
+        const { MOCK_APPROVALS, MOCK_OCR_JOBS } = await import(
+          "../lib/mockExtended"
+        );
         return {
           documents: {
             total: MOCK_DOCUMENTS.length,

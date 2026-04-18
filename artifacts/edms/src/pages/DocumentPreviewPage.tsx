@@ -408,9 +408,9 @@ export default function DocumentPreviewPage() {
   );
   const canEmbedPreview = Boolean(
     documentRecord?.fileUrl &&
-    ["PDF", "PNG", "JPG", "JPEG", "SVG", "TIFF", "IMAGE"].includes(
-      documentRecord.fileType.toUpperCase(),
-    ),
+      ["PDF", "PNG", "JPG", "JPEG", "SVG", "TIFF", "IMAGE"].includes(
+        documentRecord.fileType.toUpperCase(),
+      ),
   );
   const isImage =
     Boolean(documentRecord?.fileUrl) &&

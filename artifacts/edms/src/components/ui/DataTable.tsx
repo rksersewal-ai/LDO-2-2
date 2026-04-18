@@ -5,7 +5,8 @@
  * Eliminates duplicated table patterns across WorkLedger, DocumentHub,
  * SearchExplorer, and AuditLog pages.
  */
-import React, { useState, useCallback } from "react";
+import type React from "react";
+import { useState, useCallback } from "react";
 import {
   ChevronUp,
   ChevronDown,

@@ -10,12 +10,12 @@ export class ExportImportService {
     subtitle?: string,
   ) {
     const head = headers
-      .map((header) => `<th>${this.escapeHtml(header)}</th>`)
+      .map((header) => `<th>${ExportImportService.escapeHtml(header)}</th>`)
       .join("");
     const body = rows
       .map(
         (row) =>
-          `<tr>${row.map((cell) => `<td>${this.escapeHtml(String(cell ?? ""))}</td>`).join("")}</tr>`,
+          `<tr>${row.map((cell) => `<td>${ExportImportService.escapeHtml(String(cell ?? ""))}</td>`).join("")}</tr>`,
       )
       .join("");
 
@@ -23,7 +23,7 @@ export class ExportImportService {
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>${this.escapeHtml(title)}</title>
+    <title>${ExportImportService.escapeHtml(title)}</title>
     <style>
       body { font-family: Segoe UI, Arial, sans-serif; padding: 28px; color: #0f172a; }
       h1 { margin: 0 0 6px; font-size: 22px; }
@@ -35,8 +35,8 @@ export class ExportImportService {
     </style>
   </head>
   <body>
-    <h1>${this.escapeHtml(title)}</h1>
-    ${subtitle ? `<p>${this.escapeHtml(subtitle)}</p>` : ""}
+    <h1>${ExportImportService.escapeHtml(title)}</h1>
+    ${subtitle ? `<p>${ExportImportService.escapeHtml(subtitle)}</p>` : ""}
     <table>
       <thead><tr>${head}</tr></thead>
       <tbody>${body}</tbody>
@@ -97,7 +97,7 @@ export class ExportImportService {
       r.status,
       r.date,
       r.closingDate || r.completionDate || "",
-      this.getDaysTaken(r),
+      ExportImportService.getDaysTaken(r),
       r.plNumber || "",
       r.eOfficeNumber || "",
       r.targetDays ?? "",
@@ -135,7 +135,7 @@ export class ExportImportService {
       r.status,
       r.date,
       r.closingDate || r.completionDate || "",
-      this.getDaysTaken(r),
+      ExportImportService.getDaysTaken(r),
       r.plNumber || "",
       r.eOfficeNumber || "",
       r.targetDays ?? "",
@@ -282,15 +282,18 @@ export class ExportImportService {
 
   static downloadWorkRecordsCSV(records: WorkRecord[]) {
     const date = new Date().toISOString().split("T")[0];
-    this.downloadBlob(
-      this.exportWorkRecordsCSV(records),
+    ExportImportService.downloadBlob(
+      ExportImportService.exportWorkRecordsCSV(records),
       `work-records-${date}.csv`,
     );
   }
 
   static downloadDocumentsCSV() {
     const date = new Date().toISOString().split("T")[0];
-    this.downloadBlob(this.exportDocumentsCSV(), `documents-${date}.csv`);
+    ExportImportService.downloadBlob(
+      ExportImportService.exportDocumentsCSV(),
+      `documents-${date}.csv`,
+    );
   }
 
   static exportGenericTableExcel(
@@ -316,10 +319,15 @@ export class ExportImportService {
     filenamePrefix: string,
     subtitle?: string,
   ) {
-    const html = this.buildTableHtml(title, headers, rows, subtitle);
+    const html = ExportImportService.buildTableHtml(
+      title,
+      headers,
+      rows,
+      subtitle,
+    );
     const blob = new Blob(["\ufeff", html], { type: "application/msword" });
     const date = new Date().toISOString().split("T")[0];
-    this.downloadBlob(blob, `${filenamePrefix}-${date}.doc`);
+    ExportImportService.downloadBlob(blob, `${filenamePrefix}-${date}.doc`);
   }
 
   static exportGenericTablePdf(
@@ -328,7 +336,12 @@ export class ExportImportService {
     rows: Array<Array<string | number>>,
     subtitle?: string,
   ) {
-    const html = this.buildTableHtml(title, headers, rows, subtitle);
+    const html = ExportImportService.buildTableHtml(
+      title,
+      headers,
+      rows,
+      subtitle,
+    );
     const printWindow = window.open("", "_blank", "width=1200,height=900");
     if (!printWindow) return;
     printWindow.document.open();

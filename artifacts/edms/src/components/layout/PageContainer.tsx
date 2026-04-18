@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 type MaxWidth = "sm" | "md" | "lg" | "xl" | "full";
 

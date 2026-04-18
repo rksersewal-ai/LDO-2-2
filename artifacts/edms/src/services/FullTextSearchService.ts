@@ -27,7 +27,7 @@ export class FullTextSearchService {
       const score = nameMatch + ocrMatch;
 
       if (score > 0) {
-        const snippet = this.extractSnippet(ocrText, q);
+        const snippet = FullTextSearchService.extractSnippet(ocrText, q);
         results.push({
           id: doc.id,
           type: "document",
@@ -51,7 +51,10 @@ export class FullTextSearchService {
         const score = descMatch + typeMatch + remarksMatch;
 
         if (score > 0) {
-          const snippet = this.extractSnippet(rec.description, q);
+          const snippet = FullTextSearchService.extractSnippet(
+            rec.description,
+            q,
+          );
           results.push({
             id: rec.id,
             type: "work",
